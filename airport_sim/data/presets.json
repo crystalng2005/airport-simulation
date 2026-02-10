@@ -1,0 +1,10 @@
+{
+  "_comment": "PresetList storage",
+  "presets": [
+    {
+      "_comment": "This is a default preset",
+      "name": "Default",
+      "value": 100
+    }
+  ]
+}
