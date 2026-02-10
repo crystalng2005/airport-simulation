@@ -1,8 +1,15 @@
 # Flask Entry Point (MainController logic)from flask import Flask, render_template, request
-
-# from logic.simulation import SimulationController
+from flask import Flask, render_template, request
+from logic.simulation import SimulationController
 
 app = Flask(__name__)
+
+class MainController:
+    def __init__(self):
+        self.simulation = None
+        self.is_available = True
+
+controller = MainController()
 
 @app.route('/')
 def index():
