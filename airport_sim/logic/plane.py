@@ -37,6 +37,7 @@ class Plane:
         self.target_time = self.genTargetTime()
         self.actual_time = self.genActualTime
         self.current_location = self.origin
+        self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
         plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
