@@ -1,5 +1,5 @@
 # VisualisationController Class
-from models import Plane, Runway
+from logic.models import Plane, Runway
 
 class VisualisationController:
     def __init__(self, tickspeed: int = 5): # Tickspeed is 5 minutes by default

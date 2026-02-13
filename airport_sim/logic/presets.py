@@ -1,7 +1,7 @@
 # PresetController Class
 import json
 import os
-from models import Plane
+from logic.models import Plane
 
 class PresetController:
 
