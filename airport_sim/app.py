@@ -1,23 +1,12 @@
-# Flask Entry Point (MainController logic)from flask import Flask, render_template, request
-from flask import Flask, render_template, request
+import os
+from flask import Flask, render_template, request, jsonify
 from logic.simulation import SimulationController
+from logic.presets import PresetController
+from logic.visualisation import VisualisationController
 
-app = Flask(__name__)
-
-class MainController:
-    def __init__(self):
-        self.simulation = None
-        self.is_available = True
-
-controller = MainController()
-
-@app.route('/')
-def index():
-    pass
-
-@app.route('/start', methods=['POST'])
-def start_sim():
-    pass
-
-if __name__ == '__main__':
-    app.run(debug=True)
+# Explicitly configure templates and static directories
+app = Flask(
+    __name__,
+    template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
+    static_folder=os.path.join(os.path.dirname(__file__), 'static')
+)
