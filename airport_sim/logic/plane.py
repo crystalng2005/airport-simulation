@@ -33,7 +33,6 @@ class Plane:
         self.is_departure = is_departure
         self.fuel_level = self.genFuel()
         self.emergency_status = EmergencyStatus.NONE
-        # NOTE: NEED DEPARTURE AND ARRIVAL TIMES SEPARATELY
         self.target_time = self.genTargetTime()
         self.actual_time = self.genActualTime
         self.current_location = self.origin
@@ -95,7 +94,6 @@ class Plane:
                 else:
                     wordCount += 1
 
-
         code = code.strip()
         aiport = airport.strip()
         country = country.strip()
@@ -111,17 +109,27 @@ class Plane:
 # again, use the normal distribution
     def genTargetTime(self):
         # find way to get target (generate or input ??)
-        pass 
+        #doing it in seconds, but can change it to be in minutes as well
+        #86400
+        randSeconds = random.randint(0,86400)
+        randMinutes = 86400/60
+        randHours = randMinutes/60
+        return datetime.time(randHours, randMinutes, randSeconds)
 
     def genActualTime(self):
-        pass
+        actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
+        time = random.normal(actualSeconds, 5*60) 
+        timeSeconds = random.randint(0,86400)
+        timeMinutes = 86400/60
+        timeHours = timeMinutes/60
+        return datetime.time(timeHours,timeMinutes, timeSeconds)
 
     # ------- PLANE CONTROL FUNCTIONS ------- #
     def decreaseFuel(self) -> bool:
         pass
 
     def goToRunway(self, runway: int) -> bool:
-        pass
+        pass 
 
     def cancel(self) -> bool:
         pass
