@@ -29,16 +29,18 @@ class SimulationController:
         pass
 
     def generatePlane(self, is_departure: bool) -> bool:
-        p = Plane(is_departure, self.time)
+        p = Plane(is_departure)
         if is_departure:
             self.departure_queue.enqueue(p)
         else:
             self.landing_queue.enqueue(p)
 
-        self.report.total_planes += 1
+        self.report.total_planes += 1 #to track total planes
 
-    def generateQueue(self) -> bool:
-        pass
+    def generateQueue(self) -> bool: #departure and landing queue
+        self.departure_queue = QueueController([], self.runway_list, True)
+        self.landing_queue = QueueController([], self.runway_list, False)
+        return True
 
     def generateRunway(self) -> bool:
         self.runway_list = []
@@ -57,4 +59,14 @@ class SimulationController:
         return True
 
     def update(self) -> bool:
-        pass
+        #random planes per tick generation
+        if random.random() < (self.departures_per_hour / 3600):
+            self.generatePlane(True)
+
+        if random.random() < (self.landings_per_hour / 3600):
+            self.generatePlane(False)
+        #attempting to assign planes to available runways
+        self.departure_queue.checkRunways()
+        self.landing_queue.checkRunways()
+
+        return True
