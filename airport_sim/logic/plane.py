@@ -126,13 +126,17 @@ class Plane:
 
     # ------- PLANE CONTROL FUNCTIONS ------- #
     def decreaseFuel(self) -> bool:
+        # will need to decide on a quantity based on ticks
         pass
 
     def goToRunway(self, runway: int) -> bool:
+        # need runway class to be finished, ideally should have a runway input object
         pass 
 
     def cancel(self) -> bool:
+        # may need to add a cancelled variable (so only uncanclled planes are used) or destroy object ?
         pass
 
     def hasEmergency(self) -> bool:
+        # need to decide logic for what happens during emergencies, i.e. movement between queues based on simulation
         pass
