@@ -1,6 +1,9 @@
 # QueueController Class
 from models import Runway
 from plane import Plane, EmergencyStatus
+from typing import List
+from queue import Queue
+# from logic.models import Plane, Runway, EmergencyStatus
 from datetime import datetime
 
 class QueueController:
