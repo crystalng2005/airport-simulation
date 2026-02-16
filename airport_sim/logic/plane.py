@@ -27,17 +27,17 @@ class Plane:
 
     # NOTE: if storing the origin/destination as an airport or airport code, a 'rough' dataset may have to suffice since full updated information isn't readily available
     def __init__(self, is_departure: bool):
-        self.callsign = self.genCallsigns()
+        self.callsign = self.genCallsign()
         self.origin = self.genOrigin()
         self.destination = self.genDestination()
         self.is_departure = is_departure
         self.fuel_level = self.genFuel()
         self.emergency_status = EmergencyStatus.NONE
         self.target_time = self.genTargetTime()
-        self.actual_time = self.genActualTime
+        self.actual_time = self.genActualTime()
         self.current_location = self.origin
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
-        plane_num += 1
+        Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
     def __new__(self):

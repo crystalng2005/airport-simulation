@@ -1,5 +1,6 @@
 # QueueController Class
-from models import Plane, Runway, EmergencyStatus
+from models import Runway
+from plane import Plane, EmergencyStatus
 from datetime import datetime
 
 class QueueController:
