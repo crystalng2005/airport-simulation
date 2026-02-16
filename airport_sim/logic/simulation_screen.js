@@ -18,11 +18,6 @@
     resizeCanvas(); // initial sizing
 
 
-
-
-
-
-    
     function drawAllRunways(numberOfRuns, modes){
 
         // most imoprtant sittings 
@@ -132,15 +127,6 @@
     drawAllRunways(5,0);
 
 
-
-
-    function koko(x){
-
-    drawAllRunways(5,0);
-
-    }
-
-    koko([])
 
 
 
