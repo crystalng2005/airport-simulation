@@ -1,9 +1,8 @@
 # PresetController Class
 
-from plane import Plane
+from logic.plane import Plane
 import json
 import os
-# from logic.models import Plane
 
 class PresetController:
 
@@ -12,7 +11,7 @@ class PresetController:
         self.presets_file = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'presets.json')
 
     def savePreset(self) -> bool:
-        # TODO: Implement preset saving logic (frontend)
+        # TODO: Implement preset saving logic
         pass
 
     def reset(self) -> bool:

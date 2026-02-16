@@ -2,6 +2,7 @@ import datetime
 from enum import Enum 
 from numpy import random
 import linecache
+import os
 
 # Emergency status enum, used with the plane class
 class EmergencyStatus(Enum):
@@ -51,7 +52,9 @@ class Plane:
 
 # for the following two will create a txt file of airport AITA codes, names and countries
     def genOrigin(self):
-        line = linecache.getline('iata.txt', random.randint(3,535))
+        # line = linecache.getline('iata.txt', random.randint(3,535))
+        iata_path = os.path.join(os.path.dirname(__file__), '..', 'iata.txt') # Absolute path
+        line = linecache.getline(iata_path, random.randint(3, 535))
         wordCount = 0
         code = ""
         airport = ""
@@ -93,6 +96,8 @@ class Plane:
                         country += l
                 else:
                     wordCount += 1
+
+            first = False # Ended the infinite loop
 
         code = code.strip()
         aiport = airport.strip()

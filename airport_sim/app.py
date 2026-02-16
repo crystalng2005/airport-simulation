@@ -26,7 +26,7 @@ controller = MainController()
 @app.route('/')
 def index():
     # Renders the home page (Main Menu)
-    return render_template('index.html')
+    return render_template('menu.html')
 
 @app.route('/start', methods=['POST'])
 def start_sim():
@@ -52,6 +52,8 @@ def start_sim():
             cancellation_time=int(cancellation_time)
         )
 
+        controller.is_available = False # Simulation is ongoing
+
         return jsonify({'success': True, 'message': 'Simulation started'}), 200
 
     except Exception as e:
@@ -60,11 +62,15 @@ def start_sim():
 
 @app.route('/tick', methods=['POST'])
 def tick():
+    if not controller.is_available or controller.simulation is None:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
     controller.simulation.update()
     return jsonify({'success': True, 'message': 'Tick processed'}), 200
     
 @app.route('/visualisation/data', methods=['GET'])
 def getVisualisationData():
+    
     aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
     return jsonify({'success': True, 'data': aircraft_data}), 200
 

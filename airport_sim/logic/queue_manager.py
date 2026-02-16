@@ -1,10 +1,12 @@
 # QueueController Class
-from models import Runway
-from plane import Plane, EmergencyStatus
+from datetime import datetime
 from typing import List
 from queue import Queue
-# from logic.models import Plane, Runway, EmergencyStatus
-from datetime import datetime
+
+from logic.models import Runway
+from logic.plane import Plane, EmergencyStatus
+
+
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool):
@@ -18,7 +20,7 @@ class QueueController:
                 self.plane_queue.pop(0).goToRunway(runway.runway_number)
 
     def enqueue(self, p: Plane):
-        self.plane_queue.append(Plane)
+        self.plane_queue.append(p)
 
     def checkCancelTime(self) -> datetime:
         if self.is_departure:
