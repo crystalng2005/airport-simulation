@@ -1,6 +1,6 @@
 # PresetController Class
 
-from models import Plane
+from plane import Plane
 
 class PresetController:
 

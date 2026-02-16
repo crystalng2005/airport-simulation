@@ -1,4 +1,10 @@
 # Simulation Controller
+from datetime import datetime, timedelta
+from plane import Plane
+from models import Runway
+from queue_manager import QueueController
+from report import PerformanceReport
+import random
 
 class SimulationController:
     def __init__(
@@ -23,13 +29,44 @@ class SimulationController:
         pass
 
     def generatePlane(self, is_departure: bool) -> bool:
-        pass
+        p = Plane(is_departure)
+        if is_departure:
+            self.departure_queue.enqueue(p)
+        else:
+            self.landing_queue.enqueue(p)
 
-    def generateQueue(self) -> bool:
-        pass
+        self.report.total_planes += 1 #to track total planes
+
+    def generateQueue(self) -> bool: #departure and landing queue
+        self.departure_queue = QueueController([], self.runway_list, True)
+        self.landing_queue = QueueController([], self.runway_list, False)
+        return True
 
     def generateRunway(self) -> bool:
-        pass
+        self.runway_list = []
+        runway_num = 1
+        for i in range(self.departure_runways):
+            self.runway_list.append(Runway(True, False, runway_num, True, True))
+            runway_num += 1
+
+        for i in range(self.landing_runways):
+            self.runway_list.append(Runway(False, False, runway_num, True, True))
+            runway_num += 1
+        
+        for i in range(self.mixed_runways):
+            self.runway_list.append(Runway(True, True, runway_num, True, True))
+            runway_num += 1
+        return True
 
     def update(self) -> bool:
-        pass
+        #random planes per tick generation
+        if random.random() < (self.departures_per_hour / 3600):
+            self.generatePlane(True)
+
+        if random.random() < (self.landings_per_hour / 3600):
+            self.generatePlane(False)
+        #attempting to assign planes to available runways
+        self.departure_queue.checkRunways()
+        self.landing_queue.checkRunways()
+
+        return True
