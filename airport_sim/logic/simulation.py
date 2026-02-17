@@ -60,10 +60,10 @@ class SimulationController:
 
     def update(self) -> bool:
         #random planes per tick generation
-        if random.random() < (self.departures_per_hour / 3600):
+        if random.random() < (self.departures_per_hour / 12):
             self.generatePlane(True)
 
-        if random.random() < (self.landings_per_hour / 3600):
+        if random.random() < (self.landings_per_hour / 12):
             self.generatePlane(False)
         #attempting to assign planes to available runways
         self.departure_queue.checkRunways()
