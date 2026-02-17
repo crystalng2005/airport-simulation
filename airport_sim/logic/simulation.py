@@ -1,10 +1,12 @@
 # Simulation Controller
 from datetime import datetime, timedelta
-from plane import Plane
-from models import Runway
-from queue_manager import QueueController
-from report import PerformanceReport
 import random
+
+from logic.plane import Plane
+from logic.models import Runway
+from logic.queue_manager import QueueController
+from logic.report import PerformanceReport
+
 
 class SimulationController:
     def __init__(
@@ -24,6 +26,10 @@ class SimulationController:
         self.landing_runways = landing_runways
         self.mixed_runways = mixed_runways
         self.cancellation_time = cancellation_time
+        
+        self.generateRunway()
+        self.generateQueue()
+        self.report = PerformanceReport()
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
         pass

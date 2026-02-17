@@ -2,6 +2,7 @@ import datetime
 from enum import Enum 
 from numpy import random
 import linecache
+import os
 
 # Emergency status enum, used with the plane class
 class EmergencyStatus(Enum):
@@ -27,18 +28,17 @@ class Plane:
 
     # NOTE: if storing the origin/destination as an airport or airport code, a 'rough' dataset may have to suffice since full updated information isn't readily available
     def __init__(self, is_departure: bool):
-        self.callsign = self.genCallsigns()
+        self.callsign = self.genCallsign()
         self.origin = self.genOrigin()
         self.destination = self.genDestination()
         self.is_departure = is_departure
         self.fuel_level = self.genFuel()
         self.emergency_status = EmergencyStatus.NONE
-        # NOTE: NEED DEPARTURE AND ARRIVAL TIMES SEPARATELY
         self.target_time = self.genTargetTime()
-        self.actual_time = self.genActualTime
+        self.actual_time = self.genActualTime()
         self.current_location = self.origin
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
-        plane_num += 1
+        Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
     def __new__(self):
@@ -52,7 +52,9 @@ class Plane:
 
 # for the following two will create a txt file of airport AITA codes, names and countries
     def genOrigin(self):
-        line = linecache.getline('iata.txt', random.randint(3,535))
+        # line = linecache.getline('iata.txt', random.randint(3,535))
+        iata_path = os.path.join(os.path.dirname(__file__), '..', 'iata.txt') # Absolute path
+        line = linecache.getline(iata_path, random.randint(3, 535))
         wordCount = 0
         code = ""
         airport = ""
@@ -95,6 +97,7 @@ class Plane:
                 else:
                     wordCount += 1
 
+            first = False # Ended the infinite loop
 
         code = code.strip()
         aiport = airport.strip()
@@ -111,20 +114,34 @@ class Plane:
 # again, use the normal distribution
     def genTargetTime(self):
         # find way to get target (generate or input ??)
-        pass 
+        #doing it in seconds, but can change it to be in minutes as well
+        #86400
+        randSeconds = random.randint(0,86400)
+        randMinutes = 86400/60
+        randHours = randMinutes/60
+        return datetime.time(randHours, randMinutes, randSeconds)
 
     def genActualTime(self):
-        pass
+        actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
+        time = random.normal(actualSeconds, 5*60) 
+        timeSeconds = random.randint(0,86400)
+        timeMinutes = 86400/60
+        timeHours = timeMinutes/60
+        return datetime.time(timeHours,timeMinutes, timeSeconds)
 
     # ------- PLANE CONTROL FUNCTIONS ------- #
     def decreaseFuel(self) -> bool:
+        # will need to decide on a quantity based on ticks
         pass
 
     def goToRunway(self, runway: int) -> bool:
-        pass
+        # need runway class to be finished, ideally should have a runway input object
+        pass 
 
     def cancel(self) -> bool:
+        # may need to add a cancelled variable (so only uncanclled planes are used) or destroy object ?
         pass
 
     def hasEmergency(self) -> bool:
+        # need to decide logic for what happens during emergencies, i.e. movement between queues based on simulation
         pass

@@ -3,11 +3,6 @@
 from enum import Enum
 from datetime import datetime
 
-
-# hello
-
-
-
 class Runway:
     def __init__(self, is_departure: bool, mixed_mode: bool, runway_number: int, is_available: bool, is_operational: bool):
         self.is_departure = is_departure
