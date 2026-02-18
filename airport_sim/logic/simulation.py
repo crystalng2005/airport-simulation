@@ -6,6 +6,7 @@ from logic.plane import Plane
 from logic.models import Runway
 from logic.queue_manager import QueueController
 from logic.report import PerformanceReport
+from logic.presets import PresetController
 
 
 class SimulationController:
@@ -36,6 +37,9 @@ class SimulationController:
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
+        
+        PresetController.plane_list.append(p) # Adds generated plane to preset storage list
+
         if is_departure:
             self.departure_queue.enqueue(p)
         else:
