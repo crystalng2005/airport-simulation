@@ -33,7 +33,9 @@ class SimulationController:
         self.report = PerformanceReport()
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
-        pass
+        self.generateRunway()
+        self.generateQueue()
+        return True
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
