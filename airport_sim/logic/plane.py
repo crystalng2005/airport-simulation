@@ -3,9 +3,11 @@ from enum import Enum
 from numpy import random
 import linecache
 import os
+from globals import reportData as RD
 
 
 
+FUEL_USAGE_PER_TICK = 5
 
 # Emergency status enum, used with the plane class
 class EmergencyStatus(Enum):
@@ -140,7 +142,9 @@ class Plane:
 
     #NOTE: called each tick, so decreases by 5 minutes each call
     def decreaseFuel(self):
-        self.fuel_level -= 5
+        self.fuel_level -= FUEL_USAGE_PER_TICK
+        RD.reportData += FUEL_USAGE_PER_TICK
+
 
     #TODO: change name to check runway to make clearer?
     def goToRunway(self, runway: int) -> bool:

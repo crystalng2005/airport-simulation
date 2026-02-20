@@ -58,9 +58,14 @@ class PerformanceReport:
         std_take_off = statistics.stdev(self.take_off_delays)
         std_arrival = statistics.stdev(self.arrival_delay_times)
 
+        fuel_avg = 0
+        if self.total_planes > 0:
+            fuel_avg = self.tot_fuel_used / self.total_planes
+
         return (f"Number of diversions: {self.diversions}\n"
                 f"Number of cancellations: {self.cancellations}\n"
                 f"Total amount of fuel used: {self.tot_fuel_used}\n"
+                f"Average amount of fuel used: {fuel_avg}\n"
                 f"Total number of planes generated: {self.total_planes}\n\n"
 
                 f"Maximum number of planes in holding queue: {self.holding_max}\n"
