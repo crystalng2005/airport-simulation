@@ -5,8 +5,10 @@ import random
 from logic.plane import Plane
 from logic.models import Runway
 from logic.queue_manager import QueueController
-from logic.report import PerformanceReport
+from airport_sim.logic.report import PerformanceReport
 from logic.presets import PresetController
+
+import globals.reportData as RD
 
 
 class SimulationController:
@@ -30,7 +32,7 @@ class SimulationController:
         
         self.generateRunway()
         self.generateQueue()
-        self.report = PerformanceReport()
+        #self.report = PerformanceReport() #NOTE:moved performanceReport into a global file
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
         pass
@@ -47,10 +49,12 @@ class SimulationController:
 
         self.report.total_planes += 1 #to track total planes
 
+
     def generateQueue(self) -> bool: #departure and landing queue
         self.departure_queue = QueueController([], self.runway_list, True)
         self.landing_queue = QueueController([], self.runway_list, False)
         return True
+
 
     def generateRunway(self) -> bool:
         self.runway_list = []

@@ -4,6 +4,9 @@ from numpy import random
 import linecache
 import os
 
+
+
+
 # Emergency status enum, used with the plane class
 class EmergencyStatus(Enum):
     NONE = 0
@@ -25,8 +28,7 @@ actual_time: datetime
 
 class Plane:
     plane_num = 0
-
-    # NOTE: if storing the origin/destination as an airport or airport code, a 'rough' dataset may have to suffice since full updated information isn't readily available
+    
     def __init__(self, is_departure: bool):
         self.callsign = self.genCallsign()
         self.origin = self.genOrigin()
@@ -38,11 +40,14 @@ class Plane:
         self.actual_time = self.genActualTime()
         self.current_location = self.origin
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
+        self.current_runway = -1
+        self.cancelled = False
         Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
-    def __new__(self):
-        pass
+    # dont need, can use the built in constructor
+    """def __new__(self):
+        pass"""
 
     # ------- PLANE GENERATION FUNCTIONS ------- #
     def genCallsign(self):
@@ -129,19 +134,26 @@ class Plane:
         timeHours = timeMinutes/60
         return datetime.time(timeHours,timeMinutes, timeSeconds)
 
+
+
     # ------- PLANE CONTROL FUNCTIONS ------- #
-    def decreaseFuel(self) -> bool:
-        # will need to decide on a quantity based on ticks
-        pass
 
+    #NOTE: called each tick, so decreases by 5 minutes each call
+    def decreaseFuel(self):
+        self.fuel_level -= 5
+
+    #TODO: change name to check runway to make clearer?
     def goToRunway(self, runway: int) -> bool:
-        # need runway class to be finished, ideally should have a runway input object
-        pass 
+        if self.current_runway != runway:
+            self.current_runway = runway 
+            return True 
+        else:
+            return False
+         
 
-    def cancel(self) -> bool:
-        # may need to add a cancelled variable (so only uncanclled planes are used) or destroy object ?
-        pass
+# TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
+    def cancel(self):
+        self.cancelled = True
 
-    def hasEmergency(self) -> bool:
-        # need to decide logic for what happens during emergencies, i.e. movement between queues based on simulation
-        pass
+    def hasEmergency(self):
+        return self.emergency_status
