@@ -10,6 +10,7 @@ from logic.simulation import SimulationController
 import globals.reportData as RD
 
 
+
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool):
         self.plane_queue = plane_queue # A list, treated as a queue
@@ -21,12 +22,14 @@ class QueueController:
         for runway in self.runway_list:
             if runway.is_available and len(self.plane_queue) != 0:
                 RD.reportData.decQueueCurrent()
+                # TODO: assign queue exit time for delay in report document
                 self.plane_queue.pop(0).goToRunway(runway.runway_number)
 
 
     # Adds a plane to the back of the queue
     def enqueue(self, p: Plane):
         RD.reportData.incQueueCurrent()
+        # TODO: here assign queue entry time for report document
         self.plane_queue.append(p)
 
 

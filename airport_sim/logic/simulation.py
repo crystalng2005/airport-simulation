@@ -32,7 +32,8 @@ class SimulationController:
         
         self.generateRunway()
         self.generateQueue()
-        #self.report = PerformanceReport() #NOTE:moved performanceReport into a global file
+        # Initialises the reportData global variable
+        RD.init()
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
         self.generateRunway()
@@ -86,3 +87,4 @@ class SimulationController:
         self.landing_queue.checkRunways()
 
         return True
+    
