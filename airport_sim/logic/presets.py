@@ -2,6 +2,7 @@ from logic.plane import Plane
 import json
 import os
 from datetime import datetime
+from logic.report import PerformanceReport
 
 
 class PresetController:
@@ -13,7 +14,7 @@ class PresetController:
         self.landing_runways = 0
         self.mixed_runways = 0
 
-        # Add more things to store here
+        self.report = None  # Initialised before saving, goto line 75
 
         self.data_dir = os.path.join(
             os.path.dirname(__file__), '..', '..', 'data'
@@ -71,6 +72,7 @@ class PresetController:
             preset_id = meta[0]["id"]
 
             now = datetime.now(datetime.timezone.utc).isoformat()
+            report = None # TODO: Get report from wherever instantiated ---------------
 
             preset = {
                 "saved_at": now,
@@ -79,7 +81,8 @@ class PresetController:
                     "landing_runways": self.landing_runways,
                     "mixed_runways": self.mixed_runways,
                 },
-                "planes": [plane.__dict__ for plane in self.plane_list]
+                "planes": [plane.__dict__ for plane in self.plane_list],
+                "report": self.report.__dict__
             }
 
             with open(self.preset_files[preset_id], 'w') as f:
@@ -113,6 +116,9 @@ class PresetController:
                 plane.__dict__.update(plane_data)
                 self.plane_list.append(plane)
 
+            report = PerformanceReport.__new__(PerformanceReport)
+            report.__dict__.update(vars_data["report"])
+
             return True
         except (IOError, KeyError, IndexError): # Common file errors
             return False
@@ -124,4 +130,5 @@ class PresetController:
         self.landing_runways = 0
         self.mixed_runways = 0
         self.plane_list.clear()
+        self.report = None
         return True
