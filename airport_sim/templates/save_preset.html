@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Save Preset - Airport Simulation</title>
+    <link rel="stylesheet" href="../static/css/save_preset.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>✈️ Save Simulation Preset</h1>
+            <p class="subtitle">Save this configuration for future use</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="content">
+            <div class="preset-form">
+                <!-- Current Configuration Display -->
+                <div class="config-summary">
+                    <h2>Current Configuration</h2>
+                    
+                    <div class="config-section">
+                        <h3>Runway Configuration</h3>
+                        <div class="config-grid">
+                            <div class="config-item">
+                                <span class="config-label">Total Runways:</span>
+                                <span class="config-value" id="totalRunways">5</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Landing Runways:</span>
+                                <span class="config-value" id="landingRunways">2</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Departure Runways:</span>
+                                <span class="config-value" id="departureRunways">2</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Mixed Runways:</span>
+                                <span class="config-value" id="mixedRunways">1</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>Aircraft Flow</h3>
+                        <div class="config-grid">
+                            <div class="config-item">
+                                <span class="config-label">Inbound Flow:</span>
+                                <span class="config-value" id="landingPerHour">10 per hour</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Outbound Flow:</span>
+                                <span class="config-value" id="departurePerHour">10 per hour</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="config-section">
+                        <h3>Simulation Info</h3>
+                        <div class="config-grid">
+                            <div class="config-item">
+                                <span class="config-label">Total Planes:</span>
+                                <span class="config-value" id="totalPlanes">50</span>
+                            </div>
+                            <div class="config-item">
+                                <span class="config-label">Simulation Time:</span>
+                                <span class="config-value" id="simTime">8 hours</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preset Name Input  -->
+                <div class="preset-name-section">
+                    <label for="presetName">Preset Name (Optional)</label>
+                    <input type="text" id="presetName" placeholder="e.g., Heavy Traffic Config" maxlength="50">
+                    <p class="help-text">Leave blank to auto-generate a name with timestamp</p>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-cancel" onclick="cancelSave()">
+                        <span class="btn-icon"></span>
+                        Cancel
+                    </button>
+                    <button class="btn btn-save" onclick="savePreset()">
+                        <span class="btn-icon"></span>
+                        Save Preset
+                    </button>
+                </div>
+
+                <!-- Success Message (Hidden Initially) -->
+                <div id="successMessage" class="success-message" style="display: none;">
+                    <span class="success-icon"></span>
+                    <span>Preset saved successfully!</span>
+                </div>
+            </div>
+        </main>
+
+        
+    </div>
+
+    <script src="../static/js/save_preset.js"></script>
+</body>
+</html>

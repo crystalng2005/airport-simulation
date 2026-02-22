@@ -74,6 +74,11 @@ def getVisualisationData():
     aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
     return jsonify({'success': True, 'data': aircraft_data}), 200
 
-
+@app.route('/presets')
+def presets():
+    # TODO: Get presets from PresetController
+    presets_data = []  # Replace with actual presets
+    
+    return render_template('save_preset.html', presets=presets_data)
 if __name__ == '__main__':
     app.run(debug=True)
