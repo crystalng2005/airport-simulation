@@ -41,14 +41,6 @@ setTimeout(() => {
 }, planeSpawnSlideDuration*1000 + 1000);
 
 
-<<<<<<< Updated upstream
-    function drawAllRunways(numberOfRuns, modes){
-
-        // most imoprtant sittings 
-        let size = 130
-        const runwayHorizontalGap = Math.round(size * 0.3);
-        const runwayVerticalGap = Math.round(size * 1);
-=======
 
 
 
@@ -87,7 +79,6 @@ function createRunways(num) {
     runwayHat.style.width = (runway_size / 2) + 'px';
     runwayHat.style.height = (runway_size / 2) + 'px';;
     
->>>>>>> Stashed changes
 
 
     runway.appendChild(runwayHat);
@@ -348,7 +339,7 @@ function updateInfoScreenContent(planeID){
 // use the plane to return the Aircraft from some global list of current planes in the simulation
 function getAircraft(planeID){
 
-    
+
 
 }
 // ________________________________________________________________________________________________________
