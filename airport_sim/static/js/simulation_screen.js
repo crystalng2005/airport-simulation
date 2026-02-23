@@ -347,6 +347,7 @@ function updateInfoScreenContent(planeID){
 // Unfinished-----------------------------------------------------------------
 // use the plane to return the Aircraft from some global list of current planes in the simulation
 function getAircraft(planeID){
+
     
 
 }
