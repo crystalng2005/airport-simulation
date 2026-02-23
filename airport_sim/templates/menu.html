@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airport Simulation System - Main Menu</title>
+    <link rel="stylesheet" href="static/css/menu.css">
+    <!-- <link rel="stylesheet" href="static/css/simulation_screen.css"> -->
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>Airport Simulation System</h1>
+            <p class="subtitle">Runway Management & Aircraft Flow Modeling</p>
+            <p class="team-info">Group 12 - CS261 | University of Warwick</p>
+        </header>
+
+        <!-- Main Menu -->
+        <main class="menu-section">
+            <h2>Main Menu</h2>
+            
+            <div class="menu-buttons">
+                <!-- Start New Simulation -->
+                <button class="menu-btn primary-btn" onclick="startNewSimulation()">
+                    <span class="btn-text">Start New Simulation</span>
+                    <span class="btn-description">Configure and run a new simulation</span>
+                </button>
+
+                <!-- Load Preset -->
+                <button class="menu-btn secondary-btn" onclick="loadPreset()">
+                    <span class="btn-text">Load Preset</span>
+                    <span class="btn-description">Use a saved configuration</span>
+                </button>
+
+                <!-- View Results -->
+                <button class="menu-btn secondary-btn" onclick="viewResults()">
+                    <span class="btn-text">View Results</span>
+                    <span class="btn-description">See previous simulation results</span>
+                </button>
+
+                <!-- Settings -->
+                <button class="menu-btn secondary-btn" onclick="openSettings()">
+                    <span class="btn-text">Settings</span>
+                    <span class="btn-description">Adjust system preferences</span>
+                </button>
+
+                <!-- Exit -->
+                <button class="menu-btn exit-btn" onclick="exitApplication()">
+                    <span class="btn-text">Exit</span>
+                    <span class="btn-description">Close the application</span>
+                </button>
+            </div>
+        </main>
+
+        
+    </div>
+
+    <script src="static/js/menu.js"></script>
+</body>
+</html>
