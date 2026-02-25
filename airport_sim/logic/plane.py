@@ -3,6 +3,15 @@ from enum import Enum
 from numpy import random
 import linecache
 import os
+from globals import reportData as RD
+
+
+# CONSTANTS
+FUEL_USAGE_PER_TICK = 5
+
+MINUTES_PER_TICK = 5
+
+
 
 # Emergency status enum, used with the plane class
 class EmergencyStatus(Enum):
@@ -25,24 +34,26 @@ actual_time: datetime
 
 class Plane:
     plane_num = 0
-
-    # NOTE: if storing the origin/destination as an airport or airport code, a 'rough' dataset may have to suffice since full updated information isn't readily available
+    
     def __init__(self, is_departure: bool):
         self.callsign = self.genCallsign()
         self.origin = self.genOrigin()
         self.destination = self.genDestination()
         self.is_departure = is_departure
         self.fuel_level = self.genFuel()
-        self.emergency_status = EmergencyStatus.NONE
+        self.emergency_status = self.genEmergencyOnSpawn()
         self.target_time = self.genTargetTime()
         self.actual_time = self.genActualTime()
         self.current_location = self.origin
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
+        self.current_runway = -1
+        self.cancelled = False
         Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
-    def __new__(self):
-        pass
+    # dont need, can use the built in constructor
+    """def __new__(self):
+        pass"""
 
     # ------- PLANE GENERATION FUNCTIONS ------- #
     def genCallsign(self):
@@ -132,20 +143,94 @@ class Plane:
         timeMinutes = 86400/60
         timeHours = timeMinutes/60
         return datetime.time(timeHours,timeMinutes, timeSeconds)
+    
+  
+    def genEmergencyOnSpawn(self):
+        # offer chance to set with user input once json data available, placeholders for now
+        # Medical emergencies: https://pmc.ncbi.nlm.nih.gov/articles/PMC7125952/ 
+            # Diversion rate: 0.073, 1 emergency per 604 flights, rate per flight: 0.00012
+        # Fuel emergencies: (not a lot of data, but can use american):
+            # https://www.ishn.com/articles/107086-planes-run-out-of-fuel-more-often-than-you-think
+            # https://www.faa.gov/air_traffic/by_the_numbers
+            # 56 fuel accidents per year, 16191379 flights = 3.458*10^-6 = 0.000003458, but actual value may be higher
+            # This will just be for spawning in with the emergency
+        # Mechanical: https://www.aopa.org/training-and-safety/air-safety-institute/accident-analysis/richard-g-mcspadden-report/mcspadden-report-figure-view/?category=all&year=2023&condition=all&report=true
+            # 0.00004
+
+        # Chances per flight (based on flight per year data)
+        medical_p = 0.00012
+        fuel_p = 0.000003458
+        mechanical_p = 0.00004
+        
+        # NOTE: System allows for only 1 emergency, so pick the highest priority one generated
+        
+        # Ordered in terms of priorities
+        mechanical_val = random.randint(1,int(1/mechanical_p))
+        fuel_val = random.randint(1,int(1/fuel_p))
+        medical_val = random.randint(1,int(1/medical_p))
+
+        if mechanical_val == 1:
+            return EmergencyStatus.MECHANICAL
+        elif fuel_val == 1:
+            return EmergencyStatus.FUEL
+        elif medical_val == 1:
+            return EmergencyStatus.HEALTH
+        else:
+            return EmergencyStatus.NONE
+
+
+## need to add to the plane class the emgency deciding
 
     # ------- PLANE CONTROL FUNCTIONS ------- #
-    def decreaseFuel(self) -> bool:
-        # will need to decide on a quantity based on ticks
-        pass
 
+    #NOTE: called each tick, so decreases by 5 minutes each call
+    def decreaseFuel(self):
+        if not self.cancelled:
+            self.fuel_level -= FUEL_USAGE_PER_TICK
+            RD.reportData += FUEL_USAGE_PER_TICK
+            return True 
+        return False
+
+
+    #TODO: change name to check runway to make clearer?
     def goToRunway(self, runway: int) -> bool:
-        # need runway class to be finished, ideally should have a runway input object
-        pass 
+        if self.current_runway != runway:
+            self.current_runway = runway 
+            return True 
+        else:
+            return False
+         
 
-    def cancel(self) -> bool:
-        # may need to add a cancelled variable (so only uncanclled planes are used) or destroy object ?
-        pass
+# TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
+    def cancel(self):
+        self.cancelled = True
 
-    def hasEmergency(self) -> bool:
-        # need to decide logic for what happens during emergencies, i.e. movement between queues based on simulation
-        pass
+    # Call every tick, for every plane to both present chance of generating emergency and checking if a plane has one
+    # Update this based on tick rate
+    def hasEmergency(self):
+        # 28.4 million flight hours a year =  28400000
+        # Mechanical: per 100,000 flight hours is 0.85 --> 0.0000085 per 60 minutes
+        # https://atag.org/facts-figures : 35.3 million flights per year
+        # Medical: 88000000 flight hours per year, 2.49 hours per flight, 0.00004819 per 60 mins
+        # Fuel : 0.000003458 per flight --> 0.000001388 per 60 mins
+
+        mechanical_per_tick = 0.0000085/MINUTES_PER_TICK
+        medical_per_tick = 0.00004819/MINUTES_PER_TICK
+        #fuel_per_tick = 0.000001388/MINUTES_PER_TICK
+
+        # Ordered in terms of priorities
+        mechanical_val = random.randint(1,int(1/mechanical_per_tick))
+        #fuel_val = random.randint(1,int(1/fuel_per_tick))
+        medical_val = random.randint(1,int(1/medical_per_tick))
+        if self.emergency_status == EmergencyStatus.NONE:
+            if mechanical_val == 1:
+                self.emergency_status= EmergencyStatus.MECHANICAL
+            elif medical_val == 1:
+                self.emergency_status= EmergencyStatus.HEALTH
+            else:
+                if self.fuel_level < 20:
+                    self.emergency_status = EmergencyStatus.FUEL
+            
+        return self.emergency_status
+
+
