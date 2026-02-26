@@ -1,100 +1,267 @@
-    body {
-      background: #d6d6d6;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+body {
+  background: #d6d6d6;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
 
-    .titles{
-    }
+.holding-pattern-queue{
+  top: 17%;
 
-    .plane-queues{
-    }
+  /* fixed stats the same as take-off-queue */
+  width: 80%;
+  height: 100px;
+  border: 4px solid #000;
+  border-radius: 8px;
+  background: #a2a2a2;
+  position: absolute;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-    .holding-pattern-queue{
-      top: 5%;
+.take-off-queue{
+  top: 87%;
+  
+  /* fixed stats the same as holding-pattern-queue */
+  width: 80%;
+  height: 100px;
+  border: 4px solid #000;
+  border-radius: 8px;
+  background: #a2a2a2;
+  position: absolute;      
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-      /* fixed stats the same as take-off-queue */
-      width: 80%;
-      height: 100px;
-      border: 4px solid #000;
-      border-radius: 8px;
-      background: #a2a2a2;
-      position: absolute;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      display: flex;
-      justify-content: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.holding-pattern-title{
+  color: #0078d7;
+  width: 400px;
 
-    .take-off-queue{
-      top: 85%;
-      
-      /* fixed stats the same as holding-pattern-queue */
-      width: 80%;
-      height: 100px;
-      border: 4px solid #000;
-      border-radius: 8px;
-      background: #a2a2a2;
-      position: absolute;      
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      display: flex;
-      justify-content: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+  /* fixed stats the same as take-off-title */
+  display: flex;
+  justify-content: center;        
+  height: 30px;
+  border: 4px solid #000;
+  border-radius: 8px;
+  background: #a2a2a2;
+  position: absolute;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  top: -30%;
+  overflow: hidden;
+  font-size: 35px;  
+  display: flex;
+  justify-content: center;  
+  align-items: center;
+}
 
-    .holding-pattern-title{
-      color: #0078d7;
-      width: 400px;
+.take-off-title{
+  color: #f12020;
+  width: 250px;
 
-      /* fixed stats the same as take-off-title */
-      display: flex;
-      justify-content: center;        
-      height: 30px;
-      border: 4px solid #000;
-      border-radius: 8px;
-      background: #a2a2a2;
-      position: absolute;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      top: -30%;
-      overflow: hidden;
-      font-size: 35px;  
-      display: flex;
-      justify-content: center;  
-      align-items: center;
-    }
+  /* fixed stats the same as holding-pattern-title */
+  display: flex;
+  justify-content: center;        
+  height: 30px;
+  border: 4px solid #000;
+  border-radius: 8px;
+  background: #a2a2a2;
+  position: absolute;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  top: -30%;
+  overflow: hidden;
+  font-size: 35px;  
+  display: flex;
+  justify-content: center;  
+  align-items: center;
+}
 
-    .take-off-title{
-      color: #f12020;
-      width: 250px;
+/* not used */
+#canvas {
+display: block;
+}
 
-      /* fixed stats the same as holding-pattern-title */
-      display: flex;
-      justify-content: center;        
-      height: 30px;
-      border: 4px solid #000;
-      border-radius: 8px;
-      background: #a2a2a2;
-      position: absolute;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      top: -30%;
-      overflow: hidden;
-      font-size: 35px;  
-      display: flex;
-      justify-content: center;  
-      align-items: center;
-    }
 
-    #canvas {
 
-    /* border: 1px solid black;
-    margin: 10%; */
 
-    display: block;
+#container {
 
-    }
+  border: 4px solid rgb(0, 0, 0);
+  display: flex;
+  flex-wrap: wrap;
+
+  column-gap: 20px; 
+  row-gap: 0px;  
+
+  /* margin-top: 20px; */
+
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  align-items: center;
+  /* min-height: 500px; */
+
+  /* let container be in the center */
+
+
+  width: 90%;
+  height: 50%;
+
+  position: absolute;
+  top: 57%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.runway {
+  /* width: 100px;
+  height: 100px; */
+  background-color: rgb(247, 247, 247);
+  /* border: 4px solid rgb(0, 0, 0); */
+  position: relative;
+}
+
+.runway-hat {
+
+  border: 4px solid rgb(0, 0, 0);
+
+
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  top: -59%;        /* move upward */
+  left: 50%;         /* center horizontally */
+  transform: translateX(-50%);
+}
+
+
+.holding-pattern-plane-wrapper{
+  display: flex;
+  gap: 20px;
+  overflow: hidden; 
+  flex: 1;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  position: relative; 
+  transition: gap 1.5s ease;
+
+  /* border: 4px solid rgb(201, 0, 0); */
+}
+
+.take-off-plane-wrapper{
+  display: flex;
+  gap: 20px;
+  overflow: hidden; 
+  flex: 1; 
+  justify-content: flex-end;
+  align-items: flex-end;
+  /* border: 4px solid rgb(201, 0, 0); */
+}
+
+.planes {
+  border-radius: 50%;
+  background-color: rgb(131, 131, 255);
+
+  flex-shrink: 0; 
+  position: relative;
+
+  /* transform: translateX(150vw);  */
+  animation: slideIn 0.7s forwards; 
+}
+
+
+/* Keyframes to slide in from left */
+@keyframes slideIn {
+  to {
+    transform: translateX(0); /* end at its flex position */
+  }
+}
+
+
+.timer{
+  /* position and size */
+  top: 0.5%;
+  left: 0.5%;
+  width: 40%;
+  height: 100px;
+
+  /* shape design*/
+  border: 4px solid #000;
+  border-radius: 8px;
+  background: #a2a2a2;
+  position: absolute;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* text design */
+  color: #ffffff;
+  font-size: 50px;  
+}
+
+.display-info-screen{
+  /* position and size */
+  top: 0.5%;
+  right: 0.5%;
+  width: 55%;
+  height: 180px;
+
+  /* shape design*/
+  border: 4px solid #000;
+  border-radius: 8px;
+  background: #a2a2a2;
+  position: absolute;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+
+  /* text design */
+  color: #000000;
+  font-size: 25px;  
+
+  /* spacing between lines */
+  gap: 0px;
+  display: none;  /* the js file will change it to flex if mouse hover is active */
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  overflow: hidden;
+
+  /* column-gap: 0px; */
+}
+
+.display-info-screen ul {
+  margin: 0;
+  padding-left: 10px;
+  column-count: 2;     
+  column-gap: 100px; 
+}
+
+.display-info-screen li {
+  margin-bottom: 10px;
+  font-size: 15px;  
+}
+
+/* not useeedddd */
+.line{
+
+  margin-bottom: 5px;
+
+  /* text design */
+  color: #ff0000;
+  font-size: 15px;  
+}
+
+ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+li::before {
+  content: "✈ ";
+  color: blue;
+}
