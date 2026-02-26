@@ -70,6 +70,31 @@ class PresetController:
 
         return [(i, r["saved_at"]) for i, r in enumerate(results)]
 
+
+
+    # Given a specific report ID, exports it to the exports folder
+    def exportResults(self, id: int) -> bool:
+        return self.exportResults(self, self.loadResults(self, id))
+
+    # Given a specific report, exports it to the exports folder
+    def exportResults(self, PR: PerformanceReport) -> bool:
+        export_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'exports')
+
+        try:
+            os.makedirs(export_dir, exist_ok=True)
+
+            now = datetime.now(datetime.timezone.utc).isoformat()
+            export_file = os.path.join(export_dir, f'results-{now}.json')
+
+            result = PR.__dict__
+
+            with open(export_file, 'w') as f:
+                json.dump(result, f, indent=4)
+
+            return True
+        except (Exception, IOError):
+            return False
+
     def reset(self) -> bool:
         self.result = None
         return True
