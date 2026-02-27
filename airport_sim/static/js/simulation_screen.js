@@ -8,7 +8,7 @@ const planeSpawnSlideDuration = 1; //in sec
 const planeRunwaySlideDuration = 1; //in sec
 const planeFadeOutDuration = 0.5 //in sec
 const planesQueueSlideDuration = 1 //in sec
-const planeEmergencyColor = 'rgba(248, 0, 0, 1)';
+const planeEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
 
 // plane info screen sittings
 const showInfoScreenAllTime = false;
@@ -31,12 +31,19 @@ createRunways(numberOfRunways);
 spawnPlane(9, false)
 
 for(let i =0 ;i<10;i++){
-  spawnPlane(i+10, true);
+  spawnPlane(i+10, false);
+  spawnPlane(i+20, true);
 }
 
 setTimeout(() => {
 
-  movePlaneToRunway(10, 3);
+  movePlaneToRunway(9, 1);
+  movePlaneToRunway(12, 2);
+  movePlaneToRunway(20, 3);
+  movePlaneToRunway(24, 4);
+  movePlaneToRunway(25, 5);
+
+  letPlaneHaveEmergency(22);
 
 }, planeSpawnSlideDuration*1000 + 1000);
 
@@ -196,10 +203,19 @@ function slideQueuePlanes(plane){
   const oldPositions = [];
   const newPositions = [];
 
+  let condition = '';
+
+  // if the plane is in the Holding pattern q
+  if(plane.getBoundingClientRect().top < window.innerHeight/2){
+    condition = '<';
+  }
+  else{
+    condition = '>';
+  }
 
   // get the desired planes and their old positions
   for (const p of allPlanes) {
-    if(plane.getBoundingClientRect().left < p.getBoundingClientRect().left){
+    if(eval("plane.getBoundingClientRect().left" + condition + "p.getBoundingClientRect().left")){
       planes.push(p);
       oldPositions.push(p.getBoundingClientRect());
     }
@@ -209,11 +225,10 @@ function slideQueuePlanes(plane){
   if(planes.length == 0)
     return 0;
 
-
   // remove the plane from the wrapper 
   wrapper.removeChild(plane);
 
-  // get the new positions of all planes that are on the right 
+  // get the new positions of all planes before plane
   for (const p of planes) {
       newPositions.push(p.getBoundingClientRect());
   }
