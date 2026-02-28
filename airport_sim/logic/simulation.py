@@ -11,6 +11,7 @@ from logic.presets import PresetController
 import globals.reportData as RD
 
 
+
 class SimulationController:
     def __init__(
         self,
@@ -33,12 +34,19 @@ class SimulationController:
         self.generateRunway()
         self.generateQueue()
         # Initialises the reportData global variable
-        RD.init()
+        RD.init(total_runways, landings_per_hour)
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
         self.generateRunway()
         self.generateQueue()
         return True
+
+
+
+    def getSimulationTime() -> datetime:
+        pass
+
+
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
@@ -50,7 +58,8 @@ class SimulationController:
         else:
             self.landing_queue.enqueue(p)
 
-        self.report.total_planes += 1 #to track total planes
+        # Increases total number of planes
+        RD.reportData.total_planes += 1
 
 
     def generateQueue(self) -> bool: #departure and landing queue
@@ -77,6 +86,7 @@ class SimulationController:
             self.departure_list.append(temp)
             runway_num += 1
         return True
+
 
     def update(self) -> bool:
         #random planes per tick generation
