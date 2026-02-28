@@ -110,8 +110,12 @@ class Plane:
 
     def genDestination(self):
         first = True
+        iata_path = os.path.join(os.path.dirname(__file__), '..', 'iata.txt') # Absolute path
+        code = ""
+        airport = ""
+        country = ""
         while first or (code == self.origin):
-            line = linecache.getline('iata.txt', random.randint(3,535))
+            line = linecache.getline(iata_path, random.randint(3,535))
             wordCount = 0
             code = ""
             airport = ""

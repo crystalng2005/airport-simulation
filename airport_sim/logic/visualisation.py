@@ -9,10 +9,14 @@ class VisualisationController:
     def getAircraftData(self, simulation) -> dict:
         """Stub method to return aircraft data for visualization."""
         # TODO: Implement data retrieval from simulation (backend)
+        if simulation is None:
+            return {}
+
         return {
-            'planes': [],
-            'runways': [],
-            'queues': []
+            "current_time": simulation.current_time.isoformat(),
+            "planes": [],
+            "runways": [],
+            "queues": []
         }
 
     def getPlaneInfo(self) -> tuple:
