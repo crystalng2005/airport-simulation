@@ -5,8 +5,10 @@ from queue import Queue
 
 from logic.models import Runway
 from logic.plane import Plane, EmergencyStatus
+
+import logic.globals.reportData as RD
 from logic.simulation import SimulationController
-from logic.globals import reportData as RD
+
 
 
 
