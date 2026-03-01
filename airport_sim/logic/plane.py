@@ -3,6 +3,7 @@ from enum import Enum
 from numpy import random
 import linecache
 import os
+import math
 # from globals import reportData as RD
 import logic.globals.reportData as RD
 
@@ -32,6 +33,7 @@ fuel_level: float,
 target_time: datetime,
 actual_time: datetime
 """
+
 
 
 #TODO: get information function () format:dictionary
@@ -150,22 +152,25 @@ class Plane:
         return fuel
 
 
+
 # NTOE: is_departure will determine whether or not the taget or actual time is about the departure or arrival
 # again, use the normal distribution
     def genTargetTime(self):
         # find way to get target (generate or input ??)
         #doing it in seconds, but can change it to be in minutes as well
         #86400
-        randSeconds = random.randint(0,86400)
-        randMinutes = 86400/60
+        randSeconds = random.randint(0,82800)
+        randMinutes = randSeconds/60
+        self.tickTargetTime = math.ceil(randMinutes/5)
         randHours = randMinutes/60
         return datetime.time(int(randHours), int(randMinutes), int(randSeconds))
 
     def genActualTime(self):
         actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
         time = random.normal(actualSeconds, 5*60) 
-        timeSeconds = random.randint(0,86400)
-        timeMinutes = 86400/60
+        self.tickActualTime = random.normal(self.tickTargetTime, 1)
+        timeSeconds = time
+        timeMinutes = timeSeconds/60
         timeHours = timeMinutes/60
         return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
     
