@@ -5,16 +5,13 @@ from queue import Queue
 
 from logic.models import Runway
 from logic.plane import Plane, EmergencyStatus
-from logic.simulation import SimulationController
-
-import globals.reportData as RD
 
 
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool):
         self.plane_queue = plane_queue # A list, treated as a queue
-        self.runway_list = runway_list # List of suitable runways (e.g. if is_departure == true, then should be just mixed mode / take off runways)
+        self.runway_list = runway_list
         self.is_departure = is_departure # true = takeoff, false = landing 
 
 
@@ -35,8 +32,6 @@ class QueueController:
                 RD.reportData.decQueueCurrent()
 
 
-
-    # Adds a plane to the back of the queue
     def enqueue(self, p: Plane):
         # Adds plane to queue
         self.plane_queue.append(p)
@@ -69,7 +64,6 @@ class QueueController:
             case EmergencyStatus.MECHANICAL:
                 p.emergency_time_left = 30
         temp = 0
-        # Places plane in queue based on asc. emergency_time_left
         for plane in self.plane_queue:
                 if plane.emergency_time_left < p.emergency_time_left:
                     temp+= 1

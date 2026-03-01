@@ -7,12 +7,6 @@ from __future__ import annotations
 
 # PerformanceReport Class
 
-
-
-#TODO: depending on what changes, could generate full plot reports e.g. showing changes based on runway num/plane amt
-
-
-#NOTE: changing previous object to now just create a blank one that can be used to record data.
 class PerformanceReport:
     def __init__(self, runway_amount, landings_per_hour):
         # Simulation preset data

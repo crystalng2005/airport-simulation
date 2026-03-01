@@ -1,3 +1,5 @@
+# PresetController Class
+
 from logic.plane import Plane
 import json
 import os
@@ -61,14 +63,8 @@ class PresetController:
     # --- Preset functions ---
 
     def savePreset(self) -> bool:
-        try:
-            # Load oldest preset
-            meta = self.load_meta()["presets"]
-            unused = [p for p in meta if p["last_saved"] is None]
-            if unused:
-                return unused[0]["id"]
-            meta.sort(key=lambda p: p["last_saved"])
-            preset_id = meta[0]["id"]
+        # TODO: Implement preset saving logic
+        pass
 
             now = datetime.now(datetime.timezone.utc).isoformat()
             self.report = RD.reportData
@@ -99,35 +95,5 @@ class PresetController:
             return False
 
     def loadPreset(self, preset_id: int) -> bool:
-        try:
-            with open(self.preset_files[preset_id], 'r') as f:
-                data = json.load(f)
-
-            vars_data = data["vars"]
-            self.departure_runways = vars_data["departure_runways"]
-            self.landing_runways = vars_data["landing_runways"]
-            self.mixed_runways = vars_data["mixed_runways"]
-
-            # Loads planes by initiating new objects and importing their data from the preset
-            self.plane_list = []
-            for plane_data in data["planes"]:
-                plane = Plane.__new__(Plane)
-                plane.__dict__.update(plane_data)
-                self.plane_list.append(plane)
-
-            report = PerformanceReport.__new__(PerformanceReport)
-            report.__dict__.update(vars_data["report"])
-
-            return True
-        except (IOError, KeyError, IndexError): # Common file errors
-            return False
-
-    # Resets file to save new preset info
-    # To be called when new simulation runs
-    def reset(self) -> bool:
-        self.departure_runways = 0
-        self.landing_runways = 0
-        self.mixed_runways = 0
-        self.plane_list.clear()
-        self.report = None
-        return True
+        with open(self.presets_file, 'r') as f:
+            return json.load(f)
