@@ -57,6 +57,7 @@ class Plane:
         self.entered_hold = None 
         self.left_hold = None
         self.generated_at = None
+        self.left_simulation = False
         Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
@@ -175,7 +176,7 @@ class Plane:
         timeHours = (timeMinutes/60) % 60
         return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
     
-    
+
   
     def genEmergencyOnSpawn(self):
         # offer chance to set with user input once json data available, placeholders for now
@@ -237,6 +238,10 @@ class Plane:
 # TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
     def cancel(self):
         self.cancelled = True
+
+    
+    def exit_simulation(self):
+        self.left_simulation = True
 
     # Call every tick, for every plane to both present chance of generating emergency and checking if a plane has one
     # Update this based on tick rate
