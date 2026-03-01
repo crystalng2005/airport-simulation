@@ -174,6 +174,7 @@ class Plane:
         timeHours = (timeMinutes/60) % 60
         return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
     
+    
   
     def genEmergencyOnSpawn(self):
         # offer chance to set with user input once json data available, placeholders for now
