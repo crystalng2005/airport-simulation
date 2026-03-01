@@ -12,7 +12,7 @@ class PresetController:
         self.max_results = 50
 
         self.data_dir = os.path.join(
-            os.path.dirname(__file__), '..', '..', 'data'
+            os.path.dirname(__file__), '..', 'data'
         )
 
         self.results_file = os.path.join(self.data_dir, 'results.json')
@@ -78,7 +78,7 @@ class PresetController:
 
     # Given a specific report, exports it to the exports folder
     def exportResults(self, PR: PerformanceReport) -> bool:
-        export_dir = os.path.join(os.path.dirname(__file__), '..', '..', 'exports')
+        export_dir = os.path.join(os.path.dirname(__file__), '..', 'exports')
 
         try:
             os.makedirs(export_dir, exist_ok=True)
