@@ -5,7 +5,10 @@ import random
 from logic.plane import Plane
 from logic.models import Runway
 from logic.queue_manager import QueueController
-from logic.report import PerformanceReport
+from airport_sim.logic.report import PerformanceReport
+from logic.presets import PresetController
+
+import globals.reportData as RD
 
 
 
@@ -37,7 +40,9 @@ class SimulationController:
         RD.init(total_runways, landings_per_hour)
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
-        pass
+        self.generateRunway()
+        self.generateQueue()
+        return True
 
 
 
@@ -48,6 +53,9 @@ class SimulationController:
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
+        
+        PresetController.plane_list.append(p) # Adds generated plane to preset storage list
+
         if is_departure:
             self.departure_queue.enqueue(p)
         else:
@@ -56,24 +64,29 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
+
     def generateQueue(self) -> bool: #departure and landing queue
-        self.departure_queue = QueueController([], self.runway_list, True)
-        self.landing_queue = QueueController([], self.runway_list, False)
+        self.departure_queue = QueueController([], self.departure_list, True)
+        self.landing_queue = QueueController([], self.landing_list, False)
         return True
 
+
     def generateRunway(self) -> bool:
-        self.runway_list = []
+        self.landing_list = []
+        self.departure_list = []
         runway_num = 1
         for i in range(self.departure_runways):
-            self.runway_list.append(Runway(True, False, runway_num, True, True))
+            self.departure_list.append(Runway(True, False, runway_num, True, True))
             runway_num += 1
 
         for i in range(self.landing_runways):
-            self.runway_list.append(Runway(False, False, runway_num, True, True))
+            self.landing_list.append(Runway(False, False, runway_num, True, True))
             runway_num += 1
         
         for i in range(self.mixed_runways):
-            self.runway_list.append(Runway(True, True, runway_num, True, True))
+            temp = Runway(True, True, runway_num, True, True)
+            self.landing_list.append(temp)
+            self.departure_list.append(temp)
             runway_num += 1
         return True
 
@@ -105,3 +118,4 @@ class SimulationController:
         self.landing_queue.checkRunways()
 
         return True
+    
