@@ -63,36 +63,34 @@ class PresetController:
     # --- Preset functions ---
 
     def savePreset(self) -> bool:
-        # TODO: Implement preset saving logic
-        pass
 
-            now = datetime.now(datetime.timezone.utc).isoformat()
-            self.report = RD.reportData
+        now = datetime.now(datetime.timezone.utc).isoformat()
+        self.report = RD.reportData
 
-            preset = {
-                "saved_at": now,
-                "vars": {
-                    "departure_runways": self.departure_runways,
-                    "landing_runways": self.landing_runways,
-                    "mixed_runways": self.mixed_runways,
-                },
-                "planes": [plane.__dict__ for plane in self.plane_list],
-                "report": self.report.__dict__
-            }
+        preset = {
+            "saved_at": now,
+            "vars": {
+                "departure_runways": self.departure_runways,
+                "landing_runways": self.landing_runways,
+                "mixed_runways": self.mixed_runways,
+            },
+            "planes": [plane.__dict__ for plane in self.plane_list],
+            "report": self.report.__dict__
+        }
 
-            with open(self.preset_files[preset_id], 'w') as f:
-                json.dump(preset, f, indent=4)
+        with open(self.preset_files[preset_id], 'w') as f:
+            json.dump(preset, f, indent=4)
 
-            # Updates meta file, making
-            meta = self.load_meta()
-            for p in meta["presets"]:
-                if p["id"] == preset_id:
-                    p["last_saved"] = now
-            self.save_meta(meta)
+        # Updates meta file, making
+        meta = self.load_meta()
+        for p in meta["presets"]:
+            if p["id"] == preset_id:
+                p["last_saved"] = now
+        self.save_meta(meta)
 
-            return True
-        except IOError:
-            return False
+        return True
+    except IOError:
+        return False
 
     def loadPreset(self, preset_id: int) -> bool:
         with open(self.presets_file, 'r') as f:
