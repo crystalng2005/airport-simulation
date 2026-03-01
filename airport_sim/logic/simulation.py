@@ -7,6 +7,7 @@ from logic.models import Runway
 from logic.queue_manager import QueueController
 # from airport_sim.logic.report import PerformanceReport
 from logic.presets import PresetController
+from logic.currentFrameActions import currentFrameActions
 
 import logic.globals.reportData as RD
 
@@ -94,10 +95,10 @@ class SimulationController:
 
         if is_departure:
             self.departure_queue.enqueue(p)
-            QueueController.current_frame_actions.append(p.callsign, "spawnDeparture")
+            currentFrameActions.current_frame_actions.append(p.callsign, "spawnDeparture")
         else:
             self.landing_queue.enqueue(p)
-            QueueController.current_frame_actions.append(p.callsign, "spawnLanding")
+            currentFrameActions.current_frame_actions.append(p.callsign, "spawnLanding")
 
         # Increases total number of planes
         RD.reportData.total_planes += 1
@@ -112,7 +113,7 @@ class SimulationController:
         return True
 
     def getCurrentFrameActions(self):
-        return QueueController.current_frame_actions
+        return currentFrameActions.current_frame_actions
 
     def generateRunway(self) -> bool:
         self.landing_list = []

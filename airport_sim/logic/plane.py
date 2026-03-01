@@ -6,6 +6,7 @@ import os
 import math
 # from globals import reportData as RD
 import logic.globals.reportData as RD
+from logic.currentFrameActions import currentFrameActions
 
 
 # CONSTANTS
@@ -59,6 +60,7 @@ class Plane:
         self.generated_at = None
         self.left_simulation = False
         Plane.plane_num += 1
+        self.needsToBeRemoved = False
 
     # ------- CONSTRUCTOR ------ #
     # dont need, can use the built in constructor
@@ -218,6 +220,9 @@ class Plane:
 
     #NOTE: called each tick, so decreases by 5 minutes each call
     def decreaseFuel(self):
+        if self.needsToBeRemoved:
+            self.needsToBeRemoved = False
+            self.exit_simulation()
         if not self.cancelled:
             self.fuel_level -= FUEL_USAGE_PER_TICK
             RD.reportData += FUEL_USAGE_PER_TICK
@@ -229,6 +234,7 @@ class Plane:
     def goToRunway(self, runway: int) -> bool:
         if self.current_runway != runway:
             self.current_runway = runway 
+            self.needsToBeRemoved = True
             return True 
         else:
             return False
@@ -242,6 +248,7 @@ class Plane:
     
     def exit_simulation(self):
         self.left_simulation = True
+        currentFrameActions.current_frame_actions.append(self.callsign, "kill")
 
     # Call every tick, for every plane to both present chance of generating emergency and checking if a plane has one
     # Update this based on tick rate
