@@ -84,8 +84,11 @@ function startSimulation(){
   // visualize current frame
   simulateFrame();
 
-  // go to next frame after waiting for 1/FPS seconds
-  setTimeout(startSimulation,1000/FPS);
+  
+  if(!stopSimulationCheck()){
+    // go to next frame after waiting for 1/FPS seconds
+    setTimeout(startSimulation,1000/FPS);
+  }
 }
 
 function simulateFrame() {
@@ -495,6 +498,7 @@ function getNumberOfRunways(){
 // return true if the simulation has ended
 function stopSimulationCheck(){
   // .....
+  return true;
 }
 
 function getAircraft(planeCallSign){
