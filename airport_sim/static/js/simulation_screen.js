@@ -429,6 +429,13 @@ function updateInfoScreenContent(planeID){
 // should return a dictionary or a 2D list of size Nx2 where N is the 
 // number of actions that happened in current frame and  
 // every list inside the big list is = [planeID, action].
+
+//  result ex: [[planeID_1, action_1],
+//              [planeID_2, action_2],
+//              [planeID_3, action_3],
+//              [planeID_4, action_4],
+//              [planeID_5, action_5]]
+// where 'action' is a string or (an integer to represent a runway index)
 function getCurrentFrameActions(){
   // .....
 }
@@ -448,4 +455,13 @@ function goToNextFrame(){
 function getAircraft(planeID){
   // .....
   return new Aircraft(0,1,2,3,4,5,6,7,8,9);
+}
+
+function getNumberOfRunways(){
+  // .....
+}
+
+// return true if the simulation has ended
+function stopSimulationCheck(){
+  // .....
 }
