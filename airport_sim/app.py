@@ -49,7 +49,8 @@ def start_sim():
             departure_runways=int(departure_runways),
             landing_runways=int(landing_runways),
             mixed_runways=int(mixed_runways),
-            cancellation_time=int(cancellation_time)
+            cancellation_time=int(cancellation_time),
+            total_simulation_minutes = int(100) # --------------------------- temp FIX
         )
 
         controller.is_available = False # Simulation is ongoing
@@ -94,7 +95,7 @@ def get_presets():
     
     try:
         
-        presets = vis_controller.getAvailablePresets()
+        presets = controller.visualisation_controller.getAvailablePresets()
         
         return jsonify({
             "success": True,
@@ -122,7 +123,7 @@ def load_preset():
             }), 400
         
    
-        preset_data = vis_controller.loadPresetData(preset_id)
+        preset_data = controller.visualisation_controller.loadPresetData(preset_id)
         
         if preset_data["success"]:
             # Store in session

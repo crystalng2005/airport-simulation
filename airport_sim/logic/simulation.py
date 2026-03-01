@@ -91,7 +91,7 @@ class SimulationController:
         p.generated_at = self.current_time
         self.planes_by_call_sign[p.callsign] = p
         
-        PresetController.plane_list.append(p) # Adds generated plane to preset storage list
+        self.preset_controller.plane_list.append(p) # Adds generated plane to preset storage list
 
         if is_departure:
             self.departure_queue.enqueue(p)
@@ -141,7 +141,7 @@ class SimulationController:
         # integer part generates fixed planes, fractional part handled randomly.
 
         currentFrameActions.current_frame_actions = []
-        
+
         if self.simulation_finished:
             return False
 
