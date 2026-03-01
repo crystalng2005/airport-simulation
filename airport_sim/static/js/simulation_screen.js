@@ -476,12 +476,6 @@ function goToNextFrame(){
         .catch(error => console.error('Error advancing frame:', error));
 }
 
-// return an Aircraft object from the back-end using the plane 2 digit ID
-function getAircraft(planeID){
-  // .....
-  return new Aircraft(0,1,2,3,4,5,6,7,8,9);
-}
-
 function getNumberOfRunways(){
   // .....
 }
