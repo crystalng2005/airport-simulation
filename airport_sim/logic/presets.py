@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 from logic.report import PerformanceReport
-
+import globals.reportData as RD
 
 class PresetController:
 
@@ -25,7 +25,6 @@ class PresetController:
             os.path.join(self.data_dir, f'preset{i}.json') for i in range(3)
         ]
 
-        os.makedirs(self.data_dir, exist_ok=True)
         self.init_meta()
 
     # --- Meta file functions --- (Meta file keeps track of preset ID's and when they were saved)
@@ -72,7 +71,7 @@ class PresetController:
             preset_id = meta[0]["id"]
 
             now = datetime.now(datetime.timezone.utc).isoformat()
-            report = None # TODO: Get report from wherever instantiated ---------------
+            self.report = RD.reportData
 
             preset = {
                 "saved_at": now,

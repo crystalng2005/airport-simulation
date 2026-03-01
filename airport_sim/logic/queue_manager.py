@@ -17,20 +17,33 @@ class QueueController:
         self.runway_list = runway_list # List of suitable runways (e.g. if is_departure == true, then should be just mixed mode / take off runways)
         self.is_departure = is_departure # true = takeoff, false = landing 
 
+
     # Runway algorithm - linearly search through the runway list, when one is available, direct the first plane to that runway
     def checkRunways(self): 
         for runway in self.runway_list:
             if runway.is_available and len(self.plane_queue) != 0:
+                # Dircts the plane to the runway
+                removed = self.plane_queue.pop(0)
+                removed.goToRunway(runway.runway_number)
+
+                # Assigns the holding queue exit time to the plane object
+                removed.left_hold = SimulationController.getSimulationTime()
+                delay = datetime.total_seconds(removed.left_hold - removed.entered_hold)
+            
+                # Adds the delay time to the report and decrements current queue size
+                RD.reportData.arrival_delay_times.append(delay)
                 RD.reportData.decQueueCurrent()
-                # TODO: assign queue exit time for delay in report document
-                self.plane_queue.pop(0).goToRunway(runway.runway_number)
+
 
 
     # Adds a plane to the back of the queue
     def enqueue(self, p: Plane):
-        RD.reportData.incQueueCurrent()
-        # TODO: here assign queue entry time for report document
+        # Adds plane to queue
         self.plane_queue.append(p)
+
+        # Assigns holding queue entry time to plane object and increments current queue size
+        p.entered_hold = SimulationController.getSimulationTime()
+        RD.reportData.incQueueCurrent()
 
 
 
@@ -44,6 +57,7 @@ class QueueController:
             pass
             # SimulationController.cancellation_time
             # Needs to keep of current time (the 'now')]
+
 
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
     def planeEmergency(self, p: Plane):
