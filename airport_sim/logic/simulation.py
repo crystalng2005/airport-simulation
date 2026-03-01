@@ -33,6 +33,9 @@ class SimulationController:
         self.mixed_runways = mixed_runways
         self.cancellation_time = cancellation_time
         self.current_time = datetime.now()
+
+        self.preset_mode = False
+        self.preset_planes = []
         
         self.generateRunway()
         self.generateQueue()
@@ -40,14 +43,42 @@ class SimulationController:
         RD.init(total_runways, landings_per_hour)
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
+        if preset is None:
+            self.generateRunway()
+            self.generateQueue()
+            return True
+
+        preset_controller = PresetController()
+
+        if not preset_controller.loadPreset(preset):
+            return False
+
+        # override runway configurations
+        self.departure_runways = preset_controller.departure_runways
+        self.landing_runways = preset_controller.landing_runways
+        self.mixed_runways = preset_controller.mixed_runways
+
         self.generateRunway()
         self.generateQueue()
+
+        for plane in preset_controller.plane_list:
+            if plane.is_departure:
+                self.departure_queue.enqueue(plane)
+            else:
+                self.landing_queue.enqueue(plane)
+
+        RD.reportData = preset_controller.report
+
+        self.preset_mode = True
+
         return True
+        
 
 
 
-    def getSimulationTime() -> datetime:
-        pass
+
+    def getSimulationTime(self) -> datetime:
+        return self.current_time
 
 
 
@@ -98,8 +129,9 @@ class SimulationController:
         
         self.current_time += timedelta(minutes=self.tick_minutes)
         #random planes per tick generation
-        expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
-        expected_landings = self.landings_per_hour * (self.tick_minutes / 60)
+        if not self.preset_mode:
+            expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
+            expected_landings = self.landings_per_hour * (self.tick_minutes / 60)
 
         for _ in range(int(expected_departures)):
             self.generatePlane(True)
