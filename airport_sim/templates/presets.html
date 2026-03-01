@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Load Preset - Airport Simulation</title>
+    <link rel="stylesheet" href="static/css/presets.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1> Load Preset Configuration</h1>
+            <p class="subtitle">Select from your 3 most recent simulation runs</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="presets-section">
+            <h2>Available Presets</h2>
+            
+            <!-- Loading Indicator -->
+            <div id="loadingIndicator" class="loading">
+                <div class="spinner"></div>
+                <p>Loading presets...</p>
+            </div>
+
+            <!-- Presets Container -->
+            <div id="presetsContainer" class="presets-grid" style="display: none;">
+                <!-- Preset cards will be dynamically inserted here -->
+            </div>
+
+            <!-- No Presets Message -->
+            <div id="noPresetsMessage" class="no-presets" style="display: none;">
+                <div class="no-presets-icon"></div>
+                <h3>No Presets Available</h3>
+                <p>You haven't run any simulations yet.</p>
+                <p>Run a simulation to create your first preset!</p>
+                <button class="btn btn-primary" onclick="goToMenu()">
+                    Back to Menu
+                </button>
+            </div>
+
+            <!-- Back Button -->
+            <div class="back-button-container">
+                <button class="btn btn-secondary" onclick="goToMenu()">
+                    <span class="btn-icon"></span>
+                    Back to Main Menu
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="static/js/presets.js"></script>
+</body>
+</html>

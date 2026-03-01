@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 from logic.report import PerformanceReport
-import globals.reportData as RD
+import logic.globals.reportData as RD
 
 class PresetController:
 

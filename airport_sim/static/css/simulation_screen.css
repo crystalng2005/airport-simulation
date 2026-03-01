@@ -158,27 +158,43 @@ display: block;
   gap: 20px;
   overflow: hidden; 
   flex: 1; 
-  justify-content: flex-end;
+  flex-direction: row-reverse;  
+  justify-content: flex-start;   
   align-items: flex-end;
   /* border: 4px solid rgb(201, 0, 0); */
 }
 
 .planes {
   border-radius: 50%;
-  background-color: rgb(131, 131, 255);
+  background: linear-gradient(30deg, #937df4, #5f4fef);
 
-  flex-shrink: 0; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
   position: relative;
 
-  /* transform: translateX(150vw);  */
-  animation: slideIn 0.7s forwards; 
+  color: #ffffff;
+  font-size: 22px;              
+  font-weight: 800;          
+  font-family: system-ui, sans-serif;
+  letter-spacing: 1.5px;     
+
+  animation: slideIn 0.7s forwards;
+
+  box-sizing: border-box;  
+  border: 3px solid rgb(255, 255, 255);
 }
 
+.planes:hover {
+  transform: scale(1.10);
+}
 
-/* Keyframes to slide in from left */
+/* plane spawn slide animation */
 @keyframes slideIn {
   to {
-    transform: translateX(0); /* end at its flex position */
+    transform: translateX(0); 
   }
 }
 
@@ -248,9 +264,7 @@ display: block;
 
 /* not useeedddd */
 .line{
-
   margin-bottom: 5px;
-
   /* text design */
   color: #ff0000;
   font-size: 15px;  

@@ -3,7 +3,8 @@ from enum import Enum
 from numpy import random
 import linecache
 import os
-from globals import reportData as RD
+# from globals import reportData as RD
+import logic.globals.reportData as RD
 
 
 # CONSTANTS

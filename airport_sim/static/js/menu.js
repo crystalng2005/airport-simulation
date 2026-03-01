@@ -11,17 +11,14 @@ function startNewSimulation() {
 // Load Preset
 function loadPreset() {
     console.log("Loading preset...");
-    // TO DO: Navigate to presets page or call Flask route
-    alert("Load Preset\n\nThis will show your saved configurations.");
-    // window.location.href = '/presets';
+    // Redirect to presets page
+    window.location.href = '/presets';
 }
 
 // View Results
 function viewResults() {
     console.log("Viewing results...");
-    // TO DO: Navigate to results page or call Flask route
-    alert("View Results\n\nThis will display previous simulation results.");
-    // window.location.href = '/results';
+    window.location.href = '/results';
 }
 
 // Open Settings
