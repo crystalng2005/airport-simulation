@@ -16,10 +16,11 @@ import logic.globals.reportData as RD
 from logic.simulation import SimulationController
 
 class QueueController:
-    def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool):
+    def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
         self.plane_queue = plane_queue # A list, treated as a queue
         self.runway_list = runway_list
         self.is_departure = is_departure # true = takeoff, false = landing 
+        self.sim = sim
 
 
     # Runway algorithm - linearly search through the runway list, when one is available, direct the first plane to that runway
@@ -29,9 +30,9 @@ class QueueController:
                 # Dircts the plane to the runway
                 removed = self.plane_queue.pop(0)
                 removed.goToRunway(runway.runway_number)
-
+                self.sim.current_frame_actions.append([removed.plane_id, runway.runway_number])
                 # Assigns the holding queue exit time to the plane object
-                removed.left_hold = SimulationController.getSimulationTime()
+                removed.left_hold = self.sim.getSimulationTime()
                 delay = datetime.total_seconds(removed.left_hold - removed.entered_hold)
             
                 # Adds the delay time to the report and decrements current queue size
@@ -44,7 +45,7 @@ class QueueController:
         self.plane_queue.append(p)
 
         # Assigns holding queue entry time to plane object and increments current queue size
-        p.entered_hold = SimulationController.getSimulationTime()
+        p.entered_hold = self.sim.getSimulationTime()
         RD.reportData.incQueueCurrent()
 
 
