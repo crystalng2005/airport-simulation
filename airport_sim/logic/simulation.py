@@ -41,6 +41,8 @@ class SimulationController:
 
         self.preset_mode = False
         self.preset_planes = []
+
+        self.planes_by_call_sign = {}
         
         self.generateRunway()
         self.generateQueue()
@@ -90,6 +92,7 @@ class SimulationController:
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
+        self.planes_by_call_sign[p.callSign] = p
         
         PresetController.plane_list.append(p) # Adds generated plane to preset storage list
 
@@ -100,6 +103,9 @@ class SimulationController:
 
         # Increases total number of planes
         RD.reportData.total_planes += 1
+
+    def get_aircraft_by_callSign(self, plane_call_sign: int):
+        return self.planes_by_call_sign.get(plane_call_sign, None)
 
 
     def generateQueue(self) -> bool: #departure and landing queue
