@@ -1,10 +1,11 @@
 // big simulation sittings
 const FPS = 1;
+const startTime = getCurrentTime();
 
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
-const numberOfRunways = 5;
+const numberOfRunways = 5; // const numberOfRunways = getNumberOfRunways();
 
 // planes sittings
 const planeSpawnSlideDuration = 1 / FPS; //in sec
@@ -77,10 +78,11 @@ class Aircraft{
 // Function Difinitions Section:
 // ________________________________________________________________________________________________________
 function startSimulation(){
-  // generate current frame
-  simulateFrame();
+  // ask the back-end to calculate frame
+  goToNextFrame();
 
-  updateTimer(0);
+  // visualize current frame
+  simulateFrame();
 
   // go to next frame after waiting for 1/FPS seconds
   setTimeout(startSimulation,1000/FPS);
@@ -93,8 +95,8 @@ function simulateFrame() {
   // for every plane that did something in current frame
   for(let i = 0; i<currentFrameActions.length; i++){
 
-    let planeID = currentFrameActions[i]["ID"];
-    let action = currentFrameActions[i]["action"];
+    let planeID = currentFrameActions[i]["ID"];   // currentFrameActions[i][0];
+    let action = currentFrameActions[i]["action"];// currentFrameActions[i][1];
 
     // if the plane spawn in the holding pattern
     if(action == "something1")
@@ -117,6 +119,9 @@ function simulateFrame() {
     else if(action == "some runway Index")
       movePlaneToRunway(planeID, action + 1);
   }
+
+  updateTimer();
+
 }
 
 // unused
@@ -354,9 +359,12 @@ function killPlane(planeID){
   };
 }
 
-function updateTimer(numOfMinutes){
+function updateTimer(){
+
   const timer = document.querySelector(".timer");
   // const timer = document.getElementsByName('timer');
+
+  let numOfMinutes = Math.floor((getCurrentTime() - startTime) / 60000);
 
   let totalHours = Math.floor(numOfMinutes / 60);
 
@@ -510,5 +518,4 @@ function getAircraft(planeCallSign){
             return null;
         })
         .catch(error => console.error('Error fetching aircraft:', error));
-
 }
