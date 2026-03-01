@@ -17,7 +17,7 @@ class PresetController:
         self.report = None  # Initialised before saving, goto line 75
 
         self.data_dir = os.path.join(
-            os.path.dirname(__file__), '..', '..', 'data'
+            os.path.dirname(__file__), '..', 'data'
         )
 
         self.meta_file = os.path.join(self.data_dir, 'presets_meta.json')
