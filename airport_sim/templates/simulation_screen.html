@@ -7,23 +7,41 @@
 
 <body>
 
+ <div class="timer">DD:HH:MM</div>
 
   <div class="holding-pattern-queue">
-    <div class="holding-pattern-title">
-          HOLDING PATTERN Q
-    </div>  
+    <div class="holding-pattern-plane-wrapper"></div>  
+    <div class="holding-pattern-title">HOLDING PATTERN Q</div>  
   </div>
 
   <div class="take-off-queue">
-    <div class="take-off-title">
-          TAKE-OFF Q
-    </div>  
+    <div class="take-off-plane-wrapper"></div>  
+    <div class="take-off-title">TAKE-OFF Q</div>  
   </div>
 
+  <div id="container"></div>
 
+ <div class="display-info-screen">
+  <!-- junk info just to show the format of elements -->
+    Aircraft 88 Info:
+    <ul>
+      <li>Plane B123</li>
+      <li>Landing in 5 min</li>
+      <li>Gate 4</li>
+      <li>Gate 4</li>     
+      <li>Plane B123</li>
+      <li>Landing in 5 min</li>
+      <li>Gate 4</li>
+      <li>Gate 4</li>
+    </ul>
+  </div>  
+
+  <!-- not used right now -->
   <canvas id="canvas"></canvas>
 
-<script src="static/js/simulation_screen.js"> </script>
+  <script src="static/js/simulation_screen.js"> </script>
 
 </body>
 </html>
+
+
