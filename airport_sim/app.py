@@ -1,6 +1,6 @@
 # Flask Entry Point (MainController logic)
 import os
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session
 from logic.simulation import SimulationController
 from logic.presets import PresetController
 from logic.visualisation import VisualisationController
@@ -152,7 +152,7 @@ def results_page():
 def get_all_results():
     
     try:
-        results = vis_controller.getAllSimulationResults()
+        results = controller.visualisation_controller.getAllSimulationResults()
         
         return jsonify({
             "success": True,
@@ -169,7 +169,7 @@ def get_all_results():
 def get_full_report(sim_id):
    
     try:
-        report = vis_controller.getSimulationReport(sim_id)
+        report = controller.visualisation_controller.getSimulationReport(sim_id)
         return jsonify(report)
     except Exception as e:
         return jsonify({
@@ -192,7 +192,7 @@ def compare_simulations():
                 "error": "Both simulation IDs required"
             }), 400
         
-        comparison = vis_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
+        comparison = controller.visualisation_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
         return jsonify(comparison)
         
     except Exception as e:
@@ -208,7 +208,7 @@ def export_report(sim_id):
     try:
         from flask import send_file
         
-        filepath = vis_controller.exportSimulationReport(sim_id, format="txt")
+        filepath = controller.visualisation_controller.exportSimulationReport(sim_id, format="txt")
         
         if filepath and os.path.exists(filepath):
             return send_file(
