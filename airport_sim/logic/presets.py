@@ -1,7 +1,7 @@
 from logic.plane import Plane
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
@@ -27,7 +27,7 @@ class PresetController:
 
         self.init_meta()
 
-    # --- Meta file functions --- (Meta file keeps track of preset ID's and when they were saved)
+    # --- Meta file functions ---  (Meta file keeps track of preset ID's and when they were saved)
     def init_meta(self):
         if not os.path.exists(self.meta_file):
             meta = {
@@ -41,36 +41,45 @@ class PresetController:
                 json.dump(meta, f, indent=4)
 
     def load_meta(self):
-        with open(self.meta_file, 'r') as f:
-            return json.load(f)
+        try:
+            with open(self.meta_file, 'r') as f:
+                return json.load(f)
+        except (IOError, json.JSONDecodeError):
+            return {"presets": []}
 
     def save_meta(self, meta):
         with open(self.meta_file, 'w') as f:
             json.dump(meta, f, indent=4)
 
     def getPresetSaveTimes(self) -> list[tuple[int, str]]:
-        meta = self.load_meta()["presets"]
+        meta = self.load_meta().get("presets", [])
 
         return [
             (p["id"], p["last_saved"])
             for p in meta
-            if p["last_saved"] is not None
+            if p.get("last_saved") is not None
         ]
-
 
     # --- Preset functions ---
 
     def savePreset(self) -> bool:
         try:
-            # Load oldest preset
-            meta = self.load_meta()["presets"]
-            unused = [p for p in meta if p["last_saved"] is None]
-            if unused:
-                return unused[0]["id"]
-            meta.sort(key=lambda p: p["last_saved"])
-            preset_id = meta[0]["id"]
+            meta_data = self.load_meta()
+            presets = meta_data.get("presets", [])
 
-            now = datetime.now(datetime.timezone.utc).isoformat()
+            unused = [p for p in presets if p.get("last_saved") is None]
+            if unused:
+                preset_id = unused[0]["id"]
+            else:
+                presets = [p for p in presets if p.get("last_saved") is not None]
+                presets.sort(key=lambda p: p["last_saved"])
+                preset_id = presets[0]["id"]
+
+            now = datetime.now(timezone.utc).isoformat()
+
+            if RD.reportData is None:
+                return False
+
             self.report = RD.reportData
 
             preset = {
@@ -87,18 +96,20 @@ class PresetController:
             with open(self.preset_files[preset_id], 'w') as f:
                 json.dump(preset, f, indent=4)
 
-            # Updates meta file, making
-            meta = self.load_meta()
-            for p in meta["presets"]:
+            for p in meta_data["presets"]:
                 if p["id"] == preset_id:
                     p["last_saved"] = now
-            self.save_meta(meta)
 
+            self.save_meta(meta_data)
             return True
-        except IOError:
+
+        except (IOError, IndexError, KeyError, TypeError):
             return False
 
     def loadPreset(self, preset_id: int) -> bool:
+        if not (0 <= preset_id < len(self.preset_files)):
+            return False
+
         try:
             with open(self.preset_files[preset_id], 'r') as f:
                 data = json.load(f)
@@ -120,9 +131,8 @@ class PresetController:
             RD.reportData = report
 
             return True
-        except (IOError, KeyError, IndexError): # Common file errors
+        except (IOError, KeyError, IndexError, TypeError):
             return False
-
     # Resets file to save new preset info
     # To be called when new simulation runs
     def reset(self) -> bool:
