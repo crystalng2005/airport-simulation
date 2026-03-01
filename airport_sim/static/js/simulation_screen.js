@@ -27,9 +27,8 @@ window.addEventListener("resize", resizeWindoUpdate);
 
 // TEST :::::::::::::::::::::::::::::::::::::::::::::::::
 
-
+/*
 createRunways(numberOfRunways);
-
 
 updateTimer(0);
 
@@ -54,6 +53,9 @@ setTimeout(() => {
   killPlane(11);
 
 }, 2*1000 + 1000);
+*/
+
+startSimulation();
 
 
 // ________________________________________________________________________________________________________
