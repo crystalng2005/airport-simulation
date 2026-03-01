@@ -11,9 +11,8 @@ function startNewSimulation() {
 // Load Preset
 function loadPreset() {
     console.log("Loading preset...");
-    // TO DO: Navigate to presets page or call Flask route
-    alert("Load Preset\n\nThis will show your saved configurations.");
-    // window.location.href = '/presets';
+    // Redirect to presets page
+    window.location.href = '/presets';
 }
 
 // View Results
