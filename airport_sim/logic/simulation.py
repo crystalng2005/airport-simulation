@@ -35,6 +35,7 @@ class SimulationController:
 
         self.cancellation_time = cancellation_time
         self.current_time = 0
+        
         self.end_time = total_simulation_minutes
         self.simulation_finished = False
 
@@ -69,11 +70,7 @@ class SimulationController:
         self.generateRunway()
         self.generateQueue()
 
-        for plane in preset_controller.plane_list:
-            if plane.is_departure:
-                self.departure_queue.enqueue(plane)
-            else:
-                self.landing_queue.enqueue(plane)
+        self.preset_planes = preset_controller.plane_list.copy()
 
         RD.reportData = preset_controller.report
 
@@ -92,6 +89,7 @@ class SimulationController:
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
+        p.generated_at = self.current_time
         self.planes_by_call_sign[p.callsign] = p
         
         PresetController.plane_list.append(p) # Adds generated plane to preset storage list
@@ -152,6 +150,20 @@ class SimulationController:
         
         self.current_time += self.tick_minutes
         #random planes per tick generation
+
+        if self.preset_mode:
+            planes_to_spawn = [p for p in self.preset_planes if p.generated_at <= self.current_time]
+
+            for plane in planes_to_spawn:
+                if plane.is_departure:
+                    self.departure_queue.enqueue(plane)
+                else:
+                    self.landing_queue.enqueue(plane)
+                self.planes_by_call_sign[plane.callsign] = plane
+
+            self.preset_planes = [p for p in self.preset_planes if p.generated_at > self.current_time]
+
+
         if not self.preset_mode:
             expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
             expected_landings = self.landings_per_hour * (self.tick_minutes / 60)
