@@ -1,5 +1,3 @@
-# PresetController Class
-
 from logic.plane import Plane
 import json
 import os
@@ -63,35 +61,73 @@ class PresetController:
     # --- Preset functions ---
 
     def savePreset(self) -> bool:
+        try:
+            # Load oldest preset
+            meta = self.load_meta()["presets"]
+            unused = [p for p in meta if p["last_saved"] is None]
+            if unused:
+                return unused[0]["id"]
+            meta.sort(key=lambda p: p["last_saved"])
+            preset_id = meta[0]["id"]
 
-        now = datetime.now(datetime.timezone.utc).isoformat()
-        self.report = RD.reportData
+            now = datetime.now(datetime.timezone.utc).isoformat()
+            self.report = RD.reportData
 
-        preset = {
-            "saved_at": now,
-            "vars": {
-                "departure_runways": self.departure_runways,
-                "landing_runways": self.landing_runways,
-                "mixed_runways": self.mixed_runways,
-            },
-            "planes": [plane.__dict__ for plane in self.plane_list],
-            "report": self.report.__dict__
-        }
+            preset = {
+                "saved_at": now,
+                "vars": {
+                    "departure_runways": self.departure_runways,
+                    "landing_runways": self.landing_runways,
+                    "mixed_runways": self.mixed_runways,
+                },
+                "planes": [plane.__dict__ for plane in self.plane_list],
+                "report": self.report.__dict__
+            }
 
-        with open(self.preset_files[preset_id], 'w') as f:
-            json.dump(preset, f, indent=4)
+            with open(self.preset_files[preset_id], 'w') as f:
+                json.dump(preset, f, indent=4)
 
-        # Updates meta file, making
-        meta = self.load_meta()
-        for p in meta["presets"]:
-            if p["id"] == preset_id:
-                p["last_saved"] = now
-        self.save_meta(meta)
+            # Updates meta file, making
+            meta = self.load_meta()
+            for p in meta["presets"]:
+                if p["id"] == preset_id:
+                    p["last_saved"] = now
+            self.save_meta(meta)
 
-        return True
-    except IOError:
-        return False
+            return True
+        except IOError:
+            return False
 
     def loadPreset(self, preset_id: int) -> bool:
-        with open(self.presets_file, 'r') as f:
-            return json.load(f)
+        try:
+            with open(self.preset_files[preset_id], 'r') as f:
+                data = json.load(f)
+
+            vars_data = data["vars"]
+            self.departure_runways = vars_data["departure_runways"]
+            self.landing_runways = vars_data["landing_runways"]
+            self.mixed_runways = vars_data["mixed_runways"]
+
+            # Loads planes by initiating new objects and importing their data from the preset
+            self.plane_list = []
+            for plane_data in data["planes"]:
+                plane = Plane.__new__(Plane)
+                plane.__dict__.update(plane_data)
+                self.plane_list.append(plane)
+
+            report = PerformanceReport.__new__(PerformanceReport)
+            report.__dict__.update(vars_data["report"])
+
+            return True
+        except (IOError, KeyError, IndexError): # Common file errors
+            return False
+
+    # Resets file to save new preset info
+    # To be called when new simulation runs
+    def reset(self) -> bool:
+        self.departure_runways = 0
+        self.landing_runways = 0
+        self.mixed_runways = 0
+        self.plane_list.clear()
+        self.report = None
+        return True
