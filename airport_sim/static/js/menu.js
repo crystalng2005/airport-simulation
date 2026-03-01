@@ -19,9 +19,7 @@ function loadPreset() {
 // View Results
 function viewResults() {
     console.log("Viewing results...");
-    // TO DO: Navigate to results page or call Flask route
-    alert("View Results\n\nThis will display previous simulation results.");
-    // window.location.href = '/results';
+    window.location.href = '/results';
 }
 
 // Open Settings
