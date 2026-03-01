@@ -73,13 +73,17 @@ class PerformanceReport:
         if self.total_planes > 0:
             self.fuel_avg = self.tot_fuel_used / self.total_planes
 
-
+    def string_duration(self):
+        inSeconds = int(self.duration.total_seconds())
+        hours, remainder = divmod(inSeconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        return f"{hours} hours, {minutes} minutes, {seconds} seconds"
     
     def outputReport_dict(self):
         report = {
             "start_time" : self.start_time,
             "completed_at" : self.finish_time,
-            "duration" : self.duration,
+            "duration" : self.string_duration(),
 
             "total_planes": self.total_planes,
             "diversions": self.diversions,
