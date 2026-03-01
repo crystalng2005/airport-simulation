@@ -1,13 +1,16 @@
+// big simulation sittings
+const FPS = 1;
+
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
 const numberOfRunways = 5;
 
 // planes sittings
-const planeSpawnSlideDuration = 1; //in sec
-const planeRunwaySlideDuration = 1; //in sec
-const planeFadeOutDuration = 0.5 //in sec
-const planesQueueSlideDuration = 1 //in sec
+const planeSpawnSlideDuration = 1 / FPS; //in sec
+const planeRunwaySlideDuration = 1 / FPS; //in sec
+const planeFadeOutDuration = 0.5 / FPS; //in sec
+const planesQueueSlideDuration = 1 / FPS; //in sec
 const planeEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
 
 // plane info screen sittings
@@ -19,43 +22,104 @@ const showInfoScreenAllTime = false;
 //call resizeCanvas() if the windo size is changing
 window.addEventListener("resize", resizeWindoUpdate);
 
-// resizeWindoUpdate(); // initial sizing
+
+
+// TEST :::::::::::::::::::::::::::::::::::::::::::::::::
+
 
 createRunways(numberOfRunways);
 
 
-// updateTimer(1);
-
-
-// TEST :::::::::::::
-spawnPlane(9, false)
+updateTimer(0);
 
 for(let i =0 ;i<10;i++){
   spawnPlane(i+10, false);
   spawnPlane(i+20, true);
 }
 
+letPlaneHaveEmergency(14);
+letPlaneHaveEmergency(21);
+
 setTimeout(() => {
 
-  movePlaneToRunway(9, 1);
-  movePlaneToRunway(12, 2);
-  movePlaneToRunway(20, 3);
-  movePlaneToRunway(24, 4);
-  movePlaneToRunway(25, 5);
+  movePlaneToRunway(11,2);
+  movePlaneToRunway(21,1);
 
-  letPlaneHaveEmergency(22);
+}, 2*1000);
 
-}, planeSpawnSlideDuration*1000 + 1000);
+setTimeout(() => {
+
+  killPlane(20);
+  killPlane(11);
+
+}, 2*1000 + 1000);
 
 
-
-
-
+// ________________________________________________________________________________________________________
+// Classes Difinitions Section :
+// ________________________________________________________________________________________________________
+class Aircraft{
+  constructor(ID,c,o,d,i,f,e,t,a,cu){
+    this.id = ID;
+    this.callsign = c;
+    this.origin = o;
+    this.destination = d;
+    this.is_departure = i;
+    this.fuel_level = f;
+    this.emergency_status = e;
+    this.target_time = t;
+    this.actual_time = a;
+    this.current_location = cu;
+  }
+}
 
 // ________________________________________________________________________________________________________
 // Function Difinitions Section:
 // ________________________________________________________________________________________________________
+function startSimulation(){
+  // generate current frame
+  simulateFrame();
 
+  updateTimer(0);
+
+  // go to next frame after waiting for 1/FPS seconds
+  setTimeout(startSimulation,1000/FPS);
+}
+
+function simulateFrame() {
+
+  let currentFrameActions = getCurrentFrameActions();
+
+  // for every plane that did something in current frame
+  for(let i = 0; i<currentFrameActions.length; i++){
+
+    let planeID = currentFrameActions[i]["ID"];
+    let action = currentFrameActions[i]["action"];
+
+    // if the plane spawn in the holding pattern
+    if(action == "something1")
+      spawnPlane(planeID,true);
+
+    // if the plane spawn in the take-off
+    else if(action == "something2")
+      spawnPlane(planeID,true);
+
+    // if the plane got an emergency
+    else if(action == "something3")
+      letPlaneHaveEmergency(planeID);  
+
+    // if the plane got diverted or cancelled or landed or taked-off from a runway
+    // (aka the plan is done)
+    else if(action == "something4")
+      killPlane(planeID);  
+
+    // if the plane moved to a runway
+    else if(action == "some runway Index")
+      movePlaneToRunway(planeID, action + 1);
+  }
+}
+
+// unused
 function resizeWindoUpdate() {
   // canvas.width = window.innerWidth;
   // canvas.height = window.innerHeight;
@@ -266,7 +330,7 @@ function killPlane(planeID){
 
   const plane = document.getElementById('plane:' + planeID);
 
-  const anim = plane.animate(
+  const killAnimation = plane.animate(
     [
       { opacity: 1 },
       { opacity: 0 }
@@ -278,8 +342,15 @@ function killPlane(planeID){
     }
   );
 
-  anim.onfinish = () => {
+  killAnimation.onfinish = () => {
+    
+    // if the plane got killed in one of the queues
+    if(plane.parentElement.className != 'runway'){
+      slideQueuePlanes(plane);
+    }
+
     plane.remove();
+
   };
 }
 
@@ -314,7 +385,11 @@ function letPlaneHaveEmergency(planeID){
   plane.style.background = planeEmergencyColor;
 }
 
-// Unfinished-----------------------------------------------------------------
+// ________________________________________________________________________________________________________
+// Unfinishe Function Difinitions Section:
+// ________________________________________________________________________________________________________
+
+// must finish getAircraft(planeID) first.
 function updateInfoScreenContent(planeID){
 
   const planeInfoScreen = document.querySelector('.display-info-screen');
@@ -350,27 +425,27 @@ function updateInfoScreenContent(planeID){
     </ul> ";
 }
 
-// Unfinished-----------------------------------------------------------------
-// use the plane to return the Aircraft from some global list of current planes in the simulation
-function getAircraft(planeID){
 
-
-
+// should return a dictionary or a 2D list of size Nx2 where N is the 
+// number of actions that happened in current frame and  
+// every list inside the big list is = [planeID, action].
+function getCurrentFrameActions(){
+  // .....
 }
-// ________________________________________________________________________________________________________
-// Classes Difinitions Section :
-// ________________________________________________________________________________________________________
-class Aircraft{
-  constructor(ID,c,o,d,i,f,e,t,a,cu){
-    this.id = ID;
-    this.callsign = c;
-    this.origin = o;
-    this.destination = d;
-    this.is_departure = i;
-    this.fuel_level = f;
-    this.emergency_status = e;
-    this.target_time = t;
-    this.actual_time = a;
-    this.current_location = cu;
-  }
+
+// used for the clock/timer on the top left corner 
+function getCurrentTime(){
+  // .....
+}
+
+// tells the back-end to calculate the next frame.
+// i don't know if this function is needed or not
+function goToNextFrame(){
+  // .....
+}
+
+// return an Aircraft object from the back-end using the plane 2 digit ID
+function getAircraft(planeID){
+  // .....
+  return new Aircraft(0,1,2,3,4,5,6,7,8,9);
 }
