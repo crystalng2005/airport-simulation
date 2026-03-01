@@ -227,6 +227,44 @@ def export_report(sim_id):
             "success": False,
             "error": str(e)
         }), 500
+    
+@app.route('/api/current-frame-actions', methods=['GET'])
+def get_current_frame_actions():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    actions = controller.simulation.get_frame_actions() # Need to implement
+    return jsonify({'success': True, 'actions': actions}), 200
+
+@app.route('/api/current-time', methods=['GET'])
+def get_current_time():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    return jsonify({
+        'success': True, 
+        'time': controller.simulation.getSimulationTime()
+    }), 200
+
+@app.route('/api/next-frame', methods=['POST'])
+def next_frame():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    controller.simulation.update()
+    return jsonify({'success': True, 'message': 'Frame advanced'}), 200
+
+@app.route('/api/aircraft/<int:plane_id>', methods=['GET'])
+def get_aircraft(plane_id):
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    aircraft = controller.simulation.get_aircraft_by_id(plane_id)  # Need to implement this
+    if not aircraft:
+        return jsonify({'success': False, 'errors': ['Aircraft not found']}), 404
+    
+    return jsonify({'success': True, 'aircraft': aircraft.return_data()}), 200
+
 
     
    

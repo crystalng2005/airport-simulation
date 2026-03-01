@@ -59,8 +59,8 @@ setTimeout(() => {
 // Classes Difinitions Section :
 // ________________________________________________________________________________________________________
 class Aircraft{
-  constructor(ID,c,o,d,i,f,e,t,a,cu){
-    this.id = ID;
+  constructor(c,o,d,i,f,e,t,a,cu){
+    // this.id = ID;
     this.callsign = c;
     this.origin = o;
     this.destination = d;
@@ -437,21 +437,47 @@ function updateInfoScreenContent(planeID){
 //              [planeID_5, action_5]]
 // where 'action' is a string or (an integer to represent a runway index)
 function getCurrentFrameActions(){
-  // .....
+    fetch('/api/current-frame-actions')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.actions;
+            }
+        })
+        .catch(error => console.error('Error fetching frame actions:', error));
 }
 
-// used for the clock/timer on the top left corner 
+// used for the clock/timer on the top left corner
 function getCurrentTime(){
-  // .....
+    return fetch('/api/current-time')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return new Date(data.time);
+            }
+            throw new Error('Failed to get current time');
+        })
+        .catch(error => {
+            console.error('Error fetching time:', error);
+            return null;
+        });
 }
 
 // tells the back-end to calculate the next frame.
 // i don't know if this function is needed or not
 function goToNextFrame(){
-  // .....
+    fetch('/api/next-frame', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Frame advanced');
+            }
+        })
+        .catch(error => console.error('Error advancing frame:', error));
 }
 
 // return an Aircraft object from the back-end using the plane 2 digit ID
+<<<<<<< Updated upstream
 function getAircraft(planeID){
   // .....
   return new Aircraft(0,1,2,3,4,5,6,7,8,9);
@@ -464,4 +490,28 @@ function getNumberOfRunways(){
 // return true if the simulation has ended
 function stopSimulationCheck(){
   // .....
+=======
+function getAircraft(planeCallSign){
+    return fetch(`/api/aircraft/${planeCallSign}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const air = data.aircraft;
+                return new Aircraft(
+                    air.callsign,
+                    air.origin,
+                    air.destination,
+                    air.is_departure,
+                    air.fuel_level,
+                    air.emergency_status,
+                    air.target_time,
+                    air.actual_time,
+                    air.current_location
+                );
+            }
+            return null;
+        })
+        .catch(error => console.error('Error fetching aircraft:', error));
+
+>>>>>>> Stashed changes
 }
