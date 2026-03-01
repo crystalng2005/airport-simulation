@@ -3,9 +3,8 @@
 // Start New Simulation
 function startNewSimulation() {
     console.log("Starting new simulation...");
-    // TO DO: Navigate to configuration page or call Flask route
-    alert("Starting New Simulation\n\nThis will open the configuration screen.");
-    // window.location.href = '/configure';
+
+    window.location.href = '/simulation-screen';
 }
 
 // Load Preset

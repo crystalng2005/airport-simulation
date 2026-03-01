@@ -74,6 +74,13 @@ def getVisualisationData():
     aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
     return jsonify({'success': True, 'data': aircraft_data}), 200
 
+#Simulation screen Routes
+@app.route('/simulation-screen')
+def simulation_page():
+    """Display simulation screen page"""
+    return render_template('simulation_screen.html')
+
+
 #Presets Routes
 
 @app.route('/presets')
