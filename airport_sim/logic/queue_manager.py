@@ -15,6 +15,7 @@ class QueueController:
         self.runway_list = runway_list
         self.is_departure = is_departure # true = takeoff, false = landing 
         self.sim = sim
+        self.current_frame_actions = []
 
 
     # Runway algorithm - linearly search through the runway list, when one is available, direct the first plane to that runway
@@ -24,6 +25,7 @@ class QueueController:
                 # Dircts the plane to the runway
                 removed = self.plane_queue.pop(0)
                 removed.goToRunway(runway.runway_number)
+                self.current_frame_actions.append(removed.callsign, runway.runway_number)
                 self.sim.current_frame_actions.append([removed.plane_id, runway.runway_number])
                 # Assigns the holding queue exit time to the plane object
                 removed.left_hold = self.sim.getSimulationTime()
@@ -58,6 +60,7 @@ class QueueController:
 
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
     def planeEmergency(self, p: Plane):
+        self.current_frame_actions.append(p.callsign, "emergency")
         match (p.emergency_status):
             case EmergencyStatus.FUEL:
                 p.emergency_time_left = 10
@@ -72,4 +75,7 @@ class QueueController:
                 else:
                     self.plane_queue.insert(temp, p)
                     break
+
+    def killPlane(self, p: Plane):
+        self.current_frame_actions.append(p.callsign, "kill")
 

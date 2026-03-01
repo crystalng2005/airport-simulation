@@ -102,25 +102,25 @@ function simulateFrame() {
     let action = currentFrameActions[i]["action"];// currentFrameActions[i][1];
 
     // if the plane spawn in the holding pattern
-    if(action == "something1")
+    if(action == "spawnLanding")
       spawnPlane(planeID,true);
 
     // if the plane spawn in the take-off
-    else if(action == "something2")
-      spawnPlane(planeID,true);
+    else if(action == "spawnDeparture")
+      spawnPlane(planeID,false);
 
     // if the plane got an emergency
-    else if(action == "something3")
+    else if(action == "emergency")
       letPlaneHaveEmergency(planeID);  
 
     // if the plane got diverted or cancelled or landed or taked-off from a runway
     // (aka the plan is done)
-    else if(action == "something4")
+    else if(action == "kill")
       killPlane(planeID);  
 
     // if the plane moved to a runway
-    else if(action == "some runway Index")
-      movePlaneToRunway(planeID, action + 1);
+    else if(Number.isInteger(action))
+      movePlaneToRunway(planeID, action);
   }
 
   updateTimer();

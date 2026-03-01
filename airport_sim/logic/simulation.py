@@ -40,8 +40,6 @@ class SimulationController:
         self.simulation_finished = False
 
         self.preset_mode = False
-        self.preset_planes = []
-        self.current_frame_actions = []
 
         self.planes_by_call_sign = {}
         
@@ -96,8 +94,10 @@ class SimulationController:
 
         if is_departure:
             self.departure_queue.enqueue(p)
+            QueueController.current_frame_actions.append(p.callsign, "spawnDeparture")
         else:
             self.landing_queue.enqueue(p)
+            QueueController.current_frame_actions.append(p.callsign, "spawnLanding")
 
         # Increases total number of planes
         RD.reportData.total_planes += 1
@@ -112,7 +112,7 @@ class SimulationController:
         return True
 
     def getCurrentFrameActions(self):
-        return self.current_frame_actions
+        return QueueController.current_frame_actions
 
     def generateRunway(self) -> bool:
         self.landing_list = []
@@ -138,8 +138,6 @@ class SimulationController:
         # tick_minutes controls how much simulated time passes each frame.
         # expected planes per tick = planes_per_hour × (tick_minutes / 60).
         # integer part generates fixed planes, fractional part handled randomly.
-
-        self.current_frame_actions = []
 
         if self.simulation_finished:
             return False
