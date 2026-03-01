@@ -74,6 +74,13 @@ def getVisualisationData():
     aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
     return jsonify({'success': True, 'data': aircraft_data}), 200
 
+#Simulation screen Routes
+@app.route('/simulation-screen')
+def simulation_page():
+    """Display simulation screen page"""
+    return render_template('simulation_screen.html')
+
+
 #Presets Routes
 
 @app.route('/presets')
@@ -203,7 +210,7 @@ def compare_simulations():
 
 
 @app.route('/api/export-report/<int:sim_id>', methods=['GET'])
-def export_report(sim_id):
+def export_report(sim_id):  
     
     try:
         from flask import send_file
@@ -254,7 +261,7 @@ def next_frame():
     controller.simulation.update()
     return jsonify({'success': True, 'message': 'Frame advanced'}), 200
 
-@app.route('/api/aircraft/<str:plane_call_sign>', methods=['GET'])
+@app.route('/api/aircraft/<plane_call_sign>', methods=['GET'])
 def get_aircraft(plane_call_sign):
     if not controller.simulation:
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400

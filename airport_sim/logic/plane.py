@@ -56,6 +56,7 @@ class Plane:
         self.cancelled = False
         self.entered_hold = None 
         self.left_hold = None
+        self.generated_at = None
         Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #

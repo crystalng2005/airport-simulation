@@ -7,9 +7,7 @@ from logic.models import Runway
 from logic.plane import Plane, EmergencyStatus
 
 import logic.globals.reportData as RD
-#from logic.simulation import SimulationController
-
-
+# from logic.simulation import SimulationController
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
