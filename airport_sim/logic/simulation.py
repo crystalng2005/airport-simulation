@@ -22,6 +22,7 @@ class SimulationController:
         landing_runways: int,
         mixed_runways: int,
         cancellation_time: int,
+        total_simulation_minutes: int,
         tick_minutes: int = 5
     ):
         self.tick_minutes = tick_minutes
@@ -31,8 +32,12 @@ class SimulationController:
         self.departure_runways = departure_runways
         self.landing_runways = landing_runways
         self.mixed_runways = mixed_runways
+
         self.cancellation_time = cancellation_time
-        self.current_time = datetime.now()
+        self.start_time = datetime.now()
+        self.current_time = self.start_time
+        self.end_time = self.start_time + timedelta(minutes=total_simulation_minutes)
+        self.simulation_finished = False
 
         self.preset_mode = False
         self.preset_planes = []
@@ -126,6 +131,12 @@ class SimulationController:
         # tick_minutes controls how much simulated time passes each frame.
         # expected planes per tick = planes_per_hour × (tick_minutes / 60).
         # integer part generates fixed planes, fractional part handled randomly.
+        if self.simulation_finished:
+            return False
+
+        if self.current_time >= self.end_time:
+            self.simulation_finished = True
+            return False
         
         self.current_time += timedelta(minutes=self.tick_minutes)
         #random planes per tick generation
