@@ -477,7 +477,6 @@ function goToNextFrame(){
 }
 
 // return an Aircraft object from the back-end using the plane 2 digit ID
-<<<<<<< Updated upstream
 function getAircraft(planeID){
   // .....
   return new Aircraft(0,1,2,3,4,5,6,7,8,9);
@@ -490,7 +489,8 @@ function getNumberOfRunways(){
 // return true if the simulation has ended
 function stopSimulationCheck(){
   // .....
-=======
+}
+
 function getAircraft(planeCallSign){
     return fetch(`/api/aircraft/${planeCallSign}`)
         .then(response => response.json())
@@ -513,5 +513,4 @@ function getAircraft(planeCallSign){
         })
         .catch(error => console.error('Error fetching aircraft:', error));
 
->>>>>>> Stashed changes
 }
