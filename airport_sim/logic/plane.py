@@ -64,16 +64,19 @@ class Plane:
     # Returns the plane data as a dictionary
     def return_data(self):
         data = {
-            "callsign" : self.callsign,
-            "origin" : self.origin,
-            "destination" : self.destination,
-            "fuel level" : self.fuel_level,
-            "emergency status" : self.emergency_status,
-            "emergency time left" : self.emergency_time_left,
-            "target time" : self.target_time,
-            "actual time" : self.actual_time,
-            "current runway" : self.current_runway
+            "callsign": self.callsign,
+            "origin": self.origin,
+            "destination": self.destination,
+            "is_departure": self.is_departure,
+            "fuel_level": self.fuel_level,
+            "emergency_status": self.emergency_status.name,
+            "target_time": str(self.target_time),
+            "actual_time": str(self.actual_time),
+            "current_location": self.current_location
         }
+        return data
+
+        return data
 
     # ------- PLANE GENERATION FUNCTIONS ------- #
     def genCallsign(self):
@@ -156,7 +159,7 @@ class Plane:
         randSeconds = random.randint(0,86400)
         randMinutes = 86400/60
         randHours = randMinutes/60
-        return datetime.time(randHours, randMinutes, randSeconds)
+        return datetime.time(int(randHours), int(randMinutes), int(randSeconds))
 
     def genActualTime(self):
         actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
@@ -164,7 +167,7 @@ class Plane:
         timeSeconds = random.randint(0,86400)
         timeMinutes = 86400/60
         timeHours = timeMinutes/60
-        return datetime.time(timeHours,timeMinutes, timeSeconds)
+        return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
     
   
     def genEmergencyOnSpawn(self):
@@ -221,7 +224,8 @@ class Plane:
             return True 
         else:
             return False
-         
+
+
 
 # TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
     def cancel(self):
