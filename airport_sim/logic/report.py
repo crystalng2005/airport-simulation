@@ -3,6 +3,7 @@ import statistics
 import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
+import datetime
 
 
 # PerformanceReport Class
@@ -40,9 +41,15 @@ class PerformanceReport:
 #NOTE: arrival time maximum and average is a bit weird because surely this is already given in the assumptions
     # Since its normally distributed around the target arrival/departure time (??)
 
+    def setFinishTime(self, finishTime : datetime):
+        self.finish_time = finishTime
 
 
+
+#NOTE; need to call this at the end of the simulation for the report saving to work properly
     def output(self) -> str:
+        self.setFinishTime()
+        
         self.max_wait = max(self.wait_times)
         self.max_hold = max(self.hold_times)
         self.max_take_off = max(self.take_off_delays)
@@ -106,6 +113,13 @@ class PerformanceReport:
 
         self.holding_max = 0
         self.holding_current = 0
+
+
+
+    def getEfficiency(self):
+        if self.total_planes > 0:
+            return ((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100)
+        return 0
 
 
 

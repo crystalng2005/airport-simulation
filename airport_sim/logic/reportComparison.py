@@ -7,12 +7,15 @@ from logic.presets import PresetController
 
 
 
+
+
+
+
 ## Plots for: 
     # x:Runways, y:diversions
     # x:Runways, y:cancellations
     # x:Plane number, y:diversions
     # x:plane number, y:cancellations
-
 
 ## QUESTIONS: 
     # do we want to plot cancellations too?
