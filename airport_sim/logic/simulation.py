@@ -8,7 +8,7 @@ from logic.queue_manager import QueueController
 # from airport_sim.logic.report import PerformanceReport
 from logic.presets import PresetController
 
-import globals.reportData as RD
+import logic.globals.reportData as RD
 
 
 
