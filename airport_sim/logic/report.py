@@ -8,10 +8,11 @@ from pathlib import Path
 # PerformanceReport Class
 
 class PerformanceReport:
-    def __init__(self, runway_amount, landings_per_hour):
+    def __init__(self, runway_amount, landings_per_hour, start_time):
         # Simulation preset data
         self.runway_amount = runway_amount
         self.landings_per_hour = landings_per_hour
+        self.start_time = start_time
 
         self.diversions = 0
         self.cancellations = 0
