@@ -437,14 +437,18 @@ function updateInfoScreenContent(planeID){
 //              [planeID_5, action_5]]
 // where 'action' is a string or (an integer to represent a runway index)
 function getCurrentFrameActions(){
-    fetch('/api/current-frame-actions')
+    return fetch('/api/current-frame-actions')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 return data.actions;
             }
+            throw new Error('Failed to get frame actions');
         })
-        .catch(error => console.error('Error fetching frame actions:', error));
+        .catch(error => {
+            console.error('Error fetching frame actions:', error);
+            return [];
+        });
 }
 
 // used for the clock/timer on the top left corner

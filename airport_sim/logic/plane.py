@@ -66,16 +66,17 @@ class Plane:
     # Returns the plane data as a dictionary
     def return_data(self):
         data = {
-            "callsign" : self.callsign,
-            "origin" : self.origin,
-            "destination" : self.destination,
-            "fuel_level" : self.fuel_level,
-            "emergency_status" : self.emergency_status,
-            "emergency_time_left" : self.emergency_time_left,
-            "target_time" : self.target_time,
-            "actual_time" : self.actual_time,
-            "current_runway" : self.current_runway
+            "callsign": self.callsign,
+            "origin": self.origin,
+            "destination": self.destination,
+            "is_departure": self.is_departure,
+            "fuel_level": self.fuel_level,
+            "emergency_status": self.emergency_status.name,
+            "target_time": str(self.target_time),
+            "actual_time": str(self.actual_time),
+            "current_location": self.current_location
         }
+        return data
 
         return data
 

@@ -34,9 +34,8 @@ class SimulationController:
         self.mixed_runways = mixed_runways
 
         self.cancellation_time = cancellation_time
-        self.start_time = datetime.now()
-        self.current_time = self.start_time
-        self.end_time = self.start_time + timedelta(minutes=total_simulation_minutes)
+        self.current_time = 0
+        self.end_time = total_simulation_minutes
         self.simulation_finished = False
 
         self.preset_mode = False
@@ -93,7 +92,7 @@ class SimulationController:
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
-        self.planes_by_call_sign[p.callSign] = p
+        self.planes_by_call_sign[p.callsign] = p
         
         PresetController.plane_list.append(p) # Adds generated plane to preset storage list
 
@@ -105,7 +104,7 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
-    def get_aircraft_by_call_sign(self, plane_call_sign: int):
+    def getAircraftByCallSign(self, plane_call_sign: int):
         return self.planes_by_call_sign.get(plane_call_sign, None)
 
 
@@ -151,7 +150,7 @@ class SimulationController:
             self.simulation_finished = True
             return False
         
-        self.current_time += timedelta(minutes=self.tick_minutes)
+        self.current_time += self.tick_minutes
         #random planes per tick generation
         if not self.preset_mode:
             expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
