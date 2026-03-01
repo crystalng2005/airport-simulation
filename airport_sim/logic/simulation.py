@@ -34,9 +34,8 @@ class SimulationController:
         self.mixed_runways = mixed_runways
 
         self.cancellation_time = cancellation_time
-        self.start_time = datetime.now()
-        self.current_time = self.start_time
-        self.end_time = self.start_time + timedelta(minutes=total_simulation_minutes)
+        self.current_time = 0
+        self.end_time = total_simulation_minutes
         self.simulation_finished = False
 
         self.preset_mode = False
@@ -151,7 +150,7 @@ class SimulationController:
             self.simulation_finished = True
             return False
         
-        self.current_time += timedelta(minutes=self.tick_minutes)
+        self.current_time += self.tick_minutes
         #random planes per tick generation
         if not self.preset_mode:
             expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
