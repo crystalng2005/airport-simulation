@@ -54,6 +54,7 @@ class Plane:
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
         self.current_runway = -1
         self.cancelled = False
+        self.diverted = False
         self.entered_hold = None 
         self.left_hold = None
         self.generated_at = None
@@ -238,6 +239,9 @@ class Plane:
 # TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
     def cancel(self):
         self.cancelled = True
+
+    def divert(self):
+        self.diverted = True
 
     
     def exit_simulation(self):
