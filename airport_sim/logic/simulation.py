@@ -144,18 +144,18 @@ class SimulationController:
             expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
             expected_landings = self.landings_per_hour * (self.tick_minutes / 60)
 
-        for _ in range(int(expected_departures)):
-            self.generatePlane(True)
+            for _ in range(int(expected_departures)):
+                self.generatePlane(True)
 
-        for _ in range(int(expected_landings)):
-            self.generatePlane(False)
+            for _ in range(int(expected_landings)):
+                self.generatePlane(False)
 
-        # fractional part
-        if random.random() < (expected_departures % 1):
-            self.generatePlane(True)
+            # fractional part
+            if random.random() < (expected_departures % 1):
+                self.generatePlane(True)
 
-        if random.random() < (expected_landings % 1):
-            self.generatePlane(False)
+            if random.random() < (expected_landings % 1):
+                self.generatePlane(False)
         #attempting to assign planes to available runways
         self.departure_queue.checkRunways()
         self.landing_queue.checkRunways()
