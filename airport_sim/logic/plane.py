@@ -75,6 +75,8 @@ class Plane:
             "current runway" : self.current_runway
         }
 
+        return data
+
     # ------- PLANE GENERATION FUNCTIONS ------- #
     def genCallsign(self):
         # For this, number the planes, can just keep a global count of current value
@@ -156,7 +158,7 @@ class Plane:
         randSeconds = random.randint(0,86400)
         randMinutes = 86400/60
         randHours = randMinutes/60
-        return datetime.time(randHours, randMinutes, randSeconds)
+        return datetime.time(int(randHours), int(randMinutes), int(randSeconds))
 
     def genActualTime(self):
         actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
@@ -164,7 +166,7 @@ class Plane:
         timeSeconds = random.randint(0,86400)
         timeMinutes = 86400/60
         timeHours = timeMinutes/60
-        return datetime.time(timeHours,timeMinutes, timeSeconds)
+        return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
     
   
     def genEmergencyOnSpawn(self):
@@ -221,7 +223,8 @@ class Plane:
             return True 
         else:
             return False
-         
+
+
 
 # TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
     def cancel(self):

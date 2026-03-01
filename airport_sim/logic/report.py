@@ -79,6 +79,8 @@ class PerformanceReport:
         minutes, seconds = divmod(remainder, 60)
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
     
+
+    
     def outputReport_dict(self):
         report = {
             "start_time" : self.start_time,
