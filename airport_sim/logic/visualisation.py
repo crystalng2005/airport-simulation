@@ -9,19 +9,6 @@ class VisualisationController:
     def __init__(self, tickspeed: int = 5): # Tickspeed is 5 minutes by default
         self.tickspeed = tickspeed
 
-    def getAircraftData(self, simulation) -> dict:
-        """Stub method to return aircraft data for visualization."""
-        # TODO: Implement data retrieval from simulation (backend)
-        if simulation is None:
-            return {}
-
-        return {
-            "current_time": simulation.current_time.isoformat(),
-            "planes": [],
-            "runways": [],
-            "queues": []
-        }
-
     def getAllSimulationResults(self):
         return ResultsController.getAllResults()
 
@@ -29,20 +16,7 @@ class VisualisationController:
         report = ResultsController.loadResults(sim_id)
         if report != None:
             return {
-                "success": True, #--------------???
-                "report": {
-                    "id": sim_id,
-                    "total_planes": report.total_planes,
-                    "diversions": report.diversions,
-                    "cancellations": report.cancellations,
-                    "tot_wait_time": report.tot_wait_time,
-                    "tot_fuel_used": report.tot_fuel_used,
-                    "queue_max": report.queue_max,
-                    "holding_max": report.holding_max,
-                    "efficiency": report.getEfficiency(),
-                    "avg_wait_time": report.mean_wait,
-                    "avg_fuel_per_plane": report.fuel_avg
-                }
+                "report": report.outputReport_dict()
             }
 
     def compareSimulations(self, sim_id_1, sim_id_2):
@@ -79,7 +53,7 @@ class VisualisationController:
                     "mixed_runways": PresetController.mixed_runways
                 },
                 "planes": planes,
-                "report": 5 # --------------
+                "report": PresetController.report.outputReport_dict()
             })
         return output
 
@@ -99,8 +73,5 @@ class VisualisationController:
                 "mixed_runways": PresetController.mixed_runways,
             },
             "planes": planes,
-            "report": 5 # --------------
+            "report": PresetController.report.outputReport_dict()
         }
-
-    def loadPresetIntoSimulation(self, id):
-        pass

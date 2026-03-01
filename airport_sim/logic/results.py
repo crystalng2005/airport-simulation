@@ -82,23 +82,14 @@ class ResultsController:
             output.append({
                 "id": i,
                 "completed_at": r["saved_at"],
-                "duration": 1, # ------------------------------------
+                "duration": report.duration,
                 "config": {
-                    "total_runways": report.runway_amount,
-                    "departure_runways": 2, #--------------------------------
-                    "landing_runways": 2, # -------------------------------
-                    "mixed_runways": 1 # ----------------------
+                    "total_runways": report.runway_total,
+                    "departure_runways": report.runways_departure, 
+                    "landing_runways": report.runways_landing, 
+                    "mixed_runways": report.runways_mixed 
                 },
-                "report": {
-                    "total_planes": report.total_planes,
-                    "diversions": report.diversions,
-                    "cancellations": report.cancellations, 
-                    "queue_max": report.queue_max,
-                    "holding_max": report.holding_max,
-                    "tot_fuel_used": report.tot_fuel_used,
-                    "tot_wait_time": report.tot_wait_time,
-                    "efficiency": report.getEfficiency() 
-                }
+                "report": report.outputReport_dict()
             })
 
             return output
@@ -116,23 +107,14 @@ class ResultsController:
             return {
                 "id": id,
                 "completed_at": results[id]["saved_at"],
-                "duration": 1, # ------------------------------------
+                "duration": report.duration,
                 "config": {
-                    "total_runways": report.runway_amount,
-                    "departure_runways": 2, #--------------------------------
-                    "landing_runways": 2, # -------------------------------
-                    "mixed_runways": 1 # ----------------------
+                    "total_runways": report.runway_total,
+                    "departure_runways": report.runways_departure, 
+                    "landing_runways": report.runways_landing, 
+                    "mixed_runways": report.runways_mixed 
                 },
-                "report": {
-                    "total_planes": report.total_planes,
-                    "diversions": report.diversions,
-                    "cancellations": report.cancellations, 
-                    "queue_max": report.queue_max,
-                    "holding_max": report.holding_max,
-                    "tot_fuel_used": report.tot_fuel_used,
-                    "tot_wait_time": report.tot_wait_time,
-                    "efficiency": report.getEfficiency() 
-                }
+                "report": report.outputReport_dict()
             }       
         except (IOError, IndexError, KeyError):
             return None
