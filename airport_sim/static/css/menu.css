@@ -10,70 +10,84 @@
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
+    height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
+    overflow: hidden; 
+    padding: 0;
+    margin: 0;
 }
 
 .container {
-    width: 100%;
-    max-width: 600px;
+    width: 90%;
+    max-width: 1000px; 
+    height: 85vh; 
+    max-height: 700px;
     background: white;
     border-radius: 20px;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Header Styles */
 .header {
     background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
     color: white;
-    padding: 40px 30px;
+    padding: 25px 30px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .header h1 {
-    font-size: 2rem;
-    margin-bottom: 10px;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
     font-weight: 700;
 }
 
 .subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
     opacity: 0.9;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .team-info {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     opacity: 0.8;
 }
 
 /* Menu Section */
 .menu-section {
-    padding: 40px 30px;
+    padding: 30px 40px;
+    flex: 1;
+    overflow-y: auto; /
+    display: flex;
+    flex-direction: column;
 }
 
 .menu-section h2 {
     color: #1e3a8a;
-    font-size: 1.5rem;
-    margin-bottom: 25px;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
     text-align: center;
+    flex-shrink: 0;
 }
 
 /* Menu Buttons Container */
 .menu-buttons {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two columns */
     gap: 15px;
+    flex: 1;
+    align-content: start;
 }
 
 /* Button Base Styles */
 .menu-btn {
     width: 100%;
-    padding: 20px 25px;
+    padding: 18px 20px;
     border: none;
     border-radius: 12px;
     cursor: pointer;
@@ -113,28 +127,29 @@ body {
 
 /* Button Icon */
 .btn-icon {
-    font-size: 2rem;
+    font-size: 1.8rem;
     margin-bottom: 5px;
 }
 
 /* Button Text */
 .btn-text {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 600;
     margin-bottom: 3px;
 }
 
 /* Button Description */
 .btn-description {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     opacity: 0.8;
 }
 
-/* Primary Button (Start New Simulation) */
+/* Primary Button (Start New Simulation) - SPANS 2 COLUMNS */
 .primary-btn {
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: white;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    grid-column: 1 / -1; /* Span both columns */
 }
 
 .primary-btn:hover {
@@ -154,11 +169,12 @@ body {
     border-color: #3b82f6;
 }
 
-/* Exit Button */
+
 .exit-btn {
     background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
     color: #991b1b;
     border: 2px solid #fecaca;
+    grid-column: 1 / -1; 
 }
 
 .exit-btn:hover {
@@ -166,41 +182,14 @@ body {
     border-color: #ef4444;
 }
 
-/* Footer */
 .footer {
     background: #f8fafc;
-    padding: 20px;
+    padding: 15px 20px;
     text-align: center;
     color: #64748b;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     border-top: 1px solid #e2e8f0;
-}
-
-/* Responsive Design */
-@media (max-width: 600px) {
-    .header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .subtitle {
-        font-size: 0.9rem;
-    }
-    
-    .menu-section {
-        padding: 30px 20px;
-    }
-    
-    .menu-btn {
-        padding: 15px 20px;
-    }
-    
-    .btn-icon {
-        font-size: 1.5rem;
-    }
-    
-    .btn-text {
-        font-size: 1rem;
-    }
+    flex-shrink: 0;
 }
 
 /* Animation on Page Load */
@@ -225,8 +214,66 @@ body {
 .menu-btn:nth-child(4) { animation-delay: 0.4s; }
 .menu-btn:nth-child(5) { animation-delay: 0.5s; }
 
-/* Focus Styles for Accessibility */
+
 .menu-btn:focus {
     outline: 3px solid #3b82f6;
     outline-offset: 2px;
+}
+
+
+@media (max-width: 900px) {
+    .container {
+        width: 95%;
+        max-width: 700px;
+    }
+    
+    .menu-buttons {
+        grid-template-columns: 1fr; 
+    }
+    
+    .primary-btn,
+    .exit-btn {
+        grid-column: 1; 
+    }
+}
+
+/* Responsive Design - Mobile */
+@media (max-width: 600px) {
+    body {
+        overflow-y: auto; 
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+    
+    .container {
+        width: 95%;
+        height: auto;
+        min-height: auto;
+        max-height: none;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 0.9rem;
+    }
+    
+    .menu-section {
+        padding: 30px 20px;
+    }
+    
+    .menu-btn {
+        padding: 15px 20px;
+    }
+    
+    .btn-icon {
+        font-size: 1.5rem;
+    }
+    
+    .btn-text {
+        font-size: 1rem;
+    }
 }
