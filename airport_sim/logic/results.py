@@ -5,7 +5,7 @@ from logic.report import PerformanceReport
 import globals.reportData as RD
 
 
-class PresetController:
+class ResultsController:
 
     def __init__(self):
         self.result = None
@@ -48,7 +48,7 @@ class PresetController:
             return False
 
     # load a specific result, using its index as the ID
-    def loadResults(self, index: int) -> PerformanceReport:
+    def loadResults(self, index: int):
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -61,7 +61,7 @@ class PresetController:
 
             return self.result
         except (IOError, IndexError, KeyError):
-            return False
+            return None
 
     # Return a list of all indexes + saving timestamps of each result in list
     def getResultSaveTimes(self) -> list[tuple[int, str]]:
@@ -70,6 +70,56 @@ class PresetController:
 
         return [(i, r["saved_at"]) for i, r in enumerate(results)]
 
+
+    def getAllResults(self):
+        with open(self.results_file, 'r') as f:
+            results = json.load(f)
+
+        output = []
+        for i, r in enumerate(results):
+            report = self.loadResults(i)
+
+            output.append({
+                "id": i,
+                "completed_at": r["saved_at"],
+                "duration": report.duration,
+                "config": {
+                    "total_runways": report.runway_total,
+                    "departure_runways": report.runways_departure, 
+                    "landing_runways": report.runways_landing, 
+                    "mixed_runways": report.runways_mixed 
+                },
+                "report": report.outputReport_dict()
+            })
+
+            return output
+
+    def getOneResult(self,id:int):
+        try:
+            with open(self.results_file, 'r') as f:
+                results = json.load(f)
+
+            result_data = results[id]["result"]
+
+            report = PerformanceReport.__new__(PerformanceReport)
+            report.__dict__.update(result_data)
+
+            return {
+                "id": id,
+                "completed_at": results[id]["saved_at"],
+                "duration": report.duration,
+                "config": {
+                    "total_runways": report.runway_total,
+                    "departure_runways": report.runways_departure, 
+                    "landing_runways": report.runways_landing, 
+                    "mixed_runways": report.runways_mixed 
+                },
+                "report": report.outputReport_dict()
+            }       
+        except (IOError, IndexError, KeyError):
+            return None
+
+        
 
 
     # Given a specific report ID, exports it to the exports folder

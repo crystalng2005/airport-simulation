@@ -116,7 +116,8 @@ class PresetController:
                 self.plane_list.append(plane)
 
             report = PerformanceReport.__new__(PerformanceReport)
-            report.__dict__.update(vars_data["report"])
+            report.__dict__.update(data["report"])
+            RD.reportData = report
 
             return True
         except (IOError, KeyError, IndexError): # Common file errors

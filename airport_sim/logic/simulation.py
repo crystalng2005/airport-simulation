@@ -22,6 +22,7 @@ class SimulationController:
         landing_runways: int,
         mixed_runways: int,
         cancellation_time: int,
+        total_simulation_minutes: int,
         tick_minutes: int = 5
     ):
         self.tick_minutes = tick_minutes
@@ -31,28 +32,68 @@ class SimulationController:
         self.departure_runways = departure_runways
         self.landing_runways = landing_runways
         self.mixed_runways = mixed_runways
+
         self.cancellation_time = cancellation_time
-        self.current_time = datetime.now()
+        self.start_time = datetime.now()
+        self.current_time = self.start_time
+        self.end_time = self.start_time + timedelta(minutes=total_simulation_minutes)
+        self.simulation_finished = False
+
+        self.preset_mode = False
+        self.preset_planes = []
+        self.current_frame_actions = []
+
+        self.planes_by_call_sign = {}
         
         self.generateRunway()
         self.generateQueue()
         # Initialises the reportData global variable
-        RD.init(total_runways, landings_per_hour)
+        RD.init(total_runways, mixed_runways, departure_runways, landing_runways, landings_per_hour, self.current_time)
+
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
+        if preset is None:
+            self.generateRunway()
+            self.generateQueue()
+            return True
+
+        preset_controller = PresetController()
+
+        if not preset_controller.loadPreset(preset):
+            return False
+
+        # override runway configurations
+        self.departure_runways = preset_controller.departure_runways
+        self.landing_runways = preset_controller.landing_runways
+        self.mixed_runways = preset_controller.mixed_runways
+
         self.generateRunway()
         self.generateQueue()
+
+        for plane in preset_controller.plane_list:
+            if plane.is_departure:
+                self.departure_queue.enqueue(plane)
+            else:
+                self.landing_queue.enqueue(plane)
+
+        RD.reportData = preset_controller.report
+
+        self.preset_mode = True
+
         return True
+        
 
 
 
-    def getSimulationTime() -> datetime:
-        pass
+
+    def getSimulationTime(self) -> datetime:
+        return self.current_time
 
 
 
     def generatePlane(self, is_departure: bool) -> bool:
         p = Plane(is_departure)
+        self.planes_by_call_sign[p.callSign] = p
         
         PresetController.plane_list.append(p) # Adds generated plane to preset storage list
 
@@ -64,12 +105,17 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
+    def get_aircraft_by_call_sign(self, plane_call_sign: int):
+        return self.planes_by_call_sign.get(plane_call_sign, None)
+
 
     def generateQueue(self) -> bool: #departure and landing queue
-        self.departure_queue = QueueController([], self.departure_list, True)
-        self.landing_queue = QueueController([], self.landing_list, False)
+        self.departure_queue = QueueController([], self.departure_list, True, self)
+        self.landing_queue = QueueController([], self.landing_list, False, self)
         return True
 
+    def getCurrentFrameActions(self):
+        return self.current_frame_actions
 
     def generateRunway(self) -> bool:
         self.landing_list = []
@@ -95,24 +141,34 @@ class SimulationController:
         # tick_minutes controls how much simulated time passes each frame.
         # expected planes per tick = planes_per_hour × (tick_minutes / 60).
         # integer part generates fixed planes, fractional part handled randomly.
+
+        self.current_frame_actions = []
+
+        if self.simulation_finished:
+            return False
+
+        if self.current_time >= self.end_time:
+            self.simulation_finished = True
+            return False
         
         self.current_time += timedelta(minutes=self.tick_minutes)
         #random planes per tick generation
-        expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
-        expected_landings = self.landings_per_hour * (self.tick_minutes / 60)
+        if not self.preset_mode:
+            expected_departures = self.departures_per_hour * (self.tick_minutes / 60)
+            expected_landings = self.landings_per_hour * (self.tick_minutes / 60)
 
-        for _ in range(int(expected_departures)):
-            self.generatePlane(True)
+            for _ in range(int(expected_departures)):
+                self.generatePlane(True)
 
-        for _ in range(int(expected_landings)):
-            self.generatePlane(False)
+            for _ in range(int(expected_landings)):
+                self.generatePlane(False)
 
-        # fractional part
-        if random.random() < (expected_departures % 1):
-            self.generatePlane(True)
+            # fractional part
+            if random.random() < (expected_departures % 1):
+                self.generatePlane(True)
 
-        if random.random() < (expected_landings % 1):
-            self.generatePlane(False)
+            if random.random() < (expected_landings % 1):
+                self.generatePlane(False)
         #attempting to assign planes to available runways
         self.departure_queue.checkRunways()
         self.landing_queue.checkRunways()
