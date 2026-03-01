@@ -254,12 +254,12 @@ def next_frame():
     controller.simulation.update()
     return jsonify({'success': True, 'message': 'Frame advanced'}), 200
 
-@app.route('/api/aircraft/<int:plane_id>', methods=['GET'])
-def get_aircraft(plane_id):
+@app.route('/api/aircraft/<str:plane_call_sign>', methods=['GET'])
+def get_aircraft(plane_call_sign):
     if not controller.simulation:
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
     
-    aircraft = controller.simulation.get_aircraft_by_id(plane_id)  # Need to implement this
+    aircraft = controller.simulation.get_aircraft_by_call_sign(plane_call_sign)  # Need to implement this
     if not aircraft:
         return jsonify({'success': False, 'errors': ['Aircraft not found']}), 404
     
