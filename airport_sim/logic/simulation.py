@@ -45,7 +45,8 @@ class SimulationController:
         self.generateRunway()
         self.generateQueue()
         # Initialises the reportData global variable
-        RD.init(total_runways, landings_per_hour, self.current_time)
+        RD.init(total_runways, mixed_runways, departure_runways, landing_runways, landings_per_hour, self.current_time)
+
 
     def generateSimulation(self, preset: int) -> bool: # Consider if a preset exists according to Fede
         if preset is None:

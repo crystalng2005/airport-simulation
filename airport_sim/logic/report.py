@@ -9,9 +9,12 @@ import datetime
 # PerformanceReport Class
 
 class PerformanceReport:
-    def __init__(self, runway_amount, landings_per_hour, start_time):
+    def __init__(self, runway_total, runways_mixed, runways_departure, runways_landing, landings_per_hour, start_time):
         # Simulation preset data
-        self.runway_amount = runway_amount
+        self.runway_total = runway_total
+        self.runways_mixed = runways_mixed
+        self.runways_departure = runways_departure
+        self.runways_landing = runways_landing
         self.landings_per_hour = landings_per_hour
         self.start_time = start_time
 
@@ -41,14 +44,15 @@ class PerformanceReport:
 #NOTE: arrival time maximum and average is a bit weird because surely this is already given in the assumptions
     # Since its normally distributed around the target arrival/departure time (??)
 
+
     def setFinishTime(self, finishTime : datetime):
         self.finish_time = finishTime
+        self.duration = self.finish_time - self.start_time
+        
 
-
-
-#NOTE; need to call this at the end of the simulation for the report saving to work properly
-    def output(self) -> str:
+    def generateReport(self):
         self.setFinishTime()
+        self.efficiency = self.getEfficiency()
         
         self.max_wait = max(self.wait_times)
         self.max_hold = max(self.hold_times)
@@ -68,6 +72,49 @@ class PerformanceReport:
         self.fuel_avg = 0
         if self.total_planes > 0:
             self.fuel_avg = self.tot_fuel_used / self.total_planes
+
+
+    
+    def outputReport_dict(self):
+        report = {
+            "start_time" : self.start_time,
+            "completed_at" : self.finish_time,
+            "duration" : self.duration,
+
+            "total_planes": self.total_planes,
+            "diversions": self.diversions,
+            "cancellations": self.cancellations,
+
+            "tot_fuel_used": self.tot_fuel_used,
+            "avg_fuel_per_plane" : self.fuel_avg,
+
+            "holding_max": self.holding_max,
+            "queue_max": self.queue_max,
+            
+            "tot_wait_time": self.tot_wait_time,
+            "avg_wait_time": self.mean_wait, 
+            "std_wait_time" : self.std_wait,
+
+            "max_hold_time" : self.max_hold,
+            "avg_hold_time" : self.mean_hold,
+            "std_hold_time" : self.std_hold,
+
+            "max_takeoff_time" : self.max_take_off,
+            "avg_takeoff_time" : self.mean_take_off,
+            "std_take_off_time" : self.std_take_off,
+
+            "max_arrival_time" : self.max_arrival,
+            "avg_arrival_time" : self.mean_arrival,
+            "std_arrival_time" : self.std_arrival,
+
+            "efficiency": self.efficiency           
+        }
+
+
+
+#NOTE; need to call this at the end of the simulation for the report saving to work properly
+    def outputReport_string(self) -> str:
+        self.generateReport()
 
         return (f"Number of diversions: {self.diversions}\n"
                 f"Number of cancellations: {self.cancellations}\n"
