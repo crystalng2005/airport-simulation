@@ -12,7 +12,8 @@ from logic.simulation import SimulationController
 
 
 
-
+import logic.globals.reportData as RD
+from logic.simulation import SimulationController
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool):
