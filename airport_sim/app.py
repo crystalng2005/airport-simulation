@@ -84,10 +84,7 @@ def presets_page():
 
 @app.route('/api/get-presets', methods=['GET'])
 def get_presets():
-    """
-    Get available presets
-    Frontend → Flask → VisualisationController → PresetController
-    """
+    
     try:
         
         presets = vis_controller.getAvailablePresets()
@@ -141,6 +138,95 @@ def load_preset():
             "error": str(e)
         }), 500
 
+
+
+# Results & Comparison Routes
+
+@app.route('/results')
+def results_page():
+    """Display results page"""
+    return render_template('results.html')
+
+
+@app.route('/api/get-all-results', methods=['GET'])
+def get_all_results():
+    
+    try:
+        results = vis_controller.getAllSimulationResults()
+        
+        return jsonify({
+            "success": True,
+            "results": results
+        })
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/get-full-report/<int:sim_id>', methods=['GET'])
+def get_full_report(sim_id):
+   
+    try:
+        report = vis_controller.getSimulationReport(sim_id)
+        return jsonify(report)
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/compare-simulations', methods=['POST'])
+def compare_simulations():
+   
+    try:
+        data = request.get_json()
+        sim_id_1 = data.get('sim_id_1')
+        sim_id_2 = data.get('sim_id_2')
+        
+        if sim_id_1 is None or sim_id_2 is None:
+            return jsonify({
+                "success": False,
+                "error": "Both simulation IDs required"
+            }), 400
+        
+        comparison = vis_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
+        return jsonify(comparison)
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+
+
+@app.route('/api/export-report/<int:sim_id>', methods=['GET'])
+def export_report(sim_id):
+    
+    try:
+        from flask import send_file
+        
+        filepath = vis_controller.exportSimulationReport(sim_id, format="txt")
+        
+        if filepath and os.path.exists(filepath):
+            return send_file(
+                filepath,
+                as_attachment=True,
+                download_name=f"simulation_{sim_id}_report.txt"
+            )
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Failed to generate report"
+            }), 500
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
     
    

@@ -156,7 +156,7 @@ function createPresetCard(preset, index) {
         <!-- Load Button -->
         <div class="load-button-container">
             <button class="btn-load" onclick="loadPreset(${preset.id})">
-                ▶️ Load This Preset
+                Load This Preset
             </button>
         </div>
     `;
@@ -210,7 +210,7 @@ async function loadPreset(presetId) {
     } catch (error) {
         console.error('Error loading preset:', error);
         alert('Failed to load preset. Please try again.');
-        event.target.innerHTML = '▶️ Load This Preset';
+        event.target.innerHTML = 'Load This Preset';
         event.target.disabled = false;
     }
 }
