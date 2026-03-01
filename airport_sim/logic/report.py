@@ -80,7 +80,7 @@ class PerformanceReport:
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
     
     def outputReport_dict(self):
-        report = {
+        return {
             "start_time" : self.start_time,
             "completed_at" : self.finish_time,
             "duration" : self.string_duration(),
