@@ -3,7 +3,8 @@ from enum import Enum
 from numpy import random
 import linecache
 import os
-from globals import reportData as RD
+# from globals import reportData as RD
+import logic.globals.reportData as RD
 
 
 # CONSTANTS
@@ -32,6 +33,9 @@ target_time: datetime,
 actual_time: datetime
 """
 
+
+#TODO: get information function () format:dictionary
+
 class Plane:
     plane_num = 0
     
@@ -48,12 +52,28 @@ class Plane:
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
         self.current_runway = -1
         self.cancelled = False
+        self.entered_hold = None 
+        self.left_hold = None
         Plane.plane_num += 1
 
     # ------- CONSTRUCTOR ------ #
     # dont need, can use the built in constructor
     """def __new__(self):
         pass"""
+    
+    # Returns the plane data as a dictionary
+    def return_data(self):
+        data = {
+            "callsign" : self.callsign,
+            "origin" : self.origin,
+            "destination" : self.destination,
+            "fuel level" : self.fuel_level,
+            "emergency status" : self.emergency_status,
+            "emergency time left" : self.emergency_time_left,
+            "target time" : self.target_time,
+            "actual time" : self.actual_time,
+            "current runway" : self.current_runway
+        }
 
     # ------- PLANE GENERATION FUNCTIONS ------- #
     def genCallsign(self):
@@ -120,10 +140,12 @@ class Plane:
 
         return code 
 
+
 # use the normal dist for this 
     def genFuel(self):
         fuel = random.uniform(20,60)
         return fuel
+
 
 # NTOE: is_departure will determine whether or not the taget or actual time is about the departure or arrival
 # again, use the normal distribution
