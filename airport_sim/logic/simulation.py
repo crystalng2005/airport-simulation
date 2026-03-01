@@ -95,10 +95,10 @@ class SimulationController:
 
         if is_departure:
             self.departure_queue.enqueue(p)
-            currentFrameActions.current_frame_actions.append(p.callsign, "spawnDeparture")
+            currentFrameActions.current_frame_actions.append([p.callsign, "spawnDeparture"])
         else:
             self.landing_queue.enqueue(p)
-            currentFrameActions.current_frame_actions.append(p.callsign, "spawnLanding")
+            currentFrameActions.current_frame_actions.append([p.callsign, "spawnLanding"])
 
         # Increases total number of planes
         RD.reportData.total_planes += 1
@@ -140,6 +140,8 @@ class SimulationController:
         # expected planes per tick = planes_per_hour × (tick_minutes / 60).
         # integer part generates fixed planes, fractional part handled randomly.
 
+        currentFrameActions.current_frame_actions = []
+        
         if self.simulation_finished:
             return False
 

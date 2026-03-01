@@ -252,7 +252,7 @@ class Plane:
     
     def exit_simulation(self):
         self.left_simulation = True
-        currentFrameActions.current_frame_actions.append(self.callsign, "kill")
+        currentFrameActions.current_frame_actions.append([self.callsign, "kill"])
 
     # Call every tick, for every plane to both present chance of generating emergency and checking if a plane has one
     # Update this based on tick rate

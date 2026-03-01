@@ -26,7 +26,7 @@ class QueueController:
                 # Dircts the plane to the runway
                 removed = self.plane_queue.pop(0)
                 removed.goToRunway(runway.runway_number)
-                currentFrameActions.current_frame_actions.append(removed.callsign, runway.runway_number)
+                currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                 # Assigns the holding queue exit time to the plane object
                 removed.left_hold = self.sim.getSimulationTime()
                 delay = datetime.total_seconds(removed.left_hold - removed.entered_hold)
@@ -60,7 +60,7 @@ class QueueController:
 
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
     def planeEmergency(self, p: Plane):
-        currentFrameActions.current_frame_actions.append(p.callsign, "emergency")
+        currentFrameActions.current_frame_actions.append([p.callsign, "emergency"])
         match (p.emergency_status):
             case EmergencyStatus.FUEL:
                 p.emergency_time_left = 10
