@@ -159,19 +159,19 @@ class Plane:
         # find way to get target (generate or input ??)
         #doing it in seconds, but can change it to be in minutes as well
         #86400
-        randSeconds = random.randint(0,86400)
-        randMinutes = 86400/60
+        randSeconds = random.randint(0,82800)
+        randMinutes = (randSeconds/60) % 60
         self.tickTargetTime = math.ceil(randMinutes/5)
-        randHours = randMinutes/60
+        randHours = (randMinutes/60) % 60
         return datetime.time(int(randHours), int(randMinutes), int(randSeconds))
 
     def genActualTime(self):
         actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
         time = random.normal(actualSeconds, 5*60) 
         self.tickActualTime = random.normal(self.tickTargetTime, 1)
-        timeSeconds = random.randint(0,86400)
-        timeMinutes = 86400/60
-        timeHours = timeMinutes/60
+        timeSeconds = time
+        timeMinutes = (timeSeconds/60) % 60
+        timeHours = (timeMinutes/60) % 60
         return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
     
   
