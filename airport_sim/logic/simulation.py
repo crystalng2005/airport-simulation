@@ -35,9 +35,9 @@ class SimulationController:
         self.mixed_runways = mixed_runways
 
         self.cancellation_time = cancellation_time
-        self.current_time = 0
+        self.current_time = datetime(2000, 1, 1, 0, 0)
+        self.end_time = self.current_time + timedelta(minutes=total_simulation_minutes)
         
-        self.end_time = total_simulation_minutes
         self.simulation_finished = False
 
         self.preset_mode = False
@@ -149,8 +149,8 @@ class SimulationController:
             self.simulation_finished = True
             return False
         
-        self.current_time += self.tick_minutes
-        #random planes per tick generation
+        self.current_time += timedelta(minutes=self.tick_minutes)
+
 
         if self.preset_mode:
             planes_to_spawn = [p for p in self.preset_planes if p.generated_at <= self.current_time]
@@ -186,4 +186,3 @@ class SimulationController:
         self.landing_queue.checkRunways()
 
         return True
-    
