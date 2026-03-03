@@ -251,7 +251,7 @@ def get_current_time():
     
     return jsonify({
         'success': True, 
-        'time': controller.simulation.getSimulationTime().isoformat() # Converted to ISO string
+        'time': controller.simulation.getSimulationTime()
     }), 200
 
 @app.route('/api/next-frame', methods=['POST'])
