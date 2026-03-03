@@ -1,21 +1,4 @@
 
-fetch('/start', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    runways: 1,
-    inbound_flow: 1,
-    outbound_flow: 1,
-    departure_runways: 1,
-    landing_runways: 1,
-    mixed_runways: 1,
-    cancellation_time: 1
-  })
-})
-
-
 // big simulation sittings
 const FPS = 1;
 // const startTime = getCurrentTime();
@@ -98,6 +81,32 @@ class Aircraft{
 // Function Difinitions Section:
 // ________________________________________________________________________________________________________
 function startSimulation(){
+
+  // start simulation in the back-end by calling start_sim() in app.py
+  fetch('/start', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      runways: 1,
+      inbound_flow: 1,
+      outbound_flow: 1,
+      departure_runways: 1,
+      landing_runways: 1,
+      mixed_runways: 1,
+      cancellation_time: 1
+    })
+  })
+  .then(response => response.json())
+  .then(data => {
+   createRunways(data.runways);
+  });
+
+  runSimulation();
+}
+
+function runSimulation(){
   // ask the back-end to calculate frame
   goToNextFrame();
 
@@ -107,7 +116,7 @@ function startSimulation(){
   
   if(!stopSimulationCheck()){
     // go to next frame after waiting for 1/FPS seconds
-    setTimeout(startSimulation,1000/FPS);
+    setTimeout(runSimulation,1000/FPS);
   }
 }
 
@@ -514,6 +523,8 @@ function goToNextFrame(){
 function getNumberOfRunways(){
   // .....
 }
+
+
 
 // return true if the simulation has ended
 function stopSimulationCheck(){

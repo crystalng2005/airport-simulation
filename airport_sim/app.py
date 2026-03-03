@@ -55,7 +55,7 @@ def start_sim():
 
         controller.is_available = False # Simulation is ongoing
 
-        return jsonify({'success': True, 'message': 'Simulation started'}), 200
+        return jsonify({'success': True, 'message': 'Simulation started','runways': runways}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'errors': [str(e)]}), 500
