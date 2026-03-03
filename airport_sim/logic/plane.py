@@ -4,7 +4,7 @@ from numpy import random
 import linecache
 import os
 import math
-# from globals import reportData as RD
+
 import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
 
@@ -165,19 +165,23 @@ class Plane:
         #doing it in seconds, but can change it to be in minutes as well
         #86400
         randSeconds = random.randint(0,82800)
-        randMinutes = (randSeconds/60) % 60
+        randHours = randSeconds // 3600
+        remaining = randSeconds % 3600
+        randMinutes = remaining // 60
+        secs = remaining % 60
         self.tickTargetTime = math.ceil(randMinutes/5)
-        randHours = (randMinutes/60) % 60
-        return datetime.time(int(randHours), int(randMinutes), int(randSeconds))
+        return datetime.time(int(randHours), int(randMinutes), int(secs))
 
     def genActualTime(self):
-        actualSeconds = self.target_time.time().hour + (self.target_time.time().minute) *60 + self.target_time.time().second 
+        actualSeconds = self.target_time.time().hour * 3600 + (self.target_time.time().minute) * 60 + self.target_time.time().second 
         time = random.normal(actualSeconds, 5*60) 
         self.tickActualTime = random.normal(self.tickTargetTime, 1)
-        timeSeconds = time
-        timeMinutes = (timeSeconds/60) % 60
-        timeHours = (timeMinutes/60) % 60
-        return datetime.time(int(timeHours),int(timeMinutes), int(timeSeconds))
+        timeSeconds = int(time)
+        timeHours = timeSeconds // 3600
+        remaining = timeSeconds % 3600
+        timeMinutes = remaining // 60
+        secs = remaining % 60
+        return datetime.time(int(timeHours),int(timeMinutes), int(secs))
     
 
   
