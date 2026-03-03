@@ -1,6 +1,24 @@
+
+fetch('/start', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    runways: 1,
+    inbound_flow: 1,
+    outbound_flow: 1,
+    departure_runways: 1,
+    landing_runways: 1,
+    mixed_runways: 1,
+    cancellation_time: 1
+  })
+})
+
+
 // big simulation sittings
 const FPS = 1;
-const startTime = getCurrentTime();
+// const startTime = getCurrentTime();
 
 // runways sittings
 const runway_size = 100;
@@ -100,8 +118,8 @@ function simulateFrame() {
   // for every plane that did something in current frame
   for(let i = 0; i<currentFrameActions.length; i++){
 
-    let planeID = currentFrameActions[i]["ID"];   // currentFrameActions[i][0];
-    let action = currentFrameActions[i]["action"];// currentFrameActions[i][1];
+    let planeID = currentFrameActions[i][0];   // currentFrameActions[i][0];
+    let action = currentFrameActions[i][1];// currentFrameActions[i][1];
 
     // if the plane spawn in the holding pattern
     if(action == "spawnLanding")
