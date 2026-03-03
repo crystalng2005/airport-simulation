@@ -43,6 +43,7 @@ class SimulationController:
         self.preset_mode = False
 
         self.planes_by_call_sign = {}
+        self.preset_controller = PresetController()
         
         self.generateRunway()
         self.generateQueue()
@@ -150,6 +151,12 @@ class SimulationController:
             return False
         
         self.current_time += self.tick_minutes
+
+        # Process existing queue first — assign waiting planes to available runways
+        self.departure_queue.checkRunways()
+        self.landing_queue.checkRunways()
+
+        # Then generate new planes (they will wait at least one tick in the queue)
         #random planes per tick generation
 
         if self.preset_mode:
@@ -181,9 +188,6 @@ class SimulationController:
 
             if random.random() < (expected_landings % 1):
                 self.generatePlane(False)
-        #attempting to assign planes to available runways
-        self.departure_queue.checkRunways()
-        self.landing_queue.checkRunways()
 
         return True
     
