@@ -1,10 +1,9 @@
 
 
 // Start New Simulation
+// Change this function:
 function startNewSimulation() {
-    console.log("Starting new simulation...");
-
-    window.location.href = '/simulation-screen';
+    window.location.href = '/configure-simulation';  // Changed!
 }
 
 // Load Preset

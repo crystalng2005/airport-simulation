@@ -1,0 +1,15 @@
+{
+    "saved_at": "2026-03-03T17:01:12.151274+00:00",
+    "vars": {
+        "departure_runways": 2,
+        "landing_runways": 2,
+        "mixed_runways": 1
+    },
+    "planes": [],
+    "report": {
+        "runway_total": 5,
+        "runways_mixed": 1,
+        "runways_departure": 2,
+        "runways_landing": 2,
+        "landings_per_hour": 10,
+        "start_time": 

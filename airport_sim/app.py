@@ -30,32 +30,48 @@ def index():
 
 @app.route('/start', methods=['POST'])
 def start_sim():
-    
     try:
         data = request.get_json()
 
-        runways = data.get('runways')
-        inbound_flow = data.get('inbound_flow')
-        outbound_flow = data.get('outbound_flow')
-        departure_runways = data.get('departure_runways')
-        landing_runways = data.get('landing_runways')
-        mixed_runways = data.get('mixed_runways')
-        cancellation_time = data.get('cancellation_time')
-
         controller.simulation = SimulationController(
-            departures_per_hour=int(outbound_flow),
-            landings_per_hour=int(inbound_flow),
-            total_runways=int(runways),
-            departure_runways=int(departure_runways),
-            landing_runways=int(landing_runways),
-            mixed_runways=int(mixed_runways),
-            cancellation_time=int(cancellation_time),
-            total_simulation_minutes = int(100) # --------------------------- temp FIX
+            departures_per_hour=int(data.get('outbound_flow')),
+            landings_per_hour=int(data.get('inbound_flow')),
+            total_runways=int(data.get('runways')),
+            departure_runways=int(data.get('departure_runways')),
+            landing_runways=int(data.get('landing_runways')),
+            mixed_runways=int(data.get('mixed_runways')),
+            cancellation_time=int(data.get('cancellation_time')),
+            total_simulation_minutes=int(data.get('duration', 100)),
+            tick_minutes=5
         )
 
-        controller.is_available = False # Simulation is ongoing
+        controller.is_available = False
 
-        return jsonify({'success': True, 'message': 'Simulation started','runways': runways}), 200
+        # Save this configuration as a preset if requested
+        if data.get('save_as_preset', False):
+            try:
+                # Set preset controller values
+                controller.preset_controller.departure_runways = int(data.get('departure_runways'))
+                controller.preset_controller.landing_runways = int(data.get('landing_runways'))
+                controller.preset_controller.mixed_runways = int(data.get('mixed_runways'))
+                controller.preset_controller.plane_list = []  # Empty initially
+                
+                # Create a basic report for the preset
+                import logic.globals.reportData as RD
+                controller.preset_controller.report = RD.reportData
+                
+                # Save preset
+                preset_saved = controller.preset_controller.savePreset()
+                
+                if preset_saved:
+                    print('Configuration saved as preset')
+                else:
+                    print('Failed to save preset, but simulation will continue')
+                    
+            except Exception as preset_error:
+                print(f'Error saving preset: {preset_error}')
+
+        return jsonify({'success': True, 'message': 'Simulation started'}), 200
 
     except Exception as e:
         return jsonify({'success': False, 'errors': [str(e)]}), 500
@@ -81,7 +97,58 @@ def simulation_page():
     """Display simulation screen page"""
     return render_template('simulation_screen.html')
 
+@app.route('/configure-simulation')
+def configure_simulation_page():
+    return render_template('configure_simulation.html')
 
+@app.route('/api/runway-count', methods=['GET'])
+def get_runway_count():
+    """Get total number of runways in current simulation"""
+    if not controller.simulation:
+        return jsonify({'success': False, 'error': 'No active simulation'}), 400
+    
+    return jsonify({
+        'success': True,
+        'count': controller.simulation.total_runways
+    }), 200
+
+
+@app.route('/api/simulation-finished', methods=['GET'])
+def is_simulation_finished():
+    """Check if simulation has finished"""
+    if not controller.simulation:
+        return jsonify({'success': False, 'error': 'No active simulation'}), 400
+    
+    return jsonify({
+        'success': True,
+        'finished': controller.simulation.simulation_finished
+    }), 200
+
+
+@app.route('/api/get-preset-data/<int:preset_id>', methods=['GET'])
+def get_preset_data(preset_id):
+    """Get full preset data for configuration form"""
+    try:
+        preset_data = controller.visualisation_controller.getPresetData(preset_id)
+        
+        if preset_data:
+            return jsonify({
+                "success": True,
+                "vars": preset_data.get("vars", {}),
+                "planes": preset_data.get("planes", []),
+                "report": preset_data.get("report", {})
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Preset not found"
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 #Presets Routes
 
 @app.route('/presets')

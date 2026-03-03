@@ -4,35 +4,51 @@ document.addEventListener('DOMContentLoaded', function() {
     loadPresets();
 });
 
-/**
- * Main function to load and display presets
- * USES: VisualisationController.getAvailablePresets()
- */
-async function loadPresets() {
-    const loadingIndicator = document.getElementById('loadingIndicator');
-    const presetsContainer = document.getElementById('presetsContainer');
-    const noPresetsMessage = document.getElementById('noPresetsMessage');
+async function loadPreset(presetId) {
+    console.log(`Loading preset ${presetId} into config form...`);
 
     try {
-        // PRESUMED METHOD: Get preset metadata from backend via VisualisationController
-        const response = await fetch('/api/get-presets');
-        const data = await response.json();
-        
-        // Hide loading indicator
-        loadingIndicator.style.display = 'none';
+        const button = event.target;
+        const originalText = button.innerHTML;
+        button.innerHTML = 'Loading...';
+        button.disabled = true;
 
-        if (!data.presets || data.presets.length === 0) {
-            // No presets available
-            noPresetsMessage.style.display = 'block';
+        // Get preset data
+        const response = await fetch(`/api/get-preset-data/${presetId}`);
+        const data = await response.json();
+
+        if (data.success) {
+            button.innerHTML = 'Loaded!';
+            
+            // Create config object from preset
+            const config = {
+                runways: (data.vars.departure_runways || 0) + (data.vars.landing_runways || 0) + (data.vars.mixed_runways || 0),
+                departure_runways: data.vars.departure_runways || 0,
+                landing_runways: data.vars.landing_runways || 0,
+                mixed_runways: data.vars.mixed_runways || 0,
+                inbound_flow: 10,
+                outbound_flow: 10,
+                cancellation_time: 30,
+                duration: 100
+            };
+            
+            // Store in sessionStorage
+            sessionStorage.setItem('presetConfig', JSON.stringify(config));
+            
+            // Redirect to config form
+            setTimeout(() => {
+                window.location.href = '/configure-simulation';
+            }, 500);
         } else {
-            // Display presets
-            presetsContainer.style.display = 'grid';
-            displayPresets(data.presets);
+            alert('Error loading preset: ' + (data.error || 'Unknown error'));
+            button.innerHTML = originalText;
+            button.disabled = false;
         }
     } catch (error) {
-        console.error('Error loading presets:', error);
-        loadingIndicator.style.display = 'none';
-        noPresetsMessage.style.display = 'block';
+        console.error('Error loading preset:', error);
+        alert('Failed to load preset. Please try again.');
+        event.target.innerHTML = 'Load This Preset';
+        event.target.disabled = false;
     }
 }
 
