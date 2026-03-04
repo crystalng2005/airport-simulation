@@ -1,7 +1,7 @@
 
 // big simulation sittings
 const FPS = 1;
-// const startTime = getCurrentTime();
+let startTime = 0;
 
 // runways sittings
 const runway_size = 100;
@@ -75,6 +75,8 @@ function startSimulation(){
   });
 
   createRunways(getNumberOfRunways());
+
+  startTime = getCurrentTime();
 
   runSimulation();
 }
