@@ -548,7 +548,7 @@ function getNumberOfRunways(){
 // list[i] = true of the runway is operational false otherwise
 // output ex: if the total number of runways is 6 then the output is for example = [true, false, true, true, true, false] -> sooo, both the second and last runway are offline 
 function getRunwaysStatus(){
-  return [true, false, true]
+  return [true, true, true, true, true, true, true, true, true]
 }
 
 // returns a list where list[i] value represents the runway_i Mode
@@ -557,5 +557,6 @@ function getRunwaysStatus(){
 // list[i] =  1 -> the runway is for Arrival only
 // output ex: if the total number of runways is 6 then the output is for example = [1, 0, -1, 1, 0, 1] 
 function getRunwaysMods(){
-  return [1,1,-1,1,0,1]
+
+  return [1,1,-1,1,0,1,1,1,1]
 }
