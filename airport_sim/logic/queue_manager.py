@@ -38,7 +38,10 @@ class QueueController:
 
     def enqueue(self, p: Plane):
         # Adds plane to queue
-        self.plane_queue.append(p)
+        if(p.emergency_status != EmergencyStatus.NONE): 
+            self.planeEmergency(p)
+        else:
+            self.plane_queue.append(p)
 
         # Assigns holding queue entry time to plane object and increments current queue size
         p.entered_hold = self.sim.getSimulationTime()
@@ -50,12 +53,14 @@ class QueueController:
     # Then checks if the plane is over the user specified cancellation time, then cancel
     def checkCancelTime(self):
         if not self.is_departure and self.plane_queue[0].emergency_status != EmergencyStatus.NONE and self.plane_queue[0].emergency_time_left <= 0:
+            self.plane_queue[0].cancel()
             self.plane_queue.pop(0)
 
         for plane in self.plane_queue:
-            pass
-            # SimulationController.cancellation_time
-            # Needs to keep of current time (the 'now')]
+            if (self.sim.getSimulationTime() - plane.entered_hold > self.sim.cancellation_time):
+                plane.cancel()
+                self.plane_queue.remove(plane)
+
 
 
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
