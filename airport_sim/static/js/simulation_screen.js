@@ -2,10 +2,43 @@
 // big simulation sittings
 const FPS = 1;
 let startTime = 0;
+fetch('/start', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    runways: 9,
+    inbound_flow: 30,
+    outbound_flow: 30,
+    departure_runways: 3,
+    landing_runways: 3,
+    mixed_runways: 3,
+    cancellation_time: 30
+  })
+})
+.then(response => response.json())
+.then(data => {
+  if (data.success) {
+    console.log('Simulation started successfully');
+    createRunways(numberOfRunways);
+    startSimulation();
+  } else {
+    console.error('Failed to start simulation:', data.errors);
+  }
+})
+.catch(error => console.error('Error starting simulation:', error));
+
+
+// big simulation sittings
+const FPS = 1;
+let simulationTick = 0; // tracks how many ticks have passed
+const TICK_MINUTES = 5; // minutes per tick, must match backend
 
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
+const numberOfRunways = 9; // must match runways value sent to /start
 
 // planes sittings
 const planeSpawnSlideDuration = 1 / FPS; //in sec
@@ -28,7 +61,7 @@ window.addEventListener("resize", resizeWindoUpdate);
 // TEST :::::::::::::::::::::::::::::::::::::::::::::::::
 
 
-startSimulation();
+// startSimulation() is now called after the /start fetch completes (see above)
 
 
 // ________________________________________________________________________________________________________
@@ -51,42 +84,13 @@ class Aircraft{
 // ________________________________________________________________________________________________________
 // Function Difinitions Section:
 // ________________________________________________________________________________________________________
-function startSimulation(){
-
-  // start simulation in the back-end by calling start_sim() in app.py
-  fetch('/start', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      runways: 1,
-      inbound_flow: 1,
-      outbound_flow: 1,
-      departure_runways: 1,
-      landing_runways: 1,
-      mixed_runways: 1,
-      cancellation_time: 1
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-  //  createRunways(data.runways);
-  });
-
-  createRunways(getNumberOfRunways());
-
-  startTime = getCurrentTime();
-
-  runSimulation();
-}
-
-function runSimulation(){
+async function startSimulation(){
   // ask the back-end to calculate frame
-  goToNextFrame();
+  await goToNextFrame();
+  simulationTick++;
 
   // visualize current frame
-  simulateFrame();
+  await simulateFrame();
 
   
   if(!stopSimulationCheck()){
@@ -95,9 +99,9 @@ function runSimulation(){
   }
 }
 
-function simulateFrame() {
+async function simulateFrame() {
 
-  const currentFrameActions = getCurrentFrameActions();
+  let currentFrameActions = await getCurrentFrameActions();
 
   // for every plane that did something in current frame
   for(let i = 0; i<currentFrameActions.length; i++){
@@ -385,17 +389,15 @@ function killPlane(planeID){
 function updateTimer(){
 
   const timer = document.querySelector(".timer");
-  // const timer = document.getElementsByName('timer');
 
-  let numOfMinutes = Math.floor((getCurrentTime() - startTime) / 60000);
+  // Calculate elapsed simulated time from tick count
+  let totalMinutes = simulationTick * TICK_MINUTES;
 
-  let totalHours = Math.floor(numOfMinutes / 60);
+  let totalHours = Math.floor(totalMinutes / 60);
+  let numOfMinutes = totalMinutes % 60;
 
   let totalDays = Math.floor(totalHours / 24);
-
-  numOfMinutes %= 60;
-
-  totalHours %= 24;
+  totalHours = totalHours % 24;
 
   if(totalHours < 10) totalHours = '0'+totalHours;
   else totalHours = ''+totalHours;
@@ -500,15 +502,16 @@ function getCurrentTime(){
 
 // tells the back-end to calculate the next frame.
 // i don't know if this function is needed or not
-function goToNextFrame(){
-    fetch('/api/next-frame', { method: 'POST' })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                console.log('Frame advanced');
-            }
-        })
-        .catch(error => console.error('Error advancing frame:', error));
+async function goToNextFrame(){
+    try {
+        const response = await fetch('/api/next-frame', { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+            console.log('Frame advanced');
+        }
+    } catch (error) {
+        console.error('Error advancing frame:', error);
+    }
 }
 
 function getAircraft(planeCallSign){

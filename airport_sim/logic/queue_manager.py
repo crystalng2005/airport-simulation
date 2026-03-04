@@ -29,7 +29,7 @@ class QueueController:
                 currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                 # Assigns the holding queue exit time to the plane object
                 removed.left_hold = self.sim.getSimulationTime()
-                delay = datetime.total_seconds(removed.left_hold - removed.entered_hold)
+                delay = removed.left_hold - removed.entered_hold
             
                 # Adds the delay time to the report and decrements current queue size
                 RD.reportData.arrival_delay_times.append(delay)
