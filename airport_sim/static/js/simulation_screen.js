@@ -6,7 +6,6 @@ const FPS = 1;
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
-const numberOfRunways = 5; // const numberOfRunways = getNumberOfRunways();
 
 // planes sittings
 const planeSpawnSlideDuration = 1 / FPS; //in sec
@@ -28,33 +27,6 @@ window.addEventListener("resize", resizeWindoUpdate);
 
 // TEST :::::::::::::::::::::::::::::::::::::::::::::::::
 
-/*
-createRunways(numberOfRunways);
-
-updateTimer(0);
-
-for(let i =0 ;i<10;i++){
-  spawnPlane(i+10, false);
-  spawnPlane(i+20, true);
-}
-
-letPlaneHaveEmergency(14);
-letPlaneHaveEmergency(21);
-
-setTimeout(() => {
-
-  movePlaneToRunway(11,2);
-  movePlaneToRunway(21,1);
-
-}, 2*1000);
-
-setTimeout(() => {
-
-  killPlane(20);
-  killPlane(11);
-
-}, 2*1000 + 1000);
-*/
 
 startSimulation();
 
@@ -64,7 +36,6 @@ startSimulation();
 // ________________________________________________________________________________________________________
 class Aircraft{
   constructor(c,o,d,i,f,e,t,a,cu){
-    // this.id = ID;
     this.callsign = c;
     this.origin = o;
     this.destination = d;
@@ -100,8 +71,10 @@ function startSimulation(){
   })
   .then(response => response.json())
   .then(data => {
-   createRunways(data.runways);
+  //  createRunways(data.runways);
   });
+
+  createRunways(getNumberOfRunways());
 
   runSimulation();
 }
@@ -122,7 +95,7 @@ function runSimulation(){
 
 function simulateFrame() {
 
-  let currentFrameActions = getCurrentFrameActions();
+  const currentFrameActions = getCurrentFrameActions();
 
   // for every plane that did something in current frame
   for(let i = 0; i<currentFrameActions.length; i++){
@@ -152,7 +125,7 @@ function simulateFrame() {
       movePlaneToRunway(planeID, action);
   }
 
-  updateTimer();
+  // updateTimer();
 
 }
 
@@ -167,8 +140,9 @@ function resizeWindoUpdate() {
 }
 
 function createRunways(num) {
+
   const container = document.getElementById("container");
-  // const count = document.getElementById("runwayCount").value;
+  const runwaysModes = getRunwaysMods();
 
   // Clear previous runwayes
   container.innerHTML = "";
@@ -178,20 +152,35 @@ function createRunways(num) {
     runway.classList.add("runway");
     runway.id = 'runway:'+String(i + 1);
 
-    runway.style.border = runway_border_thinkness + 'px solid rgba(0, 0, 0, 1)';
-    runway.style.width = runway_size + 'px';
-    runway.style.height = runway_size + 'px';
+    // runway.style.border = runway_border_thinkness + 'px solid rgba(0, 0, 0, 1)';
+    // runway.style.width = runway_size + 'px';
+    // runway.style.height = runway_size + 'px';
 
     const runwayHat = document.createElement("div");
     runwayHat.classList.add("runway-hat");
-    runwayHat.style.width = (runway_size / 2) + 'px';
-    runwayHat.style.height = (runway_size / 2) + 'px';;
-    
 
 
     runway.appendChild(runwayHat);
 
     container.appendChild(runway);
+
+    runwayHat.style.width = (runway.getBoundingClientRect().width / 2) + 'px';
+    runwayHat.style.height = runwayHat.style.width;    
+
+    // if this runway accepts arrival
+    if(runwaysModes[i] >= 0){
+      const runwayHatBlue = document.createElement("div");
+      runwayHatBlue.classList.add("runway-hat-blue");    
+      runwayHat.appendChild(runwayHatBlue);
+    }
+
+    // if this runway accepts take-off
+    if(runwaysModes[i] <= 0){
+      const runwayHatRed = document.createElement("div");
+      runwayHatRed.classList.add("runway-hat-red");    
+      runwayHat.appendChild(runwayHatRed);
+    }
+
   }
 }
 
@@ -280,7 +269,7 @@ function movePlaneToRunway(planeID, runwayID){
   plane.style.margin = 0;
   plane.style.transform = 'none'; 
 
-  const shift = (runwayRect.width - planeRect.width)/4;
+  const shift = (runwayRect.width - planeRect.width)/2.5;
 
   // 6. Animate into runway final position (0,0)
   plane.animate(
@@ -520,18 +509,6 @@ function goToNextFrame(){
         .catch(error => console.error('Error advancing frame:', error));
 }
 
-function getNumberOfRunways(){
-  // .....
-}
-
-
-
-// return true if the simulation has ended
-function stopSimulationCheck(){
-  // .....
-  return true;
-}
-
 function getAircraft(planeCallSign){
     return fetch(`/api/aircraft/${planeCallSign}`)
         .then(response => response.json())
@@ -553,4 +530,32 @@ function getAircraft(planeCallSign){
             return null;
         })
         .catch(error => console.error('Error fetching aircraft:', error));
+}
+
+
+// return true if the simulation has ended
+function stopSimulationCheck(){
+  // .....
+  return true;
+}
+
+function getNumberOfRunways(){
+  // .....
+  return 9;
+}
+
+// returns a list of booleans where list[i] value represents the runway_i status
+// list[i] = true of the runway is operational false otherwise
+// output ex: if the total number of runways is 6 then the output is for example = [true, false, true, true, true, false] -> sooo, both the second and last runway are offline 
+function getRunwaysStatus(){
+  return [true, false, true]
+}
+
+// returns a list where list[i] value represents the runway_i Mode
+// list[i] = -1 -> the runway is for Take-off only
+// list[i] =  0 -> the runway is for Both Modes
+// list[i] =  1 -> the runway is for Arrival only
+// output ex: if the total number of runways is 6 then the output is for example = [1, 0, -1, 1, 0, 1] 
+function getRunwaysMods(){
+  return [1,1,-1,1,0,1]
 }
