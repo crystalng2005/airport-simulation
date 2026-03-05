@@ -4,7 +4,9 @@ from flask import Flask, render_template, request, jsonify, session
 from logic.simulation import SimulationController
 from logic.presets import PresetController
 from logic.visualisation import VisualisationController
-
+from logic.report import PerformanceReport
+from datetime import datetime
+import logic.globals.reportData as RD
 app = Flask(
     __name__,
     template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
@@ -81,6 +83,7 @@ def start_sim():
                 preset_saved = controller.preset_controller.savePreset()
                                 
             except Exception as preset_error:
+                print("error")
 
         return jsonify({'success': True, 'message': 'Simulation started'}), 200
 
