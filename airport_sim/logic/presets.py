@@ -62,8 +62,10 @@ class PresetController:
 
     # --- Preset functions ---
 
-    def savePreset(self) -> bool:
+    def savePreset(self):
         try:
+            print('savePreset called')
+            
             meta_data = self.load_meta()
             presets = meta_data.get("presets", [])
 
@@ -71,9 +73,9 @@ class PresetController:
             if unused:
                 preset_id = unused[0]["id"]
             else:
-                presets = [p for p in presets if p.get("last_saved") is not None]
-                presets.sort(key=lambda p: p["last_saved"])
-                preset_id = presets[0]["id"]
+                presets_with_time = [p for p in presets if p.get("last_saved") is not None]
+                presets_with_time.sort(key=lambda p: p["last_saved"])
+                preset_id = presets_with_time[0]["id"]
 
             now = datetime.now(timezone.utc).isoformat()
 
@@ -81,6 +83,11 @@ class PresetController:
                 return False
 
             self.report = RD.reportData
+            
+            report_dict = self.report.__dict__.copy()
+            
+            if 'start_time' in report_dict and hasattr(report_dict['start_time'], 'isoformat'):
+                report_dict['start_time'] = report_dict['start_time'].isoformat()
 
             preset = {
                 "saved_at": now,
@@ -90,7 +97,7 @@ class PresetController:
                     "mixed_runways": self.mixed_runways,
                 },
                 "planes": [plane.__dict__ for plane in self.plane_list],
-                "report": self.report.__dict__
+                "report": report_dict
             }
 
             with open(self.preset_files[preset_id], 'w') as f:
@@ -101,9 +108,13 @@ class PresetController:
                     p["last_saved"] = now
 
             self.save_meta(meta_data)
+            print('Preset saved successfully!')
             return True
 
-        except (IOError, IndexError, KeyError, TypeError):
+        except (IOError, IndexError, KeyError, TypeError) as e:
+            print(f'Error in savePreset: {e}')
+            import traceback
+            traceback.print_exc()
             return False
 
     def loadPreset(self, preset_id: int) -> bool:

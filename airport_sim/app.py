@@ -50,26 +50,37 @@ def start_sim():
         # Save this configuration as a preset if requested
         if data.get('save_as_preset', False):
             try:
+                
+                
                 # Set preset controller values
                 controller.preset_controller.departure_runways = int(data.get('departure_runways'))
                 controller.preset_controller.landing_runways = int(data.get('landing_runways'))
                 controller.preset_controller.mixed_runways = int(data.get('mixed_runways'))
-                controller.preset_controller.plane_list = []  # Empty initially
+                controller.preset_controller.plane_list = []
                 
-                # Create a basic report for the preset
-                import logic.globals.reportData as RD
+                
+                # Create report if it doesn't exist
+                if RD.reportData is None:
+                    start_time = datetime.now()
+                    
+                    RD.reportData = PerformanceReport(
+                        int(data.get('runways')),
+                        int(data.get('mixed_runways')),
+                        int(data.get('departure_runways')),
+                        int(data.get('landing_runways')),
+                        int(data.get('inbound_flow')),
+                        start_time
+                    )
+                    
+                else:
+                    print('Using existing RD.reportData')
+                
                 controller.preset_controller.report = RD.reportData
                 
                 # Save preset
                 preset_saved = controller.preset_controller.savePreset()
-                
-                if preset_saved:
-                    print('Configuration saved as preset')
-                else:
-                    print('Failed to save preset, but simulation will continue')
-                    
+                                
             except Exception as preset_error:
-                print(f'Error saving preset: {preset_error}')
 
         return jsonify({'success': True, 'message': 'Simulation started'}), 200
 
@@ -159,10 +170,12 @@ def presets_page():
 
 @app.route('/api/get-presets', methods=['GET'])
 def get_presets():
-    
+    """Get available presets for the presets page"""
     try:
+        print('🔍 /api/get-presets called')
         
         presets = controller.visualisation_controller.getAvailablePresets()
+        
         
         return jsonify({
             "success": True,
