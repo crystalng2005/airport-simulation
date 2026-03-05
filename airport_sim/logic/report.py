@@ -51,7 +51,6 @@ class PerformanceReport:
         
 
     def generateReport(self):
-        self.setFinishTime()
         self.efficiency = self.getEfficiency()
         
         self.max_wait = max(self.wait_times)

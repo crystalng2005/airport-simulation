@@ -143,12 +143,10 @@ class SimulationController:
 
         currentFrameActions.current_frame_actions = []
 
-        if self.simulation_finished:
-            return False
+
 
         if self.current_time >= self.end_time:
-            self.simulation_finished = True
-            return False
+            return self.endSimulation()
         
         self.current_time += self.tick_minutes # Time delta removed?
 
@@ -190,3 +188,15 @@ class SimulationController:
                 self.generatePlane(False)
 
         return True
+
+def endSimulation(self):
+    if self.simulation_finished:
+        return False
+
+    self.simulation_finished = True
+
+    RD.reportData.setFinishTime(self.current_time)
+
+    RD.reportData.generateReport()
+
+    return False
