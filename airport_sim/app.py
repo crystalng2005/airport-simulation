@@ -90,7 +90,7 @@ def start_sim():
 
 @app.route('/tick', methods=['POST'])
 def tick():
-    if not controller.is_available or controller.simulation is None:
+    if controller.is_available or controller.simulation is None:
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
     
     controller.simulation.update()

@@ -173,10 +173,12 @@ class Plane:
         return datetime.time(int(randHours), int(randMinutes), int(secs))
 
     def genActualTime(self):
-        actualSeconds = self.target_time.time().hour * 3600 + (self.target_time.time().minute) * 60 + self.target_time.time().second 
+        actualSeconds = self.target_time.hour * 3600 + self.target_time.minute * 60 + self.target_time.second 
         time = random.normal(actualSeconds, 5*60) 
         self.tickActualTime = random.normal(self.tickTargetTime, 1)
         timeSeconds = int(time)
+        # Clamp to valid range 0..86399
+        timeSeconds = max(0, min(timeSeconds, 86399))
         timeHours = timeSeconds // 3600
         remaining = timeSeconds % 3600
         timeMinutes = remaining // 60
