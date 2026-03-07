@@ -41,6 +41,10 @@ actual_time: datetime
 
 class Plane:
     plane_num = 0
+    # TODO: could store a list of references to the objects and then destroy them
+    # use Plane._instances.remove(self) for an object
+    # self.cleanup()
+    # self.__dict__.clear()
     
     def __init__(self, is_departure: bool):
         self.callsign = self.genCallsign()
@@ -62,6 +66,11 @@ class Plane:
         self.left_simulation = False
         Plane.plane_num += 1
         self.needsToBeRemoved = False
+        # User settings for emergency probabilities
+        self.user_setting = False
+        self.user_mechanical = 0
+        self.user_medical = 0
+        self.user_fuel = 0
 
     # ------- CONSTRUCTOR ------ #
     # dont need, can use the built in constructor
@@ -83,7 +92,6 @@ class Plane:
         }
         return data
 
-        return data
 
     # ------- PLANE GENERATION FUNCTIONS ------- #
     def genCallsign(self):
@@ -188,28 +196,38 @@ class Plane:
 
   
     def genEmergencyOnSpawn(self):
-        # offer chance to set with user input once json data available, placeholders for now
-        # Medical emergencies: https://pmc.ncbi.nlm.nih.gov/articles/PMC7125952/ 
-            # Diversion rate: 0.073, 1 emergency per 604 flights, rate per flight: 0.00012
-        # Fuel emergencies: (not a lot of data, but can use american):
-            # https://www.ishn.com/articles/107086-planes-run-out-of-fuel-more-often-than-you-think
-            # https://www.faa.gov/air_traffic/by_the_numbers
-            # 56 fuel accidents per year, 16191379 flights = 3.458*10^-6 = 0.000003458, but actual value may be higher
-            # This will just be for spawning in with the emergency
-        # Mechanical: https://www.aopa.org/training-and-safety/air-safety-institute/accident-analysis/richard-g-mcspadden-report/mcspadden-report-figure-view/?category=all&year=2023&condition=all&report=true
-            # 0.00004
+        mechanical_val = 1
+        fuel_val = 1
+        medical_val = 1
+        if not self.user_setting:
+            # offer chance to set with user input once json data available, placeholders for now
+            # Medical emergencies: https://pmc.ncbi.nlm.nih.gov/articles/PMC7125952/ 
+                # Diversion rate: 0.073, 1 emergency per 604 flights, rate per flight: 0.00012
+            # Fuel emergencies: (not a lot of data, but can use american):
+                # https://www.ishn.com/articles/107086-planes-run-out-of-fuel-more-often-than-you-think
+                # https://www.faa.gov/air_traffic/by_the_numbers
+                # 56 fuel accidents per year, 16191379 flights = 3.458*10^-6 = 0.000003458, but actual value may be higher
+                # This will just be for spawning in with the emergency
+            # Mechanical: https://www.aopa.org/training-and-safety/air-safety-institute/accident-analysis/richard-g-mcspadden-report/mcspadden-report-figure-view/?category=all&year=2023&condition=all&report=true
+                # 0.00004
+            
+            # Chances per flight (based on flight per year data)
+            medical_p = 0.00012
+            fuel_p = 0.000003458
+            mechanical_p = 0.00004
+            
+            # NOTE: System allows for only 1 emergency, so pick the highest priority one generated
+            
+            # Ordered in terms of priorities
+            mechanical_val = random.randint(1,int(1/mechanical_p))
+            fuel_val = random.randint(1,int(1/fuel_p))
+            medical_val = random.randint(1,int(1/medical_p))
 
-        # Chances per flight (based on flight per year data)
-        medical_p = 0.00012
-        fuel_p = 0.000003458
-        mechanical_p = 0.00004
-        
-        # NOTE: System allows for only 1 emergency, so pick the highest priority one generated
-        
-        # Ordered in terms of priorities
-        mechanical_val = random.randint(1,int(1/mechanical_p))
-        fuel_val = random.randint(1,int(1/fuel_p))
-        medical_val = random.randint(1,int(1/medical_p))
+        else:
+            mechanical_val = random.randint(1,int(1/self.user_mechanical))
+            fuel_val = random.randint(1,int(1/self.user_fuel))
+            medical_val = random.randint(1,int(1/self.user_medical))
+
 
         if mechanical_val == 1:
             return EmergencyStatus.MECHANICAL
@@ -219,6 +237,13 @@ class Plane:
             return EmergencyStatus.HEALTH
         else:
             return EmergencyStatus.NONE
+        
+    
+    def set_user_emergencies(self, mechanical, medical, fuel):
+        self.user_setting = True
+        self.user_mechanical = mechanical
+        self.user_medical = medical
+        self.user_fuel = fuel
 
 
 ## need to add to the plane class the emgency deciding
@@ -260,23 +285,39 @@ class Plane:
         self.left_simulation = True
         currentFrameActions.current_frame_actions.append([self.callsign, "kill"])
 
+
+
+    def hasEmergency(self):
+        return self.emergency_status
+
     # Call every tick, for every plane to both present chance of generating emergency and checking if a plane has one
     # Update this based on tick rate
-    def hasEmergency(self):
-        # 28.4 million flight hours a year =  28400000
-        # Mechanical: per 100,000 flight hours is 0.85 --> 0.0000085 per 60 minutes
-        # https://atag.org/facts-figures : 35.3 million flights per year
-        # Medical: 88000000 flight hours per year, 2.49 hours per flight, 0.00004819 per 60 mins
-        # Fuel : 0.000003458 per flight --> 0.000001388 per 60 mins
+    def updateEmergency(self):
+        if not self.user_setting:
+            # 28.4 million flight hours a year =  28400000
+            # Mechanical: per 100,000 flight hours is 0.85 --> 0.0000085 per 60 minutes
+            # https://atag.org/facts-figures : 35.3 million flights per year
+            # Medical: 88000000 flight hours per year, 2.49 hours per flight, 0.00004819 per 60 mins
+            # Fuel : 0.000003458 per flight --> 0.000001388 per 60 mins
 
-        mechanical_per_tick = 0.0000085/MINUTES_PER_TICK
-        medical_per_tick = 0.00004819/MINUTES_PER_TICK
-        #fuel_per_tick = 0.000001388/MINUTES_PER_TICK
+            mechanical_per_tick = 0.0000085/MINUTES_PER_TICK
+            medical_per_tick = 0.00004819/MINUTES_PER_TICK
+            #fuel_per_tick = 0.000001388/MINUTES_PER_TICK
 
-        # Ordered in terms of priorities
-        mechanical_val = random.randint(1,int(1/mechanical_per_tick))
-        #fuel_val = random.randint(1,int(1/fuel_per_tick))
-        medical_val = random.randint(1,int(1/medical_per_tick))
+            # Ordered in terms of priorities
+            mechanical_val = random.randint(1,int(1/mechanical_per_tick))
+            #fuel_val = random.randint(1,int(1/fuel_per_tick))
+            medical_val = random.randint(1,int(1/medical_per_tick))
+        else:
+            mechanical_per_tick = self.user_mechanical/MINUTES_PER_TICK
+            medical_per_tick = self.user_medical/MINUTES_PER_TICK
+            #fuel_per_tick = 0.000001388/MINUTES_PER_TICK
+
+            mechanical_val = random.randint(1,int(1/mechanical_per_tick))
+            #fuel_val = random.randint(1,int(1/fuel_per_tick))
+            medical_val = random.randint(1,int(1/medical_per_tick))
+
+        
         if self.emergency_status == EmergencyStatus.NONE:
             if mechanical_val == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
@@ -287,5 +328,8 @@ class Plane:
                     self.emergency_status = EmergencyStatus.FUEL
             
         return self.emergency_status
+
+
+    
 
 

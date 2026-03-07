@@ -546,6 +546,8 @@ function stopSimulationCheck(){
 
 function getNumberOfRunways(){
   // .....
+  // can also access directly from simulation controller
+  // call get_runway_num from simulation controller
   return 9;
 }
 
@@ -553,6 +555,7 @@ function getNumberOfRunways(){
 // list[i] = true of the runway is operational false otherwise
 // output ex: if the total number of runways is 6 then the output is for example = [true, false, true, true, true, false] -> sooo, both the second and last runway are offline 
 function getRunwaysStatus(){
+  // call get_runway_statuses from the simulation controller class on the simulation object
   return [true, true, true, true, true, true, true, true, true]
 }
 
@@ -562,6 +565,6 @@ function getRunwaysStatus(){
 // list[i] =  1 -> the runway is for Arrival only
 // output ex: if the total number of runways is 6 then the output is for example = [1, 0, -1, 1, 0, 1] 
 function getRunwaysMods(){
-
+  // call get_runway_modes from simulation controller
   return [1,1,-1,1,0,1,1,1,1]
 }

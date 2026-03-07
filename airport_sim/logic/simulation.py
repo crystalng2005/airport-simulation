@@ -33,6 +33,7 @@ class SimulationController:
         self.departure_runways = departure_runways
         self.landing_runways = landing_runways
         self.mixed_runways = mixed_runways
+        self.all_runways = []
 
         self.cancellation_time = cancellation_time
         self.current_time = datetime(2000, 1, 1, 0, 0)
@@ -121,20 +122,48 @@ class SimulationController:
         self.departure_list = []
         runway_num = 1
         for i in range(self.departure_runways):
-            self.departure_list.append(Runway(True, False, runway_num, True, True))
+            runway = Runway(True, False, runway_num, True, True)
+            self.departure_list.append(runway)
+            self.all_runways.append(runway)
             runway_num += 1
 
         for i in range(self.landing_runways):
-            self.landing_list.append(Runway(False, False, runway_num, True, True))
+            runway = Runway(False, False, runway_num, True, True)
+            self.landing_list.append(runway)
+            self.all_runways.append(runway)
             runway_num += 1
         
         for i in range(self.mixed_runways):
             temp = Runway(True, True, runway_num, True, True)
             self.landing_list.append(temp)
             self.departure_list.append(temp)
+            self.all_runways.append(temp)
             runway_num += 1
         return True
+    
+    def get_runway_statuses(self):
+        statuses = []
+        for runway in self.all_runways:
+            statuses.append(runway.checkStatus())
 
+        return statuses
+    
+
+    def get_runway_modes(self):
+        modes = []
+        for runway in self.all_runways:
+            if runway.mixed_mode:
+                modes.append(0)
+            else:
+                if runway.is_departure:
+                    modes.append(-1)
+                else:
+                    modes.append(1)
+
+        return modes
+    
+    def get_runway_num(self):
+        return self.total_runways
 
     def update(self) -> bool:
         # tick_minutes controls how much simulated time passes each frame.
