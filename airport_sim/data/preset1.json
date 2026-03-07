@@ -1,5 +1,5 @@
 {
-    "saved_at": "2026-03-07T22:28:11.925920+00:00",
+    "saved_at": "2026-03-07T22:54:55.454708+00:00",
     "vars": {
         "departure_runways": 2,
         "landing_runways": 2,
@@ -11,7 +11,7 @@
         "runways_mixed": 1,
         "runways_departure": 2,
         "runways_landing": 2,
-        "landings_per_hour": 20,
+        "landings_per_hour": 10,
         "start_time": "2000-01-01T00:00:00",
         "diversions": 0,
         "cancellations": 0,

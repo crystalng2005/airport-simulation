@@ -3,6 +3,7 @@ from logic.models import Runway
 from logic.plane import Plane
 from logic.results import ResultsController
 from logic.presets import PresetController
+import logic.globals.reportData as RD
 import os
 
 class VisualisationController:
@@ -83,6 +84,15 @@ class VisualisationController:
             temp += 1
             planes.append(p.return_data())
 
+        report_dict = {}
+        if self.preset_controller.report:
+            try:
+                report_dict = self.preset_controller.report.outputReport_dict()
+            except Exception:
+                report_dict = self.preset_controller.report.__dict__
+        elif RD.reportData:
+            report_dict = RD.reportData.__dict__.copy()
+
         return {
             "id": id,
             "vars":{
@@ -91,5 +101,5 @@ class VisualisationController:
                 "mixed_runways": self.preset_controller.mixed_runways,
             },
             "planes": planes,
-            "report": self.preset_controller.report.outputReport_dict()
+            "report": report_dict
         }
