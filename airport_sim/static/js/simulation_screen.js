@@ -1,44 +1,31 @@
 
 // big simulation sittings
 const FPS = 1;
-let startTime = 0;
-fetch('/start', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    runways: 9,
-    inbound_flow: 30,
-    outbound_flow: 30,
-    departure_runways: 3,
-    landing_runways: 3,
-    mixed_runways: 3,
-    cancellation_time: 30
-  })
-})
-.then(response => response.json())
-.then(data => {
-  if (data.success) {
-    console.log('Simulation started successfully');
-    createRunways(numberOfRunways);
-    startSimulation();
-  } else {
-    console.error('Failed to start simulation:', data.errors);
-  }
-})
-.catch(error => console.error('Error starting simulation:', error));
-
-
-// big simulation sittings
-const FPS = 1;
-let simulationTick = 0; // tracks how many ticks have passed
+let simulationTick = 0;
 const TICK_MINUTES = 5; // minutes per tick, must match backend
+
+// Simulation is already started by configure_simulation.js calling /start
+// Just initialize the screen and begin the loop
+(async function init() {
+  try {
+    // Get runway count from the already-running simulation
+    const res = await fetch('/api/number-of-runways');
+    const data = await res.json();
+    if (data.success) {
+      numberOfRunways = data.number;
+    }
+    await createRunways(numberOfRunways);
+    startSimulation();
+  } catch (error) {
+    console.error('Error initializing simulation screen:', error);
+  }
+})();
+
 
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
-const numberOfRunways = 9; // must match runways value sent to /start
+let numberOfRunways = 9; // will be updated from backend
 
 // planes sittings
 const planeSpawnSlideDuration = 1 / FPS; //in sec
@@ -60,6 +47,33 @@ window.addEventListener("resize", resizeWindoUpdate);
 
 // TEST :::::::::::::::::::::::::::::::::::::::::::::::::
 
+/*
+createRunways(numberOfRunways);
+
+updateTimer(0);
+
+for(let i =0 ;i<10;i++){
+  spawnPlane(i+10, false);
+  spawnPlane(i+20, true);
+}
+
+letPlaneHaveEmergency(14);
+letPlaneHaveEmergency(21);
+
+setTimeout(() => {
+
+  movePlaneToRunway(11,2);
+  movePlaneToRunway(21,1);
+
+}, 2*1000);
+
+setTimeout(() => {
+
+  killPlane(20);
+  killPlane(11);
+
+}, 2*1000 + 1000);
+*/
 
 // startSimulation() is now called after the /start fetch completes (see above)
 
@@ -69,6 +83,7 @@ window.addEventListener("resize", resizeWindoUpdate);
 // ________________________________________________________________________________________________________
 class Aircraft{
   constructor(c,o,d,i,f,e,t,a,cu){
+    // this.id = ID;
     this.callsign = c;
     this.origin = o;
     this.destination = d;
@@ -93,9 +108,9 @@ async function startSimulation(){
   await simulateFrame();
 
   
-  if(!stopSimulationCheck()){
+  if(!(await stopSimulationCheck())){
     // go to next frame after waiting for 1/FPS seconds
-    setTimeout(runSimulation,1000/FPS);
+    setTimeout(startSimulation,1000/FPS);
   }
 }
 
@@ -131,7 +146,7 @@ async function simulateFrame() {
       movePlaneToRunway(planeID, action);
   }
 
-  // updateTimer();
+  updateTimer();
 
 }
 
@@ -145,10 +160,10 @@ function resizeWindoUpdate() {
 
 }
 
-function createRunways(num) {
+async function createRunways(num) {
 
   const container = document.getElementById("container");
-  const runwaysModes = getRunwaysMods();
+  const runwaysModes = await getRunwaysMode();
 
   // Clear previous runwayes
   container.innerHTML = "";
@@ -158,35 +173,20 @@ function createRunways(num) {
     runway.classList.add("runway");
     runway.id = 'runway:'+String(i + 1);
 
-    // runway.style.border = runway_border_thinkness + 'px solid rgba(0, 0, 0, 1)';
-    // runway.style.width = runway_size + 'px';
-    // runway.style.height = runway_size + 'px';
+    runway.style.border = runway_border_thinkness + 'px solid rgba(0, 0, 0, 1)';
+    runway.style.width = runway_size + 'px';
+    runway.style.height = runway_size + 'px';
 
     const runwayHat = document.createElement("div");
     runwayHat.classList.add("runway-hat");
+    runwayHat.style.width = (runway_size / 2) + 'px';
+    runwayHat.style.height = (runway_size / 2) + 'px';;
+    
 
 
     runway.appendChild(runwayHat);
 
     container.appendChild(runway);
-
-    runwayHat.style.width = (runway.getBoundingClientRect().width / 2) + 'px';
-    runwayHat.style.height = runwayHat.style.width;    
-
-    // if this runway accepts arrival
-    if(runwaysModes[i] >= 0){
-      const runwayHatBlue = document.createElement("div");
-      runwayHatBlue.classList.add("runway-hat-blue");    
-      runwayHat.appendChild(runwayHatBlue);
-    }
-
-    // if this runway accepts take-off
-    if(runwaysModes[i] <= 0){
-      const runwayHatRed = document.createElement("div");
-      runwayHatRed.classList.add("runway-hat-red");    
-      runwayHat.appendChild(runwayHatRed);
-    }
-
   }
 }
 
@@ -275,7 +275,7 @@ function movePlaneToRunway(planeID, runwayID){
   plane.style.margin = 0;
   plane.style.transform = 'none'; 
 
-  const shift = (runwayRect.width - planeRect.width)/2.5;
+  const shift = (runwayRect.width - planeRect.width)/4;
 
   // 6. Animate into runway final position (0,0)
   plane.animate(
@@ -539,16 +539,34 @@ function getAircraft(planeCallSign){
 
 
 // return true if the simulation has ended
-function stopSimulationCheck(){
-  // .....
-  return true;
+async function stopSimulationCheck(){
+  try {
+    const response = await fetch('/api/simulation-finished');
+    const data = await response.json();
+    if (data.success) {
+      return data.finished;
+    }
+  } catch (error) {
+    console.error('Error checking simulation status:', error);
+  }
+  return false;
 }
 
 function getNumberOfRunways(){
-  // .....
   // can also access directly from simulation controller
   // call get_runway_num from simulation controller
-  return 9;
+    return fetch('/api/number-of-runways')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.number;
+            }
+            throw new Error('Failed to get number of runways');
+        })
+        .catch(error => {
+            console.error('Error fetching number of runways:', error);
+            return null;
+        });
 }
 
 // returns a list of booleans where list[i] value represents the runway_i status
@@ -556,7 +574,20 @@ function getNumberOfRunways(){
 // output ex: if the total number of runways is 6 then the output is for example = [true, false, true, true, true, false] -> sooo, both the second and last runway are offline 
 function getRunwaysStatus(){
   // call get_runway_statuses from the simulation controller class on the simulation object
-  return [true, true, true, true, true, true, true, true, true]
+
+    return fetch('/api/runway-statuses')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.status;
+            }
+            throw new Error('Failed to get runway statuses');
+        })
+        .catch(error => {
+            console.error('Error fetching statuses:', error);
+            return null;
+        });
+  // return [true, true, true, true, true, true, true, true, true]
 }
 
 // returns a list where list[i] value represents the runway_i Mode
@@ -564,7 +595,19 @@ function getRunwaysStatus(){
 // list[i] =  0 -> the runway is for Both Modes
 // list[i] =  1 -> the runway is for Arrival only
 // output ex: if the total number of runways is 6 then the output is for example = [1, 0, -1, 1, 0, 1] 
-function getRunwaysMods(){
+function getRunwaysMode(){
   // call get_runway_modes from simulation controller
-  return [1,1,-1,1,0,1,1,1,1]
+    return fetch('/api/runway-modes')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.mode;
+            }
+            throw new Error('Failed to get runway modes');
+        })
+        .catch(error => {
+            console.error('Error fetching modes:', error);
+            return null;
+        });
+  // return [1,1,-1,1,0,1,1,1,1]
 }

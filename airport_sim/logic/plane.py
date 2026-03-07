@@ -52,6 +52,11 @@ class Plane:
         self.destination = self.genDestination()
         self.is_departure = is_departure
         self.fuel_level = self.genFuel()
+        # User settings for emergency probabilities (must be set before genEmergencyOnSpawn)
+        self.user_setting = False
+        self.user_mechanical = 0
+        self.user_medical = 0
+        self.user_fuel = 0
         self.emergency_status = self.genEmergencyOnSpawn()
         self.target_time = self.genTargetTime()
         self.actual_time = self.genActualTime()
@@ -66,11 +71,6 @@ class Plane:
         self.left_simulation = False
         Plane.plane_num += 1
         self.needsToBeRemoved = False
-        # User settings for emergency probabilities
-        self.user_setting = False
-        self.user_mechanical = 0
-        self.user_medical = 0
-        self.user_fuel = 0
 
     # ------- CONSTRUCTOR ------ #
     # dont need, can use the built in constructor

@@ -120,6 +120,7 @@ class SimulationController:
     def generateRunway(self) -> bool:
         self.landing_list = []
         self.departure_list = []
+        self.all_runways = []
         runway_num = 1
         for i in range(self.departure_runways):
             runway = Runway(True, False, runway_num, True, True)
@@ -164,6 +165,15 @@ class SimulationController:
     
     def get_runway_num(self):
         return self.total_runways
+    
+    def end_simulation(self):
+        if self.simulation_finished:
+            return False
+
+        self.simulation_finished = True
+        RD.reportData.setFinishTime(self.current_time)
+        RD.reportData.generateReport()
+        return False
 
     def update(self) -> bool:
         # tick_minutes controls how much simulated time passes each frame.
@@ -175,9 +185,9 @@ class SimulationController:
 
 
         if self.current_time >= self.end_time:
-            return self.endSimulation()
+            return self.end_simulation()
         
-        self.current_time += self.tick_minutes # Time delta removed?
+        self.current_time += timedelta(minutes=self.tick_minutes)
 
         # Process existing queue first — assign waiting planes to available runways
         self.departure_queue.checkRunways()
@@ -217,15 +227,3 @@ class SimulationController:
                 self.generatePlane(False)
 
         return True
-
-def endSimulation(self):
-    if self.simulation_finished:
-        return False
-
-    self.simulation_finished = True
-
-    RD.reportData.setFinishTime(self.current_time)
-
-    RD.reportData.generateReport()
-
-    return False

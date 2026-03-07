@@ -53,20 +53,20 @@ class PerformanceReport:
     def generateReport(self):
         self.efficiency = self.getEfficiency()
         
-        self.max_wait = max(self.wait_times)
-        self.max_hold = max(self.hold_times)
-        self.max_take_off = max(self.take_off_delays)
-        self.max_arrival = max(self.arrival_delay_times)
+        self.max_wait = max(self.wait_times) if self.wait_times else 0
+        self.max_hold = max(self.hold_times) if self.hold_times else 0
+        self.max_take_off = max(self.take_off_delays) if self.take_off_delays else 0
+        self.max_arrival = max(self.arrival_delay_times) if self.arrival_delay_times else 0
 
-        self.mean_wait = statistics.mean(self.wait_times)
-        self.mean_hold = statistics.mean(self.hold_times)
-        self.mean_take_off = statistics.mean(self.take_off_delays)
-        self.mean_arrival = statistics.mean(self.arrival_delay_times)
+        self.mean_wait = statistics.mean(self.wait_times) if self.wait_times else 0
+        self.mean_hold = statistics.mean(self.hold_times) if self.hold_times else 0
+        self.mean_take_off = statistics.mean(self.take_off_delays) if self.take_off_delays else 0
+        self.mean_arrival = statistics.mean(self.arrival_delay_times) if self.arrival_delay_times else 0
 
-        self.std_wait = statistics.stdev(self.wait_times)
-        self.std_hold = statistics.stdev(self.hold_times)
-        self.std_take_off = statistics.stdev(self.take_off_delays)
-        self.std_arrival = statistics.stdev(self.arrival_delay_times)
+        self.std_wait = statistics.stdev(self.wait_times) if len(self.wait_times) >= 2 else 0
+        self.std_hold = statistics.stdev(self.hold_times) if len(self.hold_times) >= 2 else 0
+        self.std_take_off = statistics.stdev(self.take_off_delays) if len(self.take_off_delays) >= 2 else 0
+        self.std_arrival = statistics.stdev(self.arrival_delay_times) if len(self.arrival_delay_times) >= 2 else 0
 
         self.fuel_avg = 0
         if self.total_planes > 0:

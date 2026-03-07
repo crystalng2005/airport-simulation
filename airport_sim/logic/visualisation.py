@@ -7,8 +7,8 @@ import os
 
 class VisualisationController:
     def __init__(self, tickspeed: int = 5): # Tickspeed is 5 minutes by default
-        self.tickspeed = tickspeed,
-        self.preset_controller = PresetController(),
+        self.tickspeed = tickspeed
+        self.preset_controller = PresetController()
         self.results_controller = ResultsController()
 
     def getAllSimulationResults(self):
