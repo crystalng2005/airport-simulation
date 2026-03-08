@@ -104,6 +104,7 @@ class VisualisationController:
             "report": report_dict
         }
 
+
     # def getAircraftData(self, simulation):
     #     if simulation is None:
     #         return []
