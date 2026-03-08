@@ -363,18 +363,12 @@ def get_runway_modes():
 
 @app.route('/api/report', methods=['GET'])
 def get_report():
-    if not controller.visualisation_controller.hasSimulation():
-        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-
-    report = controller.visualisation_controller.getCurrentSimulationReport()
-    if report is None:
-        return jsonify({'success': False, 'errors': ['Simulation not finished yet']}), 400
-
-    return jsonify({
-        'success': True,
-        'report': report
-    }), 200
-
+    if controller.visualisation_controller.hasSimulation():
+        report = controller.visualisation_controller.getCurrentSimulationReport()
+        if report is None:
+            return jsonify({'success': False, 'error': 'Report not ready'})
+        return jsonify({'success': True, 'report': report})
+    return jsonify({'success': False, 'error': 'No active simulation'})
 
 
     
