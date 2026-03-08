@@ -7,7 +7,30 @@ from logic.presets import PresetController
 
 
 
+class ResultsSummary:
+    def __init__(self, reports: list[PerformanceReport]):
+        self.reports = reports 
+        self.summarised = False
 
+
+    def summariseAll(self):
+        self.runways = []
+        self.landings_per_hour = []
+        self.diversions = []
+        self.cancellations = []
+
+
+        for report in self.reports:
+            self.runways.append(report.runway_amount)
+            self.landings_per_hour.append(report.landings_per_hour)
+            self.diversions.append(report.diversions)
+            self.cancellations.append(report.cancellations)
+
+        self.summarised = True
+
+
+
+    
 
 
 
@@ -22,7 +45,7 @@ from logic.presets import PresetController
     # would it be good to somehow include the runway splits too?
     # should i make a summary text document for all the reports or not? would this be useful? graph easier to visualise
 
-def summariseAll(reports: list[PerformanceReport]):
+def plot_runways_diversions(reports: list[PerformanceReport]):
     runways = []
     landings_per_hour = []
     diversions = []
@@ -30,7 +53,6 @@ def summariseAll(reports: list[PerformanceReport]):
     diversions_per_runway = []
     avg_diversions_per_runway = []
 
-    
 
     for report in reports:
         runways.append(report.runway_amount)
@@ -65,11 +87,54 @@ def summariseAll(reports: list[PerformanceReport]):
     plt.title('Amount of runways and the average number of diversions')
     plt.xlabel('Amount of runways')
     plt.ylabel('Number of diversions')
-    plt.show()
+    #plt.show()
     plt.savefig(filename)
 
     
+def plot_runways_cancellations(reports: list[PerformanceReport]):
+    runways = []
+    landings_per_hour = []
+    diversions = []
+    cancellations = []
+    cancellations_per_runway = []
+    avg_cancellations_per_runway = []
 
+
+    for report in reports:
+        runways.append(report.runway_amount)
+        landings_per_hour.append(report.landings_per_hour)
+        diversions.append(report.diversions)
+        cancellations.append(report.cancellations)
+    
+    
+    for i in range(0, len(runways)):
+        if i == 0:
+            cancellations_per_runway.append([runways[i],[cancellations[i]]])
+        else:
+            for j in range(0, len(cancellations_per_runway)):
+                if cancellations_per_runway[j][0] == runways[i]:
+                    cancellations_per_runway[j][1].append(cancellations[i])
+    
+    cancellations_per_runway.sort(key = lambda entry: entry[0])
+
+    for i in range(0,len(cancellations_per_runway)):
+        avg_cancellations_per_runway[i][0] = cancellations_per_runway[i][0]
+        avg_cancellations_per_runway[i][1] = statistics.mean(cancellations_per_runway[i][1])
+
+
+    
+    location = Path("./")
+    filename = location / "runways_diversions.pdf"
+
+    x = np.array(runways)
+    y = np.array(avg_diversions_per_runway)
+
+    plt.plot(x, y, marker='o')
+    plt.title('Amount of runways and the average number of diversions')
+    plt.xlabel('Amount of runways')
+    plt.ylabel('Number of diversions')
+    #plt.show()
+    plt.savefig(filename)
 
     
     
