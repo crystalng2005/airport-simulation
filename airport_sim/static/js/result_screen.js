@@ -1,13 +1,12 @@
-
 let selectedSimulations = [];
 let currentReportId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadResults();
+    console.log('helloooo');
+
+
+    showReportModal(getReport());
 });
-
-
-
 
 
 async function getReport(){
@@ -87,19 +86,19 @@ function displayResults(result) {
 // Create table row - just display data from backend
 function createResultRow(result) {
     const row = document.createElement('tr');
-    row.dataset.simId = result.id;
+    // row.dataset.simId = result.id;
 
     // Format date for display
-    const date = new Date(result.completed_at);
-    const formattedDate = date.toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-    const formattedTime = date.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    // const date = new Date(result.completed_at);
+    // const formattedDate = date.toLocaleDateString('en-GB', {
+    //     year: 'numeric',
+    //     month: 'short',
+    //     day: 'numeric'
+    // });
+    // const formattedTime = date.toLocaleTimeString('en-GB', {
+    //     hour: '2-digit',
+    //     minute: '2-digit'
+    // });
 
     const report = result.report;
     const config = result.config;
@@ -107,16 +106,11 @@ function createResultRow(result) {
     row.innerHTML = `
         <td>
             <input type="checkbox" class="select-checkbox" 
-                   onchange="toggleSelection('${result.id}')" 
-                   id="checkbox-${result.id}">
         </td>
-        <td class="number">#${result.id}</td>
         <td>
             <div>${formattedDate}</div>
             <div style="font-size: 0.8rem; color: #64748b;">${formattedTime}</div>
         </td>
-        <td>${result.duration}</td>
-        <td class="number">${config.total_runways}</td>
         <td class="number">${report.total_planes}</td>
         <td class="${report.diversions > 0 ? 'highlight' : 'number'}">${report.diversions}</td>
         <td class="${report.cancellations > 0 ? 'highlight' : 'number'}">${report.cancellations}</td>
@@ -397,7 +391,10 @@ function showReportModal(report) {
             </div>
             <div class="metric-card">
                 <div class="metric-label">Total Fuel Used</div>
-                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>
+                <div class="metric-value">${0}</div>`
+                // <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>
+                +
+                `
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Wait Time</div>
