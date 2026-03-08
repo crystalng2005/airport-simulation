@@ -72,6 +72,8 @@ class PerformanceReport:
         if self.total_planes > 0:
             self.fuel_avg = self.tot_fuel_used / self.total_planes
 
+
+
     def string_duration(self):
         inSeconds = int(self.duration.total_seconds())
         hours, remainder = divmod(inSeconds, 3600)
