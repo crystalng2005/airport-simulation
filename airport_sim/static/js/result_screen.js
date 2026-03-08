@@ -398,7 +398,7 @@ function showReportModal(report) {
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Fuel/Plane</div>
-                <div class="metric-value">${report.avg_fuel_per_plane}</div>
+                <div class="metric-value">${report.avg_fuel_per_plane.toFixed(1)}</div>
             </div>
         </div>
     `;
