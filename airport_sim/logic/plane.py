@@ -285,7 +285,7 @@ class Plane:
             self.needsToBeRemoved = False
             self.exit_simulation()
         # Checks if the plane is cancelled (don't need to decrease if it is)
-        if not self.cancelled:
+        if not self.left_simulation:
             if not self.is_departure: self.fuel_level -= FUEL_USAGE_PER_TICK
             if self.emergency_status != EmergencyStatus.NONE: self.emergency_time_left -= FUEL_USAGE_PER_TICK
             if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK
