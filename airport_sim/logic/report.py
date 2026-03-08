@@ -174,7 +174,7 @@ class PerformanceReport:
     # Calculates the efficiency
     def getEfficiency(self):
         if self.total_planes > 0:
-            return ((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100)
+            return (round((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100))
         return 0
 
 

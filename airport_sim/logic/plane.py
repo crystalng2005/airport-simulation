@@ -191,7 +191,7 @@ class Plane:
         secs = remaining % 60
 
         # Gets the target time in ticks
-        self.tickTargetTime = math.ceil(randMinutes/5)
+        self.tickTargetTime = round(math.ceil(randMinutes/5))
 
         # Returns in datetime format, converted to int
         return datetime.time(int(randHours), int(randMinutes), int(secs))
@@ -204,7 +204,7 @@ class Plane:
         # Applies normal distribution (with standard deviation of 5 minutes (300s))
         time = random.normal(actualSeconds, 5*60) 
         # Applies the normal distribution on the tick time
-        self.tickActualTime = random.normal(self.tickTargetTime, 5/MINUTES_PER_TICK)
+        self.tickActualTime = round(random.normal(self.tickTargetTime, 5/MINUTES_PER_TICK))
 
         # Converts the new time back into datetime and returns
         timeSeconds = int(time)
