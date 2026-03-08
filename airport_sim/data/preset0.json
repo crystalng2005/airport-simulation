@@ -1,18 +1,16 @@
 {
-    "saved_at": "2026-03-08T13:03:24.138204+00:00",
-    "saved_at": "2026-03-08T13:18:20.707217+00:00",
+    "saved_at": "2026-03-08T14:01:19.338982+00:00",
     "vars": {
-        "departure_runways": 2,
+        "departure_runways": 7,
         "landing_runways": 2,
         "mixed_runways": 1
     },
     "planes": [],
     "report": {
-        "runway_total": 5,
+        "runway_total": 10,
         "runways_mixed": 1,
-        "runways_departure": 2,
+        "runways_departure": 7,
         "runways_landing": 2,
-        "landings_per_hour": 10,
         "landings_per_hour": 10,
         "start_time": "2000-01-01T00:00:00",
         "diversions": 0,
