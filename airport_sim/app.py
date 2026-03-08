@@ -386,6 +386,22 @@ def get_runway_modes():
         'mode': controller.simulation.get_runway_modes()
     }), 200
 
+@app.route('/api/report', methods=['GET'])
+def get_report():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+
+    if not controller.simulation.simulation_finished:
+        return jsonify({'success': False, 'errors': ['Simulation not finished yet']}), 400
+
+    if RD.reportData is None:
+        return jsonify({'success': False, 'errors': ['Report data not available']}), 500
+
+    return jsonify({
+        'success': True,
+        'report': RD.reportData.outputReport_dict()
+    }), 200
+
 
 
     

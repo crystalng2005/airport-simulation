@@ -111,6 +111,9 @@ async function startSimulation(){
   if(!(await stopSimulationCheck())){
     // go to next frame after waiting for 1/FPS seconds
     setTimeout(startSimulation,1000/FPS);
+  } else {
+    const report = await getReport();
+    showReport(report);
   }
 }
 
@@ -600,4 +603,42 @@ function getRunwaysMode(){
             return null;
         });
   // return [1,1,-1,1,0,1,1,1,1]
+}
+
+async function getReport(){
+  try {
+    const response = await fetch('/api/report');
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error('Failed to get report:', data.errors || data.error);
+      return null;
+    }
+
+    return data.report;
+  } catch (error) {
+    console.error('Error fetching report:', error);
+    return null;
+  }
+}
+
+function showReport(report){
+  if (!report) return;
+
+  // For Turki to change
+  const reportBox = document.querySelector('.report-container');
+  if (!reportBox) {
+    console.log('Final report:', report);
+    return;
+  }
+
+  reportBox.innerHTML = `
+    <h3>Simulation Report</h3>
+    <p>Total planes: ${report.total_planes}</p>
+    <p>Diversions: ${report.diversions}</p>
+    <p>Cancellations: ${report.cancellations}</p>
+    <p>Efficiency: ${report.efficiency}</p>
+    <p>Avg wait: ${report.avg_wait_time}</p>
+    <p>Max hold: ${report.max_hold_time}</p>
+  `;
 }
