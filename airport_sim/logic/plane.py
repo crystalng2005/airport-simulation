@@ -175,7 +175,7 @@ class Plane:
 
     # Generates fuel based on the uniform distribution between 20 and 60 minutes
     def genFuel(self):
-        fuel = random.uniform(20,60)
+        fuel = round(random.uniform(20,60))
         return fuel
 
 

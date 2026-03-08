@@ -90,6 +90,8 @@ class PresetController:
             for key, val in report_dict.items():
                 if hasattr(val, 'isoformat'):
                     report_dict[key] = val.isoformat()
+                elif hasattr(val, 'total_seconds'):
+                    report_dict[key] = val.total_seconds()
                 elif isinstance(val, list):
                     report_dict[key] = [
                         v.total_seconds() if hasattr(v, 'total_seconds') else v

@@ -205,10 +205,15 @@ class SimulationController:
     def end_simulation(self):
         if self.simulation_finished:
             return False
-
         self.simulation_finished = True
         RD.reportData.setFinishTime(self.current_time)
         RD.reportData.generateReport()
+        # Save preset with actual data
+        self.preset_controller.departure_runways = self.departure_runways
+        self.preset_controller.landing_runways = self.landing_runways
+        self.preset_controller.mixed_runways = self.mixed_runways
+        self.preset_controller.report = RD.reportData
+        self.preset_controller.savePreset()
         return False
 
 
