@@ -294,15 +294,17 @@ class Plane:
         return False
 
 
+
     # Directs a plane to the given runway
     def goToRunway(self, runway: int) -> bool:
-        if self.current_runway != runway:
-            self.current_runway = runway 
-            # Its now on a runway and will need to depart
-            self.needsToBeRemoved = True
-            return True 
-        else:
-            return False
+        if not self.left_simulation:
+            if self.current_runway != runway:
+                self.current_runway = runway 
+                # Its now on a runway and will need to depart
+                self.needsToBeRemoved = True
+                return True 
+            else:
+                return False
 
 
     # Cancels the plane and makes it leave the simulation
