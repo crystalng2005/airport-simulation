@@ -28,6 +28,19 @@ class VisualisationController:
         sim1 = self.results_controller.getOneResult(sim_id_1)
         sim2 = self.results_controller.getOneResult(sim_id_2)
 
+        if sim1 is None or sim2 is None:
+            return None
+
+        return {
+            "sim_1": sim1,
+            "sim_2": sim2,
+            "delta": {
+                "diversions": sim2["report"]["diversions"] - sim1["report"]["diversions"],
+                "cancellations": sim2["report"]["cancellations"] - sim1["report"]["cancellations"],
+                "efficiency": sim2["report"]["efficiency"] - sim1["report"]["efficiency"]
+            }
+        }
+
     def exportSimulationReport(self, sim_id):
         if self.results_controller.exportResults(sim_id):
             return os.path.dirname(__file__), '..', 'exports'

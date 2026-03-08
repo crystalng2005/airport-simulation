@@ -256,7 +256,7 @@ def get_full_report(sim_id):
         }), 500
 
 
-@app.route('/api/compare-simulations', methods=['POST'])
+@app.route('/api/compare-simulations', methods=['POST']) # Is this used anywhere?
 def compare_simulations():
    
     try:
