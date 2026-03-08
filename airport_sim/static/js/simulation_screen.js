@@ -83,8 +83,7 @@ async function startSimulation(){
     // go to next frame after waiting for 1/FPS seconds
     setTimeout(startSimulation,1000/FPS);
   } else {
-    const report = await getReport();
-    showReport(report);
+    window.location.href = '/result-screen'; 
   }
 }
 
