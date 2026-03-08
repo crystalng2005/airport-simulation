@@ -83,8 +83,7 @@ async function startSimulation(){
     // go to next frame after waiting for 1/FPS seconds
     setTimeout(startSimulation,1000/FPS);
   } else {
-    const report = await getReport();
-    showReport(report);
+    window.location.href = '/result-screen'; 
   }
 }
 
@@ -128,7 +127,7 @@ async function simulateFrame() {
   }
 
   updateTimer();
-  updateRunwaysStatus();
+  await updateRunwaysStatus();
 
 }
 
@@ -407,11 +406,16 @@ function letPlaneHaveEmergency(planeID){
   plane.style.background = planeEmergencyColor;
 }
 
-function updateRunwaysStatus(){
-  const runwayStatus = getRunwaysStatus();
+async function updateRunwaysStatus(){
+  const runwayStatus = await getRunwaysStatus();
+
+  if (!runwayStatus) {
+    return;
+  }
 
   for(let i = 0; i < numberOfRunways; i++){
     const runway = document.getElementById('runway:'+String(i + 1));
+    if (!runway) continue;
 
     if(runwayStatus[i])
       runway.style.border = "3px solid rgb(0, 0, 0)";
@@ -441,7 +445,7 @@ async function updateInfoScreenContent(planeID){
       <li>Origin: ${air.origin}</li>
       <li>Destination: ${air.destination}</li>
       <li>Is departure: ${air.is_departure}</li>
-      <li>Fuel level: ${air.fuel_level}</li>
+      <li>Fuel level: ${air.fuel_level.toFixed(1)}</li>
       <li>Emergency status: ${air.emergency_status}</li>
       <li>Target time: ${air.target_time}</li>
       <li>Actual time: ${air.actual_time}</li>
@@ -643,3 +647,9 @@ function showReport(report){
     <p>Max hold: ${report.max_hold_time}</p>
   `;
 }
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const report = await getReport();
+    showReport(report);
+    loadResults();
+});

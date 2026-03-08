@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Simulation Result - Airport Simulation</title>
+    <link rel="stylesheet" href="static/css/result_screen.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1> View Simulation Results</h1>
+            <!-- <p class="subtitle">View the result of performance metrics</p> -->
+        </header>
+
+        <!-- Main Content -->
+        <main class="results-section">
+            
+            <!-- Action Bar -->
+            <!-- <div class="action-bar">
+                <div class="info-section">
+                    <h2>Past Simulations (<span id="totalCount">0</span>)</h2>
+                    <p class="help-text">Select any simulation to view results, or select 2 to compare</p>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-compare" id="compareBtn" onclick="compareSelected()" disabled>
+                        Compare Selected (0/2)
+                    </button>
+                    <button class="btn btn-secondary" onclick="clearSelection()">
+                        Clear Selection
+                    </button>
+                </div>
+            </div> -->
+
+            <!-- Loading Indicator -->
+            <!-- <div id="loadingIndicator" class="loading">
+                <div class="spinner"></div>
+                <p>Loading simulation results...</p>
+            </div> -->
+
+            <!-- Results Table -->
+            <div id="resultsContainer" class="results-container" style="display: none;">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th width="50">Select</th>
+                            <th width="80">Sim #</th>
+                            <th width="150">Date & Time</th>
+                            <th width="100">Duration</th>
+                            <th width="80">Runways</th>
+                            <th width="100">Total Planes</th>
+                            <th width="90">Diversions</th>
+                            <th width="100">Cancellations</th>
+                            <th width="90">Max Queue</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <!-- Results will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- No Results Message -->
+            <!-- <div id="noResultsMessage" class="no-results" style="display: none;">
+                <div class="no-results-icon"></div>
+                <h3>No Simulation Results</h3>
+                <p>You haven't completed any simulations yet.</p>
+                <p>Run a simulation to see results here!</p>
+                <button class="btn btn-primary" onclick="goToMenu()">
+                    Back to Menu
+                </button>
+            </div> -->
+
+            <!-- Comparison Modal -->
+            <div id="comparisonModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Comparison Results</h2>
+                        <button class="close-btn" onclick="closeComparison()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="comparisonContent">
+                        <!-- Comparison will be inserted here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" onclick="closeComparison()">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View Report Modal -->
+            <div id="reportModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Simulation Report</h2>
+                        <button class="close-btn" onclick="closeReport()">&times;</button>
+                    </div>
+                    <div class="modal-body" id="reportContent">
+                        <!-- Report will be inserted here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-export" onclick="exportCurrentReport()">Export Report</button>
+                        <button class="btn btn-secondary" onclick="closeReport()">Close</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Back Button -->
+            <div class="back-button-container">
+                <button class="btn btn-secondary" onclick="goToMenu()">
+                    Back to Main Menu
+                </button>
+            </div>
+        </main>
+    </div>
+
+    <script src="static/js/result_screen.js"></script>
+</body>
+</html>

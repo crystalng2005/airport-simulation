@@ -3,6 +3,7 @@ from logic.models import Runway
 from logic.plane import Plane
 from logic.results import ResultsController
 from logic.presets import PresetController
+from logic.simulation import SimulationController
 import logic.globals.reportData as RD
 import os
 
@@ -11,6 +12,7 @@ class VisualisationController:
         self.tickspeed = tickspeed
         self.preset_controller = PresetController()
         self.results_controller = ResultsController()
+        self.active_simulation = None
 
     def getAllSimulationResults(self):
         return self.results_controller.getAllResults()
@@ -25,6 +27,19 @@ class VisualisationController:
     def compareSimulations(self, sim_id_1, sim_id_2):
         sim1 = self.results_controller.getOneResult(sim_id_1)
         sim2 = self.results_controller.getOneResult(sim_id_2)
+
+        if sim1 is None or sim2 is None:
+            return None
+
+        return {
+            "sim_1": sim1,
+            "sim_2": sim2,
+            "delta": {
+                "diversions": sim2["report"]["diversions"] - sim1["report"]["diversions"],
+                "cancellations": sim2["report"]["cancellations"] - sim1["report"]["cancellations"],
+                "efficiency": sim2["report"]["efficiency"] - sim1["report"]["efficiency"]
+            }
+        }
 
     def exportSimulationReport(self, sim_id):
         if self.results_controller.exportResults(sim_id):
@@ -105,14 +120,57 @@ class VisualisationController:
         }
 
 
-    # def getAircraftData(self, simulation):
-    #     if simulation is None:
-    #         return []
+    def startSimulation(self, data: dict):
+        self.active_simulation = SimulationController(
+            departures_per_hour=int(data.get('outbound_flow')),
+            landings_per_hour=int(data.get('inbound_flow')),
+            total_runways=int(data.get('runways')),
+            departure_runways=int(data.get('departure_runways')),
+            landing_runways=int(data.get('landing_runways')),
+            mixed_runways=int(data.get('mixed_runways')),
+            cancellation_time=int(data.get('cancellation_time')),
+            total_simulation_minutes=int(data.get('duration', 100)),
+            tick_minutes=5
+        )
+        return True
 
-    #     # Simulation stores live planes here by callsign.
-    #     aircraft = []
-    #     for plane in simulation.planes_by_call_sign.values():
-    #         if plane is not None:
-    #             aircraft.append(plane.return_data())
+    def hasSimulation(self):
+        return self.active_simulation is not None
 
-    #     return aircraft
+    def tick(self):
+        if not self.active_simulation:
+            return False
+        self.active_simulation.update()
+        return True
+
+    def getCurrentFrameActions(self):
+        return self.active_simulation.getCurrentFrameActions() if self.active_simulation else []
+
+    def getCurrentTime(self):
+        return self.active_simulation.getSimulationTime() if self.active_simulation else None
+
+    def getAircraftByCallSign(self, plane_call_sign: str):
+        if not self.active_simulation:
+            return None
+        return self.active_simulation.getAircraftByCallSign(plane_call_sign)
+
+    def getNumberOfRunways(self):
+        return self.active_simulation.get_runway_num() if self.active_simulation else 0
+
+    def getRunwayStatuses(self):
+        return self.active_simulation.get_runway_statuses() if self.active_simulation else []
+
+    def getRunwayModes(self):
+        return self.active_simulation.get_runway_modes() if self.active_simulation else []
+
+    def isSimulationFinished(self):
+        return self.active_simulation.simulation_finished if self.active_simulation else False
+
+    def getCurrentSimulationReport(self):
+        if not self.active_simulation:
+            return None
+        if not self.active_simulation.simulation_finished:
+            return None
+        if RD.reportData is None:
+            return None
+        return RD.reportData.outputReport_dict()
