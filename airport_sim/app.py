@@ -1,7 +1,6 @@
 # Flask Entry Point (MainController logic)
 import os
 from flask import Flask, render_template, request, jsonify, session
-from logic.simulation import SimulationController
 from logic.presets import PresetController
 from logic.visualisation import VisualisationController
 from logic.report import PerformanceReport
@@ -15,7 +14,6 @@ app = Flask(
 
 class MainController:
     def __init__(self):
-        self.simulation = None
         self.is_available = True
         self.preset_controller = PresetController()
         self.visualisation_controller = VisualisationController()
@@ -34,18 +32,7 @@ def index():
 def start_sim():
     try:
         data = request.get_json()
-
-        controller.simulation = SimulationController(
-            departures_per_hour=int(data.get('outbound_flow')),
-            landings_per_hour=int(data.get('inbound_flow')),
-            total_runways=int(data.get('runways')),
-            departure_runways=int(data.get('departure_runways')),
-            landing_runways=int(data.get('landing_runways')),
-            mixed_runways=int(data.get('mixed_runways')),
-            cancellation_time=int(data.get('cancellation_time')),
-            total_simulation_minutes=int(data.get('duration', 100)),
-            tick_minutes=5
-        )
+        controller.visualisation_controller.startSimulation(data)
 
         controller.is_available = False
 
@@ -93,10 +80,10 @@ def start_sim():
 
 @app.route('/tick', methods=['POST'])
 def tick():
-    if controller.is_available or controller.simulation is None:
+    if controller.is_available or not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
-    controller.simulation.update()
+
+    controller.visualisation_controller.tick()
     return jsonify({'success': True, 'message': 'Tick processed'}), 200
     
 # @app.route('/visualisation/data', methods=['GET'])
@@ -118,24 +105,24 @@ def configure_simulation_page():
 @app.route('/api/runway-count', methods=['GET'])
 def get_runway_count():
     """Get total number of runways in current simulation"""
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'error': 'No active simulation'}), 400
-    
+
     return jsonify({
         'success': True,
-        'count': controller.simulation.total_runways
+        'count': controller.visualisation_controller.getNumberOfRunways()
     }), 200
 
 
 @app.route('/api/simulation-finished', methods=['GET'])
 def is_simulation_finished():
     """Check if simulation has finished"""
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'error': 'No active simulation'}), 400
-    
+
     return jsonify({
         'success': True,
-        'finished': controller.simulation.simulation_finished
+        'finished': controller.visualisation_controller.isSimulationFinished()
     }), 200
 
 
@@ -208,7 +195,7 @@ def load_preset():
    
         preset_data = controller.visualisation_controller.getPresetData(preset_id)
         
-        if preset_data["success"]:
+        if preset_data and "vars" in preset_data:
             # Store in session
             session['preset_mode'] = True
             session['preset_id'] = preset_id
@@ -321,36 +308,36 @@ def export_report(sim_id):
     
 @app.route('/api/current-frame-actions', methods=['GET'])
 def get_current_frame_actions():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
     
-    actions = controller.simulation.getCurrentFrameActions()
+    actions = controller.visualisation_controller.getCurrentFrameActions()
     return jsonify({'success': True, 'actions': actions}), 200
 
 @app.route('/api/current-time', methods=['GET'])
 def get_current_time():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
+
     return jsonify({
-        'success': True, 
-        'time': controller.simulation.getSimulationTime()
+        'success': True,
+        'time': controller.visualisation_controller.getCurrentTime()
     }), 200
 
 @app.route('/api/next-frame', methods=['POST'])
 def next_frame():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
-    controller.simulation.update()
+
+    controller.visualisation_controller.tick()
     return jsonify({'success': True, 'message': 'Frame advanced'}), 200
 
 @app.route('/api/aircraft/<plane_call_sign>', methods=['GET'])
 def get_aircraft(plane_call_sign):
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
     
-    aircraft = controller.simulation.getAircraftByCallSign(plane_call_sign)
+    aircraft = controller.visualisation_controller.getAircraftByCallSign(plane_call_sign)
     if not aircraft:
         return jsonify({'success': False, 'errors': ['Aircraft not found']}), 404
     
@@ -358,48 +345,46 @@ def get_aircraft(plane_call_sign):
 
 @app.route('/api/number-of-runways', methods=['GET'])
 def get_number_of_runways():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
+
     return jsonify({
-        'success': True, 
-        'number': controller.simulation.get_runway_num()
+        'success': True,
+        'number': controller.visualisation_controller.getNumberOfRunways()
     }), 200
 
 @app.route('/api/runway-statuses', methods=['GET'])
 def get_runway_status():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
+
     return jsonify({
-        'success': True, 
-        'status': controller.simulation.get_runway_statuses()
+        'success': True,
+        'status': controller.visualisation_controller.getRunwayStatuses()
     }), 200
 
 @app.route('/api/runway-modes', methods=['GET'])
 def get_runway_modes():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
+
     return jsonify({
-        'success': True, 
-        'mode': controller.simulation.get_runway_modes()
+        'success': True,
+        'mode': controller.visualisation_controller.getRunwayModes()
     }), 200
 
 @app.route('/api/report', methods=['GET'])
 def get_report():
-    if not controller.simulation:
+    if not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
 
-    if not controller.simulation.simulation_finished:
+    report = controller.visualisation_controller.getCurrentSimulationReport()
+    if report is None:
         return jsonify({'success': False, 'errors': ['Simulation not finished yet']}), 400
-
-    if RD.reportData is None:
-        return jsonify({'success': False, 'errors': ['Report data not available']}), 500
 
     return jsonify({
         'success': True,
-        'report': RD.reportData.outputReport_dict()
+        'report': report
     }), 200
 
 

@@ -128,7 +128,7 @@ async function simulateFrame() {
   }
 
   updateTimer();
-  updateRunwaysStatus();
+  await updateRunwaysStatus();
 
 }
 
@@ -407,11 +407,16 @@ function letPlaneHaveEmergency(planeID){
   plane.style.background = planeEmergencyColor;
 }
 
-function updateRunwaysStatus(){
-  const runwayStatus = getRunwaysStatus();
+async function updateRunwaysStatus(){
+  const runwayStatus = await getRunwaysStatus();
+
+  if (!runwayStatus) {
+    return;
+  }
 
   for(let i = 0; i < numberOfRunways; i++){
     const runway = document.getElementById('runway:'+String(i + 1));
+    if (!runway) continue;
 
     if(runwayStatus[i])
       runway.style.border = "3px solid rgb(0, 0, 0)";
