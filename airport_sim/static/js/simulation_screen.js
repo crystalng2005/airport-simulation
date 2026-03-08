@@ -1,4 +1,3 @@
-
 // big simulation sittings
 const FPS = 1;
 let simulationTick = 0;
@@ -424,7 +423,6 @@ function updateRunwaysStatus(){
 // Unfinishe Function Difinitions Section:
 // ________________________________________________________________________________________________________
 
-// must finish getAircraft(planeID) first.
 async function updateInfoScreenContent(planeID){
   const planeInfoScreen = document.querySelector('.display-info-screen');
   const air = await getAircraft(planeID);
@@ -447,6 +445,7 @@ async function updateInfoScreenContent(planeID){
       <li>Current location: ${air.current_location}</li>
     </ul>`;
 }
+
 
 // should return a dictionary or a 2D list of size Nx2 where N is the 
 // number of actions that happened in current frame and  
@@ -523,10 +522,10 @@ function getAircraft(planeCallSign){
             }
             return null;
         })
-        .catch(error => {
-        console.error('Error fetching aircraft:', error);
-        return null;
-      });
+    .catch(error => {
+      console.error('Error fetching aircraft:', error);
+      return null;
+    });
 }
 
 
