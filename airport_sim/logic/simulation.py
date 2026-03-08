@@ -181,8 +181,8 @@ class SimulationController:
         # integer part generates fixed planes, fractional part handled randomly.
 
         currentFrameActions.current_frame_actions = []
-
-
+        for runway in self.all_runways:
+            runway.maxPlanes = 0
 
         if self.current_time >= self.end_time:
             return self.end_simulation()
@@ -190,8 +190,8 @@ class SimulationController:
         self.current_time += timedelta(minutes=self.tick_minutes)
 
         # Process existing queue first — assign waiting planes to available runways
-        self.departure_queue.checkRunways()
         self.landing_queue.checkRunways()
+        self.departure_queue.checkRunways()
 
         # Then generate new planes (they will wait at least one tick in the queue)
         #random planes per tick generation
