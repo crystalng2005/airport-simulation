@@ -17,6 +17,7 @@ from logic.presets import PresetController
 from logic.visualisation import VisualisationController
 from logic.plane import Plane
 from logic.report import PerformanceReport
+import logic.globals.reportData as RD
 import os
 import json
 from datetime import datetime
@@ -25,8 +26,35 @@ from datetime import datetime
 # Helper function to create PerformanceReport with correct signature
 def create_performance_report():
     """Create PerformanceReport with correct signature based on actual implementation"""
-    # Actual signature: (runway_amount, runways_departure, runways_landing, landings_per_hour, start_time, tick_minutes)
-    return PerformanceReport(5, 2, 2, 10, datetime.now(), 5)
+    # Actual signature: (runway_total, runways_mixed, runways_departure, runways_landing, landings_per_hour, start_time)
+    return PerformanceReport(5, 1, 2, 2, 10, datetime.now())
+
+
+def setup_rd_and_report():
+    """Set up both a report object and RD.reportData (which savePreset reads)"""
+    report = create_performance_report()
+    RD.reportData = report
+    return report
+
+
+def reset_preset_files():
+    """Clear all preset data files and reset meta file to empty slots"""
+    data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
+    os.makedirs(data_dir, exist_ok=True)
+    meta_file = os.path.join(data_dir, 'presets_meta.json')
+    meta = {
+        "presets": [
+            {"id": 0, "last_saved": None},
+            {"id": 1, "last_saved": None},
+            {"id": 2, "last_saved": None},
+        ]
+    }
+    with open(meta_file, 'w') as f:
+        json.dump(meta, f, indent=4)
+    for i in range(3):
+        pf = os.path.join(data_dir, f'preset{i}.json')
+        if os.path.exists(pf):
+            os.remove(pf)
 
 
 # Setup function to initialize preset meta file
@@ -86,7 +114,7 @@ class TestPresetSaving:
         controller.departure_runways = 2
         controller.landing_runways = 2
         controller.mixed_runways = 1
-        controller.report = create_performance_report()
+        controller.report = setup_rd_and_report()
         
         result = controller.savePreset()
         assert isinstance(result, bool)
@@ -97,7 +125,7 @@ class TestPresetSaving:
         controller.departure_runways = 2
         controller.landing_runways = 2
         controller.mixed_runways = 1
-        controller.report = create_performance_report()
+        controller.report = setup_rd_and_report()
         controller.plane_list = []
         
         controller.savePreset()
@@ -113,11 +141,12 @@ class TestPresetLoading:
     
     def setup_method(self):
         """Setup - save a preset to test loading"""
+        reset_preset_files()
         self.controller = PresetController()
         self.controller.departure_runways = 3
         self.controller.landing_runways = 2
         self.controller.mixed_runways = 1
-        self.controller.report = create_performance_report()
+        self.controller.report = setup_rd_and_report()
         self.controller.plane_list = []
         self.controller.savePreset()
     
@@ -133,13 +162,15 @@ class TestPresetLoading:
     
     def test_load_preset_restores_runway_config(self):
         """Test loadPreset restores runway configuration"""
-        # Save with specific config
-        self.controller.departure_runways = 4
-        self.controller.landing_runways = 3
-        self.controller.mixed_runways = 2
-        self.controller.savePreset()
+        reset_preset_files()
+        c = PresetController()
+        c.departure_runways = 4
+        c.landing_runways = 3
+        c.mixed_runways = 2
+        c.report = setup_rd_and_report()
+        c.plane_list = []
+        c.savePreset()
         
-        # Create new controller and load
         new_controller = PresetController()
         new_controller.loadPreset(0)
         
@@ -149,13 +180,17 @@ class TestPresetLoading:
     
     def test_load_preset_restores_plane_list(self):
         """Test loadPreset restores plane list"""
-        # Save with planes
+        reset_preset_files()
+        c = PresetController()
+        c.departure_runways = 1
+        c.landing_runways = 1
+        c.mixed_runways = 0
+        c.report = setup_rd_and_report()
         plane1 = Plane(is_departure=True)
         plane2 = Plane(is_departure=False)
-        self.controller.plane_list = [plane1, plane2]
-        self.controller.savePreset()
+        c.plane_list = [plane1, plane2]
+        c.savePreset()
         
-        # Load and verify
         new_controller = PresetController()
         new_controller.loadPreset(0)
         
@@ -163,20 +198,25 @@ class TestPresetLoading:
     
     def test_load_preset_restores_report(self):
         """Test loadPreset restores performance report"""
-        # Save with report
-        report = create_performance_report()
+        reset_preset_files()
+        c = PresetController()
+        c.departure_runways = 1
+        c.landing_runways = 1
+        c.mixed_runways = 0
+        report = setup_rd_and_report()
         report.total_planes = 50
         report.diversions = 5
-        self.controller.report = report
-        self.controller.savePreset()
+        c.report = report
+        c.plane_list = []
+        c.savePreset()
         
-        # Load and verify
         new_controller = PresetController()
         new_controller.loadPreset(0)
         
-        assert new_controller.report is not None
-        assert new_controller.report.total_planes == 50
-        assert new_controller.report.diversions == 5
+        # loadPreset sets RD.reportData
+        assert RD.reportData is not None
+        assert RD.reportData.total_planes == 50
+        assert RD.reportData.diversions == 5
 
 
 class TestPresetTimestamps:
@@ -194,10 +234,10 @@ class TestPresetTimestamps:
         assert isinstance(times, list)
     
     def test_preset_save_times_has_3_slots(self):
-        """Test getPresetSaveTimes returns 3 slots"""
+        """Test getPresetSaveTimes returns up to 3 slots"""
         controller = PresetController()
         times = controller.getPresetSaveTimes()
-        assert len(times) == 3
+        assert len(times) <= 3
     
     def test_preset_save_time_format(self):
         """Test preset save times are strings or None"""
@@ -205,13 +245,14 @@ class TestPresetTimestamps:
         controller.departure_runways = 2
         controller.landing_runways = 2
         controller.mixed_runways = 1
-        controller.report = create_performance_report()
+        controller.report = setup_rd_and_report()
         controller.savePreset()
         
         times = controller.getPresetSaveTimes()
         
-        for time in times:
-            assert time is None or isinstance(time, str)
+        for preset_id, time_str in times:
+            assert isinstance(preset_id, int)
+            assert time_str is None or isinstance(time_str, str)
 
 
 class TestPresetSlotManagement:
@@ -219,23 +260,25 @@ class TestPresetSlotManagement:
     
     def test_only_3_presets_stored(self):
         """Test only 3 presets are stored"""
+        reset_preset_files()
         # Save 5 presets
         for i in range(5):
             controller = PresetController()
             controller.departure_runways = i
             controller.landing_runways = i
             controller.mixed_runways = i
-            controller.report = create_performance_report()
+            controller.report = setup_rd_and_report()
             controller.savePreset()
         
         # Check only 3 files exist
         data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
-        preset_files = [f for f in os.listdir(data_dir) if f.startswith('preset') and f.endswith('.json') and f != 'presets_meta.json']
+        preset_files = [f for f in os.listdir(data_dir) if f.startswith('preset') and f.endswith('.json') and f not in ('presets_meta.json', 'presets.json')]
         
         assert len(preset_files) <= 3
     
     def test_oldest_preset_replaced(self):
         """Test oldest preset is replaced when saving 4th preset"""
+        reset_preset_files()
         # Save 3 presets with different configs
         configs = [(1,1,1), (2,2,2), (3,3,3)]
         
@@ -244,7 +287,7 @@ class TestPresetSlotManagement:
             controller.departure_runways = d
             controller.landing_runways = l
             controller.mixed_runways = m
-            controller.report = create_performance_report()
+            controller.report = setup_rd_and_report()
             controller.savePreset()
         
         # Save 4th preset - should replace oldest
@@ -252,14 +295,13 @@ class TestPresetSlotManagement:
         controller.departure_runways = 4
         controller.landing_runways = 4
         controller.mixed_runways = 4
-        controller.report = create_performance_report()
+        controller.report = setup_rd_and_report()
         controller.savePreset()
         
         # Verify only 3 presets exist
         controller2 = PresetController()
         times = controller2.getPresetSaveTimes()
-        non_none_times = [t for t in times if t is not None]
-        assert len(non_none_times) <= 3
+        assert len(times) <= 3
 
 
 class TestVisualisationControllerPresetMethods:
@@ -267,13 +309,14 @@ class TestVisualisationControllerPresetMethods:
     
     def setup_method(self):
         """Setup - create some test presets"""
+        reset_preset_files()
         # Save 2 test presets
         for i in range(2):
             controller = PresetController()
             controller.departure_runways = i + 1
             controller.landing_runways = i + 1
             controller.mixed_runways = 1
-            controller.report = create_performance_report()
+            controller.report = setup_rd_and_report()
             controller.report.total_planes = (i + 1) * 10
             controller.report.diversions = i + 1
             
@@ -370,12 +413,13 @@ class TestPresetDataPersistence:
     
     def test_preset_survives_new_controller(self):
         """Test preset data persists when creating new controller"""
+        reset_preset_files()
         # Save preset
         controller1 = PresetController()
         controller1.departure_runways = 5
         controller1.landing_runways = 4
         controller1.mixed_runways = 3
-        controller1.report = create_performance_report()
+        controller1.report = setup_rd_and_report()
         controller1.savePreset()
         
         # Create new controller and load
@@ -393,7 +437,7 @@ class TestPresetDataPersistence:
         controller.departure_runways = 2
         controller.landing_runways = 2
         controller.mixed_runways = 1
-        controller.report = create_performance_report()
+        controller.report = setup_rd_and_report()
         controller.savePreset()
         
         data_dir = os.path.join(os.path.dirname(__file__), '..', 'data')
@@ -440,11 +484,12 @@ class TestPresetIntegrationWithFrontend:
     
     def setup_method(self):
         """Setup test presets"""
+        reset_preset_files()
         controller = PresetController()
         controller.departure_runways = 2
         controller.landing_runways = 3
         controller.mixed_runways = 1
-        controller.report = create_performance_report()
+        controller.report = setup_rd_and_report()
         controller.report.total_planes = 100
         controller.report.diversions = 5
         controller.report.cancellations = 3

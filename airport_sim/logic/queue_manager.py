@@ -1,5 +1,5 @@
 # QueueController Class
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from queue import Queue
 
@@ -29,7 +29,7 @@ class QueueController:
                 currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                 # Assigns the holding queue exit time to the plane object
                 removed.left_hold = self.sim.getSimulationTime()
-                delay = removed.left_hold - removed.entered_hold
+                delay = (removed.left_hold - removed.entered_hold).total_seconds()
             
                 # Adds the delay time to the report and decrements current queue size
                 RD.reportData.arrival_delay_times.append(delay)
@@ -52,12 +52,16 @@ class QueueController:
     # (For landing only) Checks if emergency_time_left <= 0, then cancel
     # Then checks if the plane is over the user specified cancellation time, then cancel
     def checkCancelTime(self):
+        if len(self.plane_queue) == 0:
+            return
+
         if not self.is_departure and self.plane_queue[0].emergency_status != EmergencyStatus.NONE and self.plane_queue[0].emergency_time_left <= 0:
             self.plane_queue[0].cancel()
             self.plane_queue.pop(0)
 
-        for plane in self.plane_queue:
-            if (self.sim.getSimulationTime() - plane.entered_hold > self.sim.cancellation_time):
+        cancellation_limit = timedelta(minutes=self.sim.cancellation_time)
+        for plane in list(self.plane_queue):
+            if (self.sim.getSimulationTime() - plane.entered_hold) > cancellation_limit:
                 plane.cancel()
                 self.plane_queue.remove(plane)
 
@@ -73,12 +77,13 @@ class QueueController:
                 p.emergency_time_left = 20
             case EmergencyStatus.MECHANICAL:
                 p.emergency_time_left = 30
-        temp = 0
-        for plane in self.plane_queue:
-                if plane.emergency_time_left < p.emergency_time_left:
-                    temp+= 1
-                else:
-                    self.plane_queue.insert(temp, p)
-                    break
+        inserted = False
+        for i, plane in enumerate(self.plane_queue):
+            if plane.emergency_time_left == 0 or plane.emergency_time_left >= p.emergency_time_left:
+                self.plane_queue.insert(i, p)
+                inserted = True
+                break
+        if not inserted:
+            self.plane_queue.append(p)
 
 

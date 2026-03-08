@@ -1,4 +1,4 @@
-from logic.plane import Plane
+from logic.plane import Plane, EmergencyStatus
 import json
 import os
 from datetime import datetime, timezone
@@ -86,8 +86,15 @@ class PresetController:
             
             report_dict = self.report.__dict__.copy()
             
-            if 'start_time' in report_dict and hasattr(report_dict['start_time'], 'isoformat'):
-                report_dict['start_time'] = report_dict['start_time'].isoformat()
+            # Convert any datetime objects to ISO strings for JSON serialization
+            for key, val in report_dict.items():
+                if hasattr(val, 'isoformat'):
+                    report_dict[key] = val.isoformat()
+                elif isinstance(val, list):
+                    report_dict[key] = [
+                        v.total_seconds() if hasattr(v, 'total_seconds') else v
+                        for v in val
+                    ]
 
             preset = {
                 "saved_at": now,
@@ -96,7 +103,7 @@ class PresetController:
                     "landing_runways": self.landing_runways,
                     "mixed_runways": self.mixed_runways,
                 },
-                "planes": [plane.__dict__ for plane in self.plane_list],
+                "planes": [self._serialize_plane(plane) for plane in self.plane_list],
                 "report": report_dict
             }
 
@@ -135,10 +142,14 @@ class PresetController:
             for plane_data in data["planes"]:
                 plane = Plane.__new__(Plane)
                 plane.__dict__.update(plane_data)
+                # Restore enum from int
+                if isinstance(plane.emergency_status, int):
+                    plane.emergency_status = EmergencyStatus(plane.emergency_status)
                 self.plane_list.append(plane)
 
             report = PerformanceReport.__new__(PerformanceReport)
             report.__dict__.update(data["report"])
+            self.report = report
             RD.reportData = report
 
             return True
@@ -153,3 +164,16 @@ class PresetController:
         self.plane_list.clear()
         self.report = None
         return True
+
+    @staticmethod
+    def _serialize_plane(plane):
+        """Convert a Plane object to a JSON-serializable dict."""
+        d = {}
+        for k, v in plane.__dict__.items():
+            if hasattr(v, 'isoformat'):       # datetime / datetime.time
+                d[k] = v.isoformat()
+            elif hasattr(v, 'value'):          # Enum
+                d[k] = v.value
+            else:
+                d[k] = v
+        return d

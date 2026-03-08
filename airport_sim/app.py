@@ -206,7 +206,7 @@ def load_preset():
             }), 400
         
    
-        preset_data = controller.visualisation_controller.loadPresetData(preset_id)
+        preset_data = controller.visualisation_controller.getPresetData(preset_id)
         
         if preset_data["success"]:
             # Store in session
@@ -299,7 +299,7 @@ def export_report(sim_id):
     try:
         from flask import send_file
         
-        filepath = controller.visualisation_controller.exportSimulationReport(sim_id, format="txt")
+        filepath = controller.visualisation_controller.exportSimulationReport(sim_id)
         
         if filepath and os.path.exists(filepath):
             return send_file(
@@ -324,7 +324,7 @@ def get_current_frame_actions():
     if not controller.simulation:
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
     
-    actions = controller.simulation.getCurrentFrameActions() # Need to implement
+    actions = controller.simulation.getCurrentFrameActions()
     return jsonify({'success': True, 'actions': actions}), 200
 
 @app.route('/api/current-time', methods=['GET'])
@@ -355,6 +355,37 @@ def get_aircraft(plane_call_sign):
         return jsonify({'success': False, 'errors': ['Aircraft not found']}), 404
     
     return jsonify({'success': True, 'aircraft': aircraft.return_data()}), 200
+
+@app.route('/api/number-of-runways', methods=['GET'])
+def get_number_of_runways():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    return jsonify({
+        'success': True, 
+        'number': controller.simulation.get_runway_num()
+    }), 200
+
+@app.route('/api/runway-statuses', methods=['GET'])
+def get_runway_status():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    return jsonify({
+        'success': True, 
+        'status': controller.simulation.get_runway_statuses()
+    }), 200
+
+@app.route('/api/runway-modes', methods=['GET'])
+def get_runway_modes():
+    if not controller.simulation:
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    return jsonify({
+        'success': True, 
+        'mode': controller.simulation.get_runway_modes()
+    }), 200
+
 
 
     

@@ -25,7 +25,7 @@ class TestDiversionTracking:
     def setup_method(self):
         """Setup before each test"""
         # Initialize report data
-        RD.init(runway_amount=5, landings_per_hour=10)
+        RD.init(5, 1, 2, 2, 10, datetime(2000, 1, 1))
     
     def test_diversion_counter_increments(self):
         """Test that diversions are tracked correctly"""
@@ -75,7 +75,7 @@ class TestTimeProgression:
     
     def setup_method(self):
         """Setup simulation for testing"""
-        RD.init(runway_amount=5, landings_per_hour=10)
+        RD.init(5, 1, 2, 2, 10, datetime(2000, 1, 1))
         self.sim = SimulationController(
             departures_per_hour=10,
             landings_per_hour=10,
@@ -84,6 +84,7 @@ class TestTimeProgression:
             landing_runways=2,
             mixed_runways=1,
             cancellation_time=30,
+            total_simulation_minutes=100,
             tick_minutes=5
         )
     
@@ -114,7 +115,7 @@ class TestTimeProgression:
         assert self.sim.tick_minutes == 5
         
         # Create sim with different tick speed
-        sim2 = SimulationController(10, 10, 3, 1, 1, 1, 30, tick_minutes=10)
+        sim2 = SimulationController(10, 10, 3, 1, 1, 1, 30, 100, tick_minutes=10)
         assert sim2.tick_minutes == 10
     
     def test_planes_generated_per_tick(self):
@@ -135,7 +136,19 @@ class TestQueueSystem:
     
     def setup_method(self):
         """Setup queue system"""
-        RD.init(runway_amount=3, landings_per_hour=10)
+        RD.init(3, 0, 1, 2, 10, datetime(2000, 1, 1))
+        
+        # Create a minimal simulation for the queue controller
+        self.sim = SimulationController(
+            departures_per_hour=10,
+            landings_per_hour=10,
+            total_runways=3,
+            departure_runways=1,
+            landing_runways=2,
+            mixed_runways=0,
+            cancellation_time=30,
+            total_simulation_minutes=100
+        )
         
         # Create runways
         self.landing_runways = [
@@ -147,9 +160,9 @@ class TestQueueSystem:
             Runway(True, False, 3, True, True)
         ]
         
-        # Create queues
-        self.landing_queue = QueueController([], self.landing_runways, False)
-        self.departure_queue = QueueController([], self.departure_runways, True)
+        # Create queues with sim reference
+        self.landing_queue = QueueController([], self.landing_runways, False, self.sim)
+        self.departure_queue = QueueController([], self.departure_runways, True, self.sim)
     
     def test_plane_enqueued_to_landing(self):
         """Test plane is added to landing queue"""
@@ -237,7 +250,7 @@ class TestQueueSystem:
         self.landing_runways[0].is_available = True
         
         # Check runways - should assign plane
-        self.landing_queue.checkRunways(datetime.now())  # ✅ FIX: Pass current_time
+        self.landing_queue.checkRunways()
         
         # Plane should be removed from queue
         assert plane not in self.landing_queue.plane_queue
@@ -248,7 +261,7 @@ class TestCancellationSystem:
     
     def setup_method(self):
         """Setup for cancellation tests"""
-        RD.init(runway_amount=3, landings_per_hour=10)
+        RD.init(3, 0, 1, 2, 10, datetime(2000, 1, 1))
     
     def test_cancellation_counter_increments(self):
         """Test cancellation counter works"""
@@ -297,7 +310,7 @@ class TestIntegratedQueueAndTime:
     
     def setup_method(self):
         """Setup integrated system"""
-        RD.init(runway_amount=5, landings_per_hour=10)
+        RD.init(5, 1, 2, 2, 10, datetime(2000, 1, 1))
         self.sim = SimulationController(
             departures_per_hour=12,
             landings_per_hour=10,
@@ -306,6 +319,7 @@ class TestIntegratedQueueAndTime:
             landing_runways=2,
             mixed_runways=1,
             cancellation_time=30,
+            total_simulation_minutes=200,
             tick_minutes=5
         )
     
@@ -334,7 +348,7 @@ class TestIntegratedQueueAndTime:
             runway.is_available = True
         
         # Process queue
-        self.sim.landing_queue.checkRunways(self.sim.current_time)  # ✅ FIX: Pass current_time
+        self.sim.landing_queue.checkRunways()
         
         # Some planes should be assigned
         final_queue = len(self.sim.landing_queue.plane_queue)
