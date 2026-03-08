@@ -1,13 +1,11 @@
 let selectedSimulations = [];
 let currentReportId = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('helloooo');
-
-
-    showReportModal(getReport());
+    const report = await getReport();
+    showReportModal(report);
 });
-
 
 async function getReport(){
   try {

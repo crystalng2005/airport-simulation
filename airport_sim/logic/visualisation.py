@@ -173,4 +173,5 @@ class VisualisationController:
             return None
         if RD.reportData is None:
             return None
+        RD.reportData.generateReport()
         return RD.reportData.outputReport_dict()
