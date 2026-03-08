@@ -445,7 +445,7 @@ async function updateInfoScreenContent(planeID){
       <li>Origin: ${air.origin}</li>
       <li>Destination: ${air.destination}</li>
       <li>Is departure: ${air.is_departure}</li>
-      <li>Fuel level: ${air.fuel_level}</li>
+      <li>Fuel level: ${air.fuel_level.toFixed(1)}</li>
       <li>Emergency status: ${air.emergency_status}</li>
       <li>Target time: ${air.target_time}</li>
       <li>Actual time: ${air.actual_time}</li>
