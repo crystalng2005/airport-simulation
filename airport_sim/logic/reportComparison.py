@@ -265,6 +265,7 @@ class ResultsSummary:
             print("Results not summarised.")
 
 
+
 ## Plots for: 
     # x:Runways, y:diversions
     # x:Runways, y:cancellations
