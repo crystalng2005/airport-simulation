@@ -239,12 +239,15 @@ class SimulationController:
         self.current_time += timedelta(minutes=self.tick_minutes)
 
         # Updates the status for each of the planes
-        for plane in self.preset_controller.plane_list:
+        for plane in self.planes_by_call_sign.values():
             if not plane.left_simulation:
                 plane.decrease_fuel()
                 plane.update_emergency()
 
         # Process existing queue first — assign waiting planes to available runways
+        self.landing_queue.checkCancelTime()
+        self.departure_queue.checkCancelTime()
+
         self.landing_queue.checkRunways()
         self.departure_queue.checkRunways()
 
