@@ -257,7 +257,7 @@ class Plane:
             self.exit_simulation()
         if not self.cancelled:
             self.fuel_level -= FUEL_USAGE_PER_TICK
-            RD.reportData += FUEL_USAGE_PER_TICK
+            RD.reportData.tot_fuel_used += FUEL_USAGE_PER_TICK
             return True 
         return False
 
