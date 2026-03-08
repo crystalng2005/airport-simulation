@@ -43,13 +43,15 @@ class Plane:
     # Stores the total number of plane objects generated
     plane_num = 0
     
-    def __init__(self, is_departure: bool):
+    def __init__(self, is_departure: bool, queue_controller, cancellation_time):
         
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
         self.user_setting = False
         self.user_mechanical = 0
         self.user_medical = 0
         self.user_fuel = 0
+        self.queue_controller = queue_controller
+        self.cancellation_time = cancellation_time
 
         # Management variables
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
@@ -284,7 +286,9 @@ class Plane:
             self.exit_simulation()
         # Checks if the plane is cancelled (don't need to decrease if it is)
         if not self.cancelled:
-            self.fuel_level -= FUEL_USAGE_PER_TICK
+            if not self.is_departure: self.fuel_level -= FUEL_USAGE_PER_TICK
+            if self.emergency_status != EmergencyStatus.NONE: self.emergency_time_left -= FUEL_USAGE_PER_TICK
+            if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK
             RD.reportData.tot_fuel_used += FUEL_USAGE_PER_TICK
             return True 
         return False
@@ -362,13 +366,15 @@ class Plane:
         if self.emergency_status == EmergencyStatus.NONE:
             if mechanical_val == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
+                self.queue_controller.planeEmergency(self)
             elif medical_val == 1:
                 self.emergency_status= EmergencyStatus.HEALTH
-            
+                self.queue_controller.planeEmergency(self)
             # Checks the fuel level and flags emergency if needed
             else:
                 if self.fuel_level < 20:
                     self.emergency_status = EmergencyStatus.FUEL
+                    self.queue_controller.planeEmergency(self)
             
         return self.emergency_status
 
