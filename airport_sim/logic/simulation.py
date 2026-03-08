@@ -105,7 +105,7 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
-    def getAircraftByCallSign(self, plane_call_sign: int):
+    def getAircraftByCallSign(self, plane_call_sign: str):
         return self.planes_by_call_sign.get(plane_call_sign, None)
 
 

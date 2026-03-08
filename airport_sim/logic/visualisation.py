@@ -103,3 +103,15 @@ class VisualisationController:
             "planes": planes,
             "report": report_dict
         }
+
+    # def getAircraftData(self, simulation):
+    #     if simulation is None:
+    #         return []
+
+    #     # Simulation stores live planes here by callsign.
+    #     aircraft = []
+    #     for plane in simulation.planes_by_call_sign.values():
+    #         if plane is not None:
+    #             aircraft.append(plane.return_data())
+
+    #     return aircraft
