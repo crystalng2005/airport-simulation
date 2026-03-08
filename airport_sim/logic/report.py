@@ -76,7 +76,7 @@ class PerformanceReport:
             self.fuel_avg = self.tot_fuel_used / self.total_planes
 
 
-
+    # Returns the duration in seconds as a formatted string
     def string_duration(self):
         inSeconds = int(self.duration.total_seconds())
         hours, remainder = divmod(inSeconds, 3600)
@@ -84,7 +84,7 @@ class PerformanceReport:
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
     
 
-    
+    # Outputs the values for the reports as a dictionary
     def outputReport_dict(self):
         return {
             "start_time" : self.start_time,
@@ -121,7 +121,7 @@ class PerformanceReport:
         }
 
 
-
+    # Generates the report and returns as a formatted string
     def outputReport_string(self) -> str:
         self.generateReport()
 
@@ -151,7 +151,7 @@ class PerformanceReport:
                 f"Standard deviation of arrival times: {self.std_arrival}\n\n")
 
 
-
+    # Resets the values stored in the report
     def reset(self) -> bool:
         self.diversions = 0
         self.cancellations = 0
@@ -171,28 +171,33 @@ class PerformanceReport:
         self.holding_current = 0
 
 
-
+    # Calculates the efficiency
     def getEfficiency(self):
         if self.total_planes > 0:
             return ((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100)
         return 0
 
 
-
+    # Increments the number of planes currently in the runway queue
+    # Checks if the maximum number needs to be updated
     def incQueueCurrent(self):
         self.queue_current +=1 
         if self.queue_current > self.queue_max:
             self.queue_max = self.queue_current 
 
+    # Decrements the number of planes currently in the runway queue
     def decQueueCurrent(self):
         if self.queue_current > 0:
             self.queue_current -= 1
 
+    # Increments the number of planes currently in the holding queue
+    # Checks if the maximum number needs to be updated
     def incHoldingCurrent(self):
         self.holding_current += 1
         if self.holding_current > self.holding_max:
             self.holding_max = self.holding_current
 
+    # Decrements the number of planes currently in the holding queue
     def decHoldingCurrent(self):
         if self.holding_current > 0:
             self.holding_current -= 1

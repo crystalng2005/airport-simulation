@@ -403,6 +403,7 @@ function updateTimer(){
 
 function letPlaneHaveEmergency(planeID){
   const plane = document.getElementById('plane:' + planeID);
+  if (!plane) return;
   plane.style.background = planeEmergencyColor;
 }
 
@@ -648,8 +649,3 @@ function showReport(report){
   `;
 }
 
-document.addEventListener('DOMContentLoaded', async function() {
-    const report = await getReport();
-    showReport(report);
-    loadResults();
-});
