@@ -251,7 +251,7 @@ class Plane:
     # ------- PLANE CONTROL FUNCTIONS ------- #
 
     #NOTE: called each tick, so decreases by 5 minutes each call
-    def decreaseFuel(self):
+    def decrease_fuel(self):
         if self.needsToBeRemoved:
             self.needsToBeRemoved = False
             self.exit_simulation()
@@ -276,9 +276,11 @@ class Plane:
 # TODO: modify if additional cancellation logic required (e.g. checking validity of cancel request?)
     def cancel(self):
         self.cancelled = True
+        self.exit_simulation()
 
     def divert(self):
         self.diverted = True
+        self.exit_simulation()
 
     
     def exit_simulation(self):
@@ -287,12 +289,12 @@ class Plane:
 
 
 
-    def hasEmergency(self):
+    def has_emergency(self):
         return self.emergency_status
 
     # Call every tick, for every plane to both present chance of generating emergency and checking if a plane has one
     # Update this based on tick rate
-    def updateEmergency(self):
+    def update_emergency(self):
         if not self.user_setting:
             # 28.4 million flight hours a year =  28400000
             # Mechanical: per 100,000 flight hours is 0.85 --> 0.0000085 per 60 minutes

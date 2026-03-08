@@ -99,11 +99,11 @@ def tick():
     controller.simulation.update()
     return jsonify({'success': True, 'message': 'Tick processed'}), 200
     
-@app.route('/visualisation/data', methods=['GET'])
-def getVisualisationData():
+# @app.route('/visualisation/data', methods=['GET'])
+# def getVisualisationData():
     
-    aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
-    return jsonify({'success': True, 'data': aircraft_data}), 200
+#     aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
+#     return jsonify({'success': True, 'data': aircraft_data}), 200
 
 #Simulation screen Routes
 @app.route('/simulation-screen')
@@ -350,7 +350,7 @@ def get_aircraft(plane_call_sign):
     if not controller.simulation:
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
     
-    aircraft = controller.simulation.getAircraftByCallSign(plane_call_sign)  # Need to implement this
+    aircraft = controller.simulation.getAircraftByCallSign(plane_call_sign)
     if not aircraft:
         return jsonify({'success': False, 'errors': ['Aircraft not found']}), 404
     

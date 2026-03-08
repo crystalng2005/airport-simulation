@@ -17,23 +17,38 @@ class QueueController:
         self.is_departure = is_departure # true = takeoff, false = landing 
         self.sim = sim
         self.current_frame_actions = []
+        self.evenTurn = False
 
 
     # Runway algorithm - linearly search through the runway list, when one is available, direct the first plane to that runway
     def checkRunways(self): 
-        for runway in self.runway_list:
-            if runway.is_available and len(self.plane_queue) != 0:
-                # Dircts the plane to the runway
-                removed = self.plane_queue.pop(0)
-                removed.goToRunway(runway.runway_number)
-                currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
-                # Assigns the holding queue exit time to the plane object
-                removed.left_hold = self.sim.getSimulationTime()
-                delay = (removed.left_hold - removed.entered_hold).total_seconds()
-            
-                # Adds the delay time to the report and decrements current queue size
-                RD.reportData.arrival_delay_times.append(delay)
-                RD.reportData.decQueueCurrent()
+        if self.evenTurn: self.evenTurn = False
+        else: self.evenTurn = True
+
+        checked = 0
+        while checked < len(self.runway_list):
+            checked = 0
+            for runway in self.runway_list:
+                if runway.maxPlanes < 5 and len(self.plane_queue) != 0:
+                    # Alternates each tick who can use mixed mode (allowing departure to use it too)
+                    if self.evenTurn == True and self.is_departure == False and runway.mixed_mode == True:
+                        checked += 1
+                        continue
+
+                    # Directs the plane to the runway
+                    runway.maxPlanes += 1
+                    removed = self.plane_queue.pop(0)
+                    removed.goToRunway(runway.runway_number)
+                    currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
+                    # Assigns the holding queue exit time to the plane object
+                    removed.left_hold = self.sim.getSimulationTime()
+                    delay = (removed.left_hold - removed.entered_hold).total_seconds()
+                
+                    # Adds the delay time to the report and decrements current queue size
+                    RD.reportData.arrival_delay_times.append(delay)
+                    RD.reportData.decQueueCurrent()
+                else:
+                    checked += 1
 
 
     def enqueue(self, p: Plane):
