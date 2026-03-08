@@ -105,8 +105,7 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
-
-    def getAircraftByCallSign(self, plane_call_sign: int):
+    def getAircraftByCallSign(self, plane_call_sign: str):
         return self.planes_by_call_sign.get(plane_call_sign, None)
 
 
@@ -183,7 +182,8 @@ class SimulationController:
         # integer part generates fixed planes, fractional part handled randomly.
 
         currentFrameActions.current_frame_actions = []
-
+        for runway in self.all_runways:
+            runway.maxPlanes = 0
 
         if self.current_time >= self.end_time:
             return self.end_simulation()
@@ -196,8 +196,8 @@ class SimulationController:
                 plane.update_emergency()
 
         # Process existing queue first — assign waiting planes to available runways
-        self.departure_queue.checkRunways()
         self.landing_queue.checkRunways()
+        self.departure_queue.checkRunways()
 
         # Then generate new planes (they will wait at least one tick in the queue)
         #random planes per tick generation

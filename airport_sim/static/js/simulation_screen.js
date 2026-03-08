@@ -423,41 +423,28 @@ function letPlaneHaveEmergency(planeID){
 // ________________________________________________________________________________________________________
 
 // must finish getAircraft(planeID) first.
-function updateInfoScreenContent(planeID){
-
+async function updateInfoScreenContent(planeID){
   const planeInfoScreen = document.querySelector('.display-info-screen');
- 
+  const air = await getAircraft(planeID);
 
-  // get the Aircraft object from the list of Aricrafts??? maybe 
+  if (!air) {
+    planeInfoScreen.innerHTML = `Aircraft ${planeID} Info: unavailable`;
+    return;
+  }
 
-  // const air = getAircraft(planeID);
-  // planeInfoScreen.innerHTML = "Aircraft "+planeID+" Info:\
-  //     <ul>\
-  //       <li>Callsign: "+ air.callsign +"</li>\
-  //       <li>Origin: "+ air.origin +"</li>\
-  //       <li>Destination: "+ air.destination +"</li>\
-  //       <li>Is departure: "+ air.is_departure +"</li>\
-  //       <li>Fuel level: "+ air.fuel_level +"</li>\
-  //       <li>Emergency status: "+ air.emergency_status +"</li>\
-  //       <li>Target time: "+ air.target_time +"</li>\
-  //       <li>Actual time: "+ air.actual_time +"</li>\
-  //       <li>Current location: "+ air.current_location +"</li>\
-  //     </ul> ";
-
-  planeInfoScreen.innerHTML = "Aircraft "+planeID+" Info:\
-    <ul>\
-      <li>Callsign: "+ 1 +"</li>\
-      <li>Origin: "+ 1 +"</li>\
-      <li>Destination: "+ 1 +"</li>\
-      <li>Is departure: "+ 1 +"</li>\
-      <li>Fuel level: "+ 1 +"</li>\
-      <li>Emergency status: "+ 1+ "</li>\
-      <li>Target time: "+ 1 +"</li>\
-      <li>Actual time: "+ 1 +"</li>\
-      <li>Current location: "+ 1 +"</li>\
-    </ul> ";
+  planeInfoScreen.innerHTML = `Aircraft ${planeID} Info:
+    <ul>
+      <li>Callsign: ${air.callsign}</li>
+      <li>Origin: ${air.origin}</li>
+      <li>Destination: ${air.destination}</li>
+      <li>Is departure: ${air.is_departure}</li>
+      <li>Fuel level: ${air.fuel_level}</li>
+      <li>Emergency status: ${air.emergency_status}</li>
+      <li>Target time: ${air.target_time}</li>
+      <li>Actual time: ${air.actual_time}</li>
+      <li>Current location: ${air.current_location}</li>
+    </ul>`;
 }
-
 
 // should return a dictionary or a 2D list of size Nx2 where N is the 
 // number of actions that happened in current frame and  
@@ -534,7 +521,10 @@ function getAircraft(planeCallSign){
             }
             return null;
         })
-        .catch(error => console.error('Error fetching aircraft:', error));
+        .catch(error => {
+        console.error('Error fetching aircraft:', error);
+        return null;
+      });
 }
 
 

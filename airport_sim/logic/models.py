@@ -17,6 +17,7 @@ class Runway:
         self.user_maintenance = 0
         self.user_safety = 0
         self.user_construction = 0
+        self.maxPlanes = 0
 
 
     # Function to open and close runways, can be called outside the class if necessary
