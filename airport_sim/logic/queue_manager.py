@@ -75,12 +75,11 @@ class QueueController:
             return
 
         # If the emergency time exceeds the limit, diverts the plane
-        if not self.is_departure and self.plane_queue[0].emergency_status != EmergencyStatus.NONE and self.plane_queue[0].emergency_time_left <= 0:
-            # Cancels the plane (same logic for diversions)
-            self.plane_queue[0].cancel()
-            self.plane_queue.pop(0)
-            # Increments diversions in the report
-            RD.reportData.diversions += 1
+        for plane in self.plane_queue[:]:
+            if not self.is_departure and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
+                plane.divert()
+                self.plane_queue.remove(plane)
+                RD.reportData.diversions += 1
 
         # If the plane exceeds the cancellation time
         i = 0

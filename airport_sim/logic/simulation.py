@@ -235,7 +235,7 @@ class SimulationController:
         self.current_time += timedelta(minutes=self.tick_minutes)
 
         # Updates the status for each of the planes
-        for plane in self.preset_controller.plane_list:
+        for plane in self.planes_by_call_sign.values():
             if not plane.left_simulation:
                 plane.decrease_fuel()
                 plane.update_emergency()
