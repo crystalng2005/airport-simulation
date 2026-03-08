@@ -105,6 +105,7 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
+
     def getAircraftByCallSign(self, plane_call_sign: int):
         return self.planes_by_call_sign.get(plane_call_sign, None)
 
@@ -160,12 +161,12 @@ class SimulationController:
                     modes.append(-1)
                 else:
                     modes.append(1)
-
         return modes
     
     def get_runway_num(self):
         return self.total_runways
     
+
     def end_simulation(self):
         if self.simulation_finished:
             return False
@@ -174,6 +175,7 @@ class SimulationController:
         RD.reportData.setFinishTime(self.current_time)
         RD.reportData.generateReport()
         return False
+
 
     def update(self) -> bool:
         # tick_minutes controls how much simulated time passes each frame.
@@ -188,6 +190,11 @@ class SimulationController:
             return self.end_simulation()
         
         self.current_time += timedelta(minutes=self.tick_minutes)
+
+        for plane in self.planes_by_call_sign:
+            if not plane.left_simulation:
+                plane.decrease_fuel()
+                plane.update_emergency()
 
         # Process existing queue first — assign waiting planes to available runways
         self.landing_queue.checkRunways()
