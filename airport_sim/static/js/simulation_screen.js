@@ -241,6 +241,8 @@ function movePlaneToRunway(planeID, runwayID){
   const plane = document.getElementById('plane:' + planeID);
   const runway = document.getElementById('runway:' + runwayID);
 
+  if (!plane || !runway) return;
+
   // 1. Get positions before moving
   const planeRect = plane.getBoundingClientRect();
   const runwayRect = runway.getBoundingClientRect();
