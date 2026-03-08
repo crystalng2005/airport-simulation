@@ -103,7 +103,8 @@ class SimulationController:
     # Generates a plane and adds it to the plane list
     def generatePlane(self, is_departure: bool) -> bool:
         # Generates depending on departure or not
-        p = Plane(is_departure)
+        if is_departure: p = Plane(is_departure, self.departure_queue, self.cancellation_time)
+        else: p = Plane(is_departure, self.landing_queue, self.cancellation_time)
         p.generated_at = self.current_time
 
         # Adds to the plane by call sign and preset storage lists
@@ -204,10 +205,15 @@ class SimulationController:
     def end_simulation(self):
         if self.simulation_finished:
             return False
-
         self.simulation_finished = True
         RD.reportData.setFinishTime(self.current_time)
         RD.reportData.generateReport()
+        # Save preset with actual data
+        self.preset_controller.departure_runways = self.departure_runways
+        self.preset_controller.landing_runways = self.landing_runways
+        self.preset_controller.mixed_runways = self.mixed_runways
+        self.preset_controller.report = RD.reportData
+        self.preset_controller.savePreset()
         return False
 
 

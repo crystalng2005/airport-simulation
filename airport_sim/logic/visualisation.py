@@ -175,3 +175,15 @@ class VisualisationController:
             return None
         RD.reportData.generateReport()
         return RD.reportData.outputReport_dict()
+
+    def saveSimulationAsPreset(self):
+        if not self.active_simulation or not self.active_simulation.simulation_finished:
+            return False
+        
+        sim = self.active_simulation
+        self.preset_controller.departure_runways = sim.departure_runways
+        self.preset_controller.landing_runways = sim.landing_runways
+        self.preset_controller.mixed_runways = sim.mixed_runways
+        self.preset_controller.plane_list = sim.preset_controller.plane_list
+        self.preset_controller.report = RD.reportData
+        return self.preset_controller.savePreset()
