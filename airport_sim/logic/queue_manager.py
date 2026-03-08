@@ -83,19 +83,24 @@ class QueueController:
             RD.reportData.diversions += 1
 
         # If the plane exceeds the cancellation time
-        if self.is_departure:
-            for plane in self.plane_queue:
-                if plane.cancellation_time <= 0:
-                    # Cancels the plane and removes the queue
-                    plane.cancel()
-                    self.plane_queue.remove(plane)
-                    RD.reportData.cancellations += 1
+        i = 0
+        while i < len(self.plane_queue):
+            plane = self.plane_queue[i]
+            if plane.cancellation_time <= 0:
+                plane.cancel()
+                self.plane_queue.pop(i)
+                RD.reportData.cancellations += 1
+            else:
+                i += 1
 
 
 
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
     def planeEmergency(self, p: Plane):
         currentFrameActions.current_frame_actions.append([p.callsign, "emergency"])
+        if p in self.plane_queue:
+            self.plane_queue.remove(p)
+
         # Assings time based on emergency status
         match (p.emergency_status):
             case EmergencyStatus.FUEL:

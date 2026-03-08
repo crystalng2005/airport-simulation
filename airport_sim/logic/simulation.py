@@ -241,6 +241,9 @@ class SimulationController:
                 plane.update_emergency()
 
         # Process existing queue first — assign waiting planes to available runways
+        self.landing_queue.checkCancelTime()
+        self.departure_queue.checkCancelTime()
+
         self.landing_queue.checkRunways()
         self.departure_queue.checkRunways()
 
