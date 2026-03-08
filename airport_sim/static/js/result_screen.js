@@ -394,7 +394,7 @@ function showReportModal(report) {
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Wait Time</div>
-                <div class="metric-value">${report.avg_wait_time} min</div>
+                <div class="metric-value">${report.avg_wait_time.toFixed(1)} min</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Fuel/Plane</div>
