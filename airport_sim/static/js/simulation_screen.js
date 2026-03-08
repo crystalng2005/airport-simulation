@@ -1,4 +1,3 @@
-
 // big simulation sittings
 const FPS = 1;
 let simulationTick = 0;
@@ -25,12 +24,13 @@ const TICK_MINUTES = 5; // minutes per tick, must match backend
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
-let numberOfRunways = 9; // will be updated from backend
+let numberOfRunways = 10; // will be updated from backend
+const runwayEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
 
 // planes sittings
-const planeSpawnSlideDuration = 1 / FPS; //in sec
-const planeRunwaySlideDuration = 1 / FPS; //in sec
-const planeFadeOutDuration = 0.5 / FPS; //in sec
+const planeSpawnSlideDuration = 0.3 / FPS; //in sec
+const planeRunwaySlideDuration = 0.5 / FPS; //in sec
+const planeFadeOutDuration = 0.2 / FPS; //in sec
 const planesQueueSlideDuration = 1 / FPS; //in sec
 const planeEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
 
@@ -45,35 +45,6 @@ window.addEventListener("resize", resizeWindoUpdate);
 
 
 
-// TEST :::::::::::::::::::::::::::::::::::::::::::::::::
-
-/*
-createRunways(numberOfRunways);
-
-updateTimer(0);
-
-for(let i =0 ;i<10;i++){
-  spawnPlane(i+10, false);
-  spawnPlane(i+20, true);
-}
-
-letPlaneHaveEmergency(14);
-letPlaneHaveEmergency(21);
-
-setTimeout(() => {
-
-  movePlaneToRunway(11,2);
-  movePlaneToRunway(21,1);
-
-}, 2*1000);
-
-setTimeout(() => {
-
-  killPlane(20);
-  killPlane(11);
-
-}, 2*1000 + 1000);
-*/
 
 // startSimulation() is now called after the /start fetch completes (see above)
 
@@ -107,7 +78,7 @@ async function startSimulation(){
   // visualize current frame
   await simulateFrame();
 
-  
+
   if(!(await stopSimulationCheck())){
     // go to next frame after waiting for 1/FPS seconds
     setTimeout(startSimulation,1000/FPS);
@@ -128,21 +99,28 @@ async function simulateFrame() {
     let action = currentFrameActions[i][1];// currentFrameActions[i][1];
 
     // if the plane spawn in the holding pattern
-    if(action == "spawnLanding")
+    if(action == "spawnLanding"){
+      // console.log("Land"+planeID)
       spawnPlane(planeID,true);
+    }
 
     // if the plane spawn in the take-off
-    else if(action == "spawnDeparture")
+    else if(action == "spawnDeparture"){
+      // console.log("Derp"+planeID)
       spawnPlane(planeID,false);
+    }
 
     // if the plane got an emergency
-    else if(action == "emergency")
+    else if(action == "emergency"){
+      // console.log("emer"+planeID)
       letPlaneHaveEmergency(planeID);  
-
+    }
     // if the plane got diverted or cancelled or landed or taked-off from a runway
     // (aka the plan is done)
-    else if(action == "kill")
+    else if(action == "kill"){
+      // console.log("kill:"+planeID)
       killPlane(planeID);  
+    }
 
     // if the plane moved to a runway
     else if(Number.isInteger(action))
@@ -150,6 +128,7 @@ async function simulateFrame() {
   }
 
   updateTimer();
+  updateRunwaysStatus();
 
 }
 
@@ -176,20 +155,27 @@ async function createRunways(num) {
     runway.classList.add("runway");
     runway.id = 'runway:'+String(i + 1);
 
-    runway.style.border = runway_border_thinkness + 'px solid rgba(0, 0, 0, 1)';
-    runway.style.width = runway_size + 'px';
-    runway.style.height = runway_size + 'px';
-
     const runwayHat = document.createElement("div");
     runwayHat.classList.add("runway-hat");
-    runwayHat.style.width = (runway_size / 2) + 'px';
-    runwayHat.style.height = (runway_size / 2) + 'px';;
-    
-
 
     runway.appendChild(runwayHat);
 
     container.appendChild(runway);
+
+    runwayHat.style.width = (runway.getBoundingClientRect().width / 2) + 'px';
+    runwayHat.style.height = runwayHat.style.width;    
+
+    if(runwaysModes[i] >= 0){
+      const runwayHatBlue = document.createElement("div");
+      runwayHatBlue.classList.add("runway-hat-blue");    
+      runwayHat.appendChild(runwayHatBlue);
+    }
+  
+    if(runwaysModes[i] <= 0){
+      const runwayHatRed = document.createElement("div");
+      runwayHatRed.classList.add("runway-hat-red");    
+      runwayHat.appendChild(runwayHatRed);
+    }
   }
 }
 
@@ -421,11 +407,25 @@ function letPlaneHaveEmergency(planeID){
   plane.style.background = planeEmergencyColor;
 }
 
+function updateRunwaysStatus(){
+  const runwayStatus = getRunwaysStatus();
+
+  for(let i = 0; i < numberOfRunways; i++){
+    const runway = document.getElementById('runway:'+String(i + 1));
+
+    if(runwayStatus[i])
+      runway.style.border = "3px solid rgb(0, 0, 0)";
+
+    else
+      runway.style.border = "3px solid "+ runwayEmergencyColor;
+  }
+}
+
+
 // ________________________________________________________________________________________________________
 // Unfinishe Function Difinitions Section:
 // ________________________________________________________________________________________________________
 
-// must finish getAircraft(planeID) first.
 async function updateInfoScreenContent(planeID){
   const planeInfoScreen = document.querySelector('.display-info-screen');
   const air = await getAircraft(planeID);
@@ -448,6 +448,7 @@ async function updateInfoScreenContent(planeID){
       <li>Current location: ${air.current_location}</li>
     </ul>`;
 }
+
 
 // should return a dictionary or a 2D list of size Nx2 where N is the 
 // number of actions that happened in current frame and  
@@ -524,10 +525,10 @@ function getAircraft(planeCallSign){
             }
             return null;
         })
-        .catch(error => {
-        console.error('Error fetching aircraft:', error);
-        return null;
-      });
+    .catch(error => {
+      console.error('Error fetching aircraft:', error);
+      return null;
+    });
 }
 
 
