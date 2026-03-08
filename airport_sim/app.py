@@ -258,26 +258,10 @@ def get_full_report(sim_id):
 
 @app.route('/api/compare-simulations', methods=['POST']) # Is this used anywhere?
 def compare_simulations():
-   
-    try:
-        data = request.get_json()
-        sim_id_1 = data.get('sim_id_1')
-        sim_id_2 = data.get('sim_id_2')
-        
-        if sim_id_1 is None or sim_id_2 is None:
-            return jsonify({
-                "success": False,
-                "error": "Both simulation IDs required"
-            }), 400
-        
-        comparison = controller.visualisation_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
-        return jsonify(comparison)
-        
-    except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+    comparison = controller.visualisation_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
+    if comparison is None:
+        return jsonify({"success": False, "error": "One or both simulation IDs not found"}), 404
+    return jsonify({"success": True, "comparison": comparison})
 
 
 @app.route('/api/export-report/<int:sim_id>', methods=['GET'])
