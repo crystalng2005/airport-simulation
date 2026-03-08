@@ -225,6 +225,10 @@ def results_page():
     """Display results page"""
     return render_template('results.html')
 
+@app.route('/result-screen')
+def result_screen_page():
+    return render_template('result_screen.html')
+
 
 @app.route('/api/get-all-results', methods=['GET'])
 def get_all_results():
