@@ -647,3 +647,9 @@ function showReport(report){
     <p>Max hold: ${report.max_hold_time}</p>
   `;
 }
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const report = await getReport();
+    showReport(report);
+    loadResults();
+});
