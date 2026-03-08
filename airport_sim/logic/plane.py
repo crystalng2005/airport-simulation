@@ -44,17 +44,7 @@ class Plane:
     plane_num = 0
     
     def __init__(self, is_departure: bool):
-        # Basic information relating to the plane
-        self.callsign = self.genCallsign()
-        self.origin = self.genOrigin()
-        self.destination = self.genDestination()
-        self.current_location = self.origin
-        self.is_departure = is_departure
-        self.fuel_level = self.genFuel()
-        self.emergency_status = self.genEmergencyOnSpawn()
-        self.target_time = self.genTargetTime()
-        self.actual_time = self.genActualTime()
-
+        
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
         self.user_setting = False
         self.user_mechanical = 0
@@ -73,6 +63,17 @@ class Plane:
         self.generated_at = None
         self.left_simulation = False
         self.needsToBeRemoved = False
+
+        # Basic information relating to the plane
+        self.callsign = self.genCallsign()
+        self.origin = self.genOrigin()
+        self.destination = self.genDestination()
+        self.current_location = self.origin
+        self.is_departure = is_departure
+        self.fuel_level = self.genFuel()
+        self.emergency_status = self.genEmergencyOnSpawn()
+        self.target_time = self.genTargetTime()
+        self.actual_time = self.genActualTime()
 
         # Increments total number of planes
         Plane.plane_num += 1
