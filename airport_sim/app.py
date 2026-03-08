@@ -6,6 +6,8 @@ from logic.visualisation import VisualisationController
 from logic.report import PerformanceReport
 from datetime import datetime
 import logic.globals.reportData as RD
+
+
 app = Flask(
     __name__,
     template_folder=os.path.join(os.path.dirname(__file__), 'templates'),

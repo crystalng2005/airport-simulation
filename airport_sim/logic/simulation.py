@@ -39,6 +39,7 @@ class SimulationController:
         # Times for the simulation
         self.cancellation_time = cancellation_time
         self.current_time = datetime(2000, 1, 1, 0, 0)
+        self.ticks_elapsed = 0
         self.end_time = self.current_time + timedelta(minutes=total_simulation_minutes)
 
         # Operation checks
@@ -216,10 +217,13 @@ class SimulationController:
         self.preset_controller.savePreset()
         return False
 
+    def get_tick_time(self):
+        return self.ticks_elapsed
 
     # Update function called each tick, progresses the simulation by 5 minutes
     # Controls the movement of planes between queues and fuel usage/emergency generation
     def update(self) -> bool:
+        self.ticks_elapsed += 1
         # Definitions:
             # tick_minutes controls how much simulated time passes each frame.
             # Expected planes per tick = planes_per_hour × (tick_minutes / 60).

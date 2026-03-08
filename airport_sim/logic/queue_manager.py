@@ -1,5 +1,5 @@
 # QueueController Class
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from typing import List
 from queue import Queue
 
@@ -10,6 +10,7 @@ import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
 # from logic.simulation import SimulationController
 
+MINUTES_PER_TICK = 5
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
@@ -42,9 +43,9 @@ class QueueController:
                     removed.goToRunway(runway.runway_number)
                     currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                     # Assigns the holding queue exit time to the plane object
-                    removed.left_hold = self.sim.getSimulationTime()
-                    delay = removed.left_hold - removed.actual_time
-                    wait_time = (removed.left_hold - removed.entered_hold).total_seconds()
+                    removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
+                    delay = (removed.left_hold - removed.tickActualTime) 
+                    wait_time = removed.left_hold - removed.entered_hold
                 
                     # Adds the delay time and wait time to the report and decrements current queue size
                     RD.reportData.arrival_delay_times.append(delay)
@@ -63,7 +64,7 @@ class QueueController:
             self.plane_queue.append(p)
 
         # Assigns holding queue entry time to plane object and increments current queue size
-        p.entered_hold = self.sim.getSimulationTime()
+        p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
         RD.reportData.incQueueCurrent()
 
 

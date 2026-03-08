@@ -310,6 +310,7 @@ class Plane:
     # Cancels the plane and makes it leave the simulation
     def cancel(self):
         self.cancelled = True
+        #RD.reportData.cancellations += 1
         self.exit_simulation()
 
 
