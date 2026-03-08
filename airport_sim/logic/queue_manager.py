@@ -10,6 +10,7 @@ import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
 # from logic.simulation import SimulationController
 
+
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
         self.plane_queue = plane_queue # A list, treated as a queue
@@ -93,6 +94,7 @@ class QueueController:
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
     def planeEmergency(self, p: Plane):
         currentFrameActions.current_frame_actions.append([p.callsign, "emergency"])
+        # Assings time based on emergency status
         match (p.emergency_status):
             case EmergencyStatus.FUEL:
                 p.emergency_time_left = 10
@@ -100,6 +102,8 @@ class QueueController:
                 p.emergency_time_left = 20
             case EmergencyStatus.MECHANICAL:
                 p.emergency_time_left = 30
+        
+        # Uses emergency time left to modify its queue position
         inserted = False
         for i, plane in enumerate(self.plane_queue):
             if plane.emergency_time_left == 0 or plane.emergency_time_left >= p.emergency_time_left:
