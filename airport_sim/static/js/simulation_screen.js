@@ -82,6 +82,8 @@ async function startSimulation(){
   if(!(await stopSimulationCheck())){
     // go to next frame after waiting for 1/FPS seconds
     setTimeout(startSimulation,1000/FPS);
+  } else {
+    window.location.href = '/result-screen'; 
   }
 }
 
@@ -125,7 +127,7 @@ async function simulateFrame() {
   }
 
   updateTimer();
-  updateRunwaysStatus();
+  await updateRunwaysStatus();
 
 }
 
@@ -404,11 +406,16 @@ function letPlaneHaveEmergency(planeID){
   plane.style.background = planeEmergencyColor;
 }
 
-function updateRunwaysStatus(){
-  const runwayStatus = getRunwaysStatus();
+async function updateRunwaysStatus(){
+  const runwayStatus = await getRunwaysStatus();
+
+  if (!runwayStatus) {
+    return;
+  }
 
   for(let i = 0; i < numberOfRunways; i++){
     const runway = document.getElementById('runway:'+String(i + 1));
+    if (!runway) continue;
 
     if(runwayStatus[i])
       runway.style.border = "3px solid rgb(0, 0, 0)";
@@ -438,7 +445,7 @@ async function updateInfoScreenContent(planeID){
       <li>Origin: ${air.origin}</li>
       <li>Destination: ${air.destination}</li>
       <li>Is departure: ${air.is_departure}</li>
-      <li>Fuel level: ${air.fuel_level}</li>
+      <li>Fuel level: ${air.fuel_level.toFixed(1)}</li>
       <li>Emergency status: ${air.emergency_status}</li>
       <li>Target time: ${air.target_time}</li>
       <li>Actual time: ${air.actual_time}</li>
@@ -602,3 +609,47 @@ function getRunwaysMode(){
         });
   // return [1,1,-1,1,0,1,1,1,1]
 }
+
+async function getReport(){
+  try {
+    const response = await fetch('/api/report');
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error('Failed to get report:', data.errors || data.error);
+      return null;
+    }
+
+    return data.report;
+  } catch (error) {
+    console.error('Error fetching report:', error);
+    return null;
+  }
+}
+
+function showReport(report){
+  if (!report) return;
+
+  // For Turki to change
+  const reportBox = document.querySelector('.report-container');
+  if (!reportBox) {
+    console.log('Final report:', report);
+    return;
+  }
+
+  reportBox.innerHTML = `
+    <h3>Simulation Report</h3>
+    <p>Total planes: ${report.total_planes}</p>
+    <p>Diversions: ${report.diversions}</p>
+    <p>Cancellations: ${report.cancellations}</p>
+    <p>Efficiency: ${report.efficiency}</p>
+    <p>Avg wait: ${report.avg_wait_time}</p>
+    <p>Max hold: ${report.max_hold_time}</p>
+  `;
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
+    const report = await getReport();
+    showReport(report);
+    loadResults();
+});

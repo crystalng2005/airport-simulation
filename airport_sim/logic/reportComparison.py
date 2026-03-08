@@ -16,21 +16,253 @@ class ResultsSummary:
     def summariseAll(self):
         self.runways = []
         self.landings_per_hour = []
+        self.landings_per_runway = []
         self.diversions = []
         self.cancellations = []
+        self.mean_wait = []
+        self.mean_fuel = []
 
 
         for report in self.reports:
-            self.runways.append(report.runway_amount)
+            self.runways.append(report.runway_total)
             self.landings_per_hour.append(report.landings_per_hour)
             self.diversions.append(report.diversions)
             self.cancellations.append(report.cancellations)
+            self.mean_wait.append(report.mean_wait)
+            self.mean_fuel.append(report.fuel_avg)
+            self.landings_per_runway.append(report.landings_per_hour/report.runway_total)
 
         self.summarised = True
 
 
+    def gen_plots(self):
+        self.gen_runways_diversions()
+        self.gen_runways_cancellations()
+        self.gen_runways_fuelused()
+        self.gen_runways_waittime()
+        self.gen_landings_diversions()
+        self.gen_landings_runways_diversions()
+        
 
-    
+
+
+    def gen_runways_diversions(self):
+        if self.summarised:
+            self.diversions_per_runway = []
+            self.avg_diversions_per_runway = []
+
+
+            for i in range(0, len(self.runways)):
+                if i == 0:
+                    self.diversions_per_runway.append([self.runways[i],[self.diversions[i]]])
+                else:
+                    for j in range(0, len(self.diversions_per_runway)):
+                        if self.diversions_per_runway[j][0] == self.runways[i]:
+                            self.diversions_per_runway[j][1].append(self.diversions[i])
+            
+            self.diversions_per_runway.sort(key = lambda entry: entry[0])
+
+            for i in range(0,len(self.diversions_per_runway)):
+                self.avg_diversions_per_runway[i][0] = self.diversions_per_runway[i][0]
+                self.avg_diversions_per_runway[i][1] = statistics.mean(self.diversions_per_runway[i][1])
+
+            location = Path("./")
+            filename = location / "runways_diversions.pdf"
+
+            x = np.array(self.runways)
+            y = np.array(self.avg_diversions_per_runway)
+
+            plt.plot(x, y, marker='o')
+            plt.title('Amount of runways and the average number of diversions')
+            plt.xlabel('Amount of runways')
+            plt.ylabel('Average number of diversions')
+            #plt.show()
+            plt.savefig(filename)
+        else:
+            print("Results not summarised.")
+
+
+
+    def gen_runways_cancellations(self):
+        if self.summarised:
+            self.cancellations_per_runway = []
+            self.avg_cancellations_per_runway = []
+            
+            for i in range(0, len(self.runways)):
+                if i == 0:
+                    self.cancellations_per_runway.append([self.runways[i],[self.cancellations[i]]])
+                else:
+                    for j in range(0, len(self.cancellations_per_runway)):
+                        if self.cancellations_per_runway[j][0] == self.runways[i]:
+                            self.cancellations_per_runway[j][1].append(self.cancellations[i])
+            
+            self.cancellations_per_runway.sort(key = lambda entry: entry[0])
+
+            for i in range(0,len(self.cancellations_per_runway)):
+                self.avg_cancellations_per_runway[i][0] = self.cancellations_per_runway[i][0]
+                self.avg_cancellations_per_runway[i][1] = statistics.mean(self.cancellations_per_runway[i][1])
+
+
+            location = Path("./")
+            filename = location / "runways_cancellations.pdf"
+
+            x = np.array(self.runways)
+            y = np.array(self.avg_cancellations_per_runway)
+
+            plt.plot(x, y, marker='o')
+            plt.title('Amount of runways and the average number of cancellations')
+            plt.xlabel('Amount of runways')
+            plt.ylabel('Average number of cancellations')
+            #plt.show()
+            plt.savefig(filename)
+
+        else:
+            print("Results not summarised")
+
+
+    def gen_runways_waittime(self):
+        if self.summarised:
+            self.waittime_per_runway = []
+            self.avg_waittime_per_runway = []
+            
+            for i in range(0, len(self.runways)):
+                if i == 0:
+                    self.waittime_per_runway.append([self.runways[i],[self.mean_wait[i]]])
+                else:
+                    for j in range(0, len(self.waittime_per_runway)):
+                        if self.waittime_per_runway[j][0] == self.runways[i]:
+                            self.waittime_per_runway[j][1].append(self.mean_wait[i])
+            
+            self.waittime_per_runway.sort(key = lambda entry: entry[0])
+
+            for i in range(0,len(self.waittime_per_runway)):
+                self.avg_waittime_per_runway[i][0] = self.waittime_per_runway[i][0]
+                self.avg_waittime_per_runway[i][1] = statistics.mean(self.waittime_per_runway[i][1])
+            
+            location = Path("./")
+            filename = location / "runways_watitime.pdf"
+
+            x = np.array(self.runways)
+            y = np.array(self.avg_waittime_per_runway)
+
+            plt.plot(x, y, marker='o')
+            plt.title('Amount of runways and the average wait time (s)')
+            plt.xlabel('Amount of runways')
+            plt.ylabel('Average wait time (s)')
+            #plt.show()
+            plt.savefig(filename)
+
+        else:
+            print("Results not summarised")
+
+
+    def gen_runways_fuelused(self):
+        if self.summarised:
+            self.fuelused_per_runway = []
+            self.avg_fuelused_per_runway = []
+            
+            for i in range(0, len(self.runways)):
+                if i == 0:
+                    self.fuelused_per_runway.append([self.runways[i],[self.mean_fuel[i]]])
+                else:
+                    for j in range(0, len(self.fuelused_per_runway)):
+                        if self.fuelused_per_runway[j][0] == self.runways[i]:
+                            self.fuelused_per_runway[j][1].append(self.mean_fuel[i])
+            
+            self.fuelused_per_runway.sort(key = lambda entry: entry[0])
+
+            for i in range(0,len(self.fuelused_per_runway)):
+                self.avg_waittime_per_runway[i][0] = self.fuelused_per_runway[i][0]
+                self.avg_waittime_per_runway[i][1] = statistics.mean(self.fuelused_per_runway[i][1])
+
+            
+            location = Path("./")
+            filename = location / "runways_fuelused.pdf"
+
+            x = np.array(self.runways)
+            y = np.array(self.avg_fuelused_per_runway)
+
+            plt.plot(x, y, marker='o')
+            plt.title('Amount of runways and the average amount of fuel used')
+            plt.xlabel('Amount of runways')
+            plt.ylabel('Average amount of fuel used')
+            #plt.show()
+            plt.savefig(filename)
+
+        else:
+            print("Results not summarised")
+
+
+    def gen_landings_diversions(self):
+        if self.summarised:
+            self.diversions_per_landings = []
+            self.avg_diversions_per_landings = []
+
+            for i in range(0, len(self.landings_per_hour)):
+                if i == 0:
+                    self.diversions_per_landings.append([self.landings_per_hour[i],[self.diversions[i]]])
+                else:
+                    for j in range(0, len(self.diversions_per_landings)):
+                        if self.diversions_per_landings[j][0] == self.landings_per_hour[i]:
+                            self.diversions_per_landings[j][1].append(self.diversions[i])
+            
+            self.diversions_per_landings.sort(key = lambda entry: entry[0])
+
+            for i in range(0,len(self.diversions_per_landings)):
+                self.avg_diversions_per_landings[i][0] = self.diversions_per_landings[i][0]
+                self.avg_diversions_per_landings[i][1] = statistics.mean(self.diversions_per_landings[i][1])
+
+            location = Path("./")
+            filename = location / "landings_diversions.pdf"
+
+            x = np.array(self.landings_per_hour)
+            y = np.array(self.avg_diversions_per_landings)
+
+            plt.plot(x, y, marker='o')
+            plt.title('Landings per hour and the average number of diversions')
+            plt.xlabel('Landings per hour')
+            plt.ylabel('Average number of diversions')
+            #plt.show()
+            plt.savefig(filename)
+
+        else:
+            print("Results not summarised.")
+
+
+    def gen_landings_runways_diversions(self):
+        if self.summarised:
+            self.diversions_per_landings_runways = []
+            self.avg_diversions_per_landings_runways = []
+
+            for i in range(0, len(self.landings_per_runway)):
+                if i == 0:
+                    self.diversions_per_landings_runways.append([self.landings_per_runway[i],[self.diversions[i]]])
+                else:
+                    for j in range(0, len(self.diversions_per_landings_runways)):
+                        if self.diversions_per_landings_runways[j][0] == self.landings_per_runway[i]:
+                            self.diversions_per_landings_runways[j][1].append(self.diversions[i])
+            
+            self.diversions_per_landings_runways.sort(key = lambda entry: entry[0])
+
+            for i in range(0,len(self.diversions_per_landings_runways)):
+                self.avg_diversions_per_landings_runways[i][0] = self.diversions_per_landings_runways[i][0]
+                self.avg_diversions_per_landings_runways[i][1] = statistics.mean(self.diversions_per_landings_runways[i][1])
+
+            location = Path("./")
+            filename = location / "runways_landings_diversions.pdf"
+
+            x = np.array(self.landings_per_runway)
+            y = np.array(self.avg_diversions_per_landings_runways)
+
+            plt.plot(x, y, marker='o')
+            plt.title('Number of landings per runway and average diversions')
+            plt.xlabel('Number of landings per runway')
+            plt.ylabel('Average number of diversions')
+            #plt.show()
+            plt.savefig(filename)
+        
+        else:
+            print("Results not summarised.")
 
 
 
