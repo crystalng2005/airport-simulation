@@ -39,6 +39,7 @@ class SimulationController:
         # Times for the simulation
         self.cancellation_time = cancellation_time
         self.current_time = datetime(2000, 1, 1, 0, 0)
+        self.ticks_elapsed = 0
         self.end_time = self.current_time + timedelta(minutes=total_simulation_minutes)
 
         # Operation checks
@@ -103,7 +104,8 @@ class SimulationController:
     # Generates a plane and adds it to the plane list
     def generatePlane(self, is_departure: bool) -> bool:
         # Generates depending on departure or not
-        p = Plane(is_departure)
+        if is_departure: p = Plane(is_departure, self.departure_queue, self.cancellation_time)
+        else: p = Plane(is_departure, self.landing_queue, self.cancellation_time)
         p.generated_at = self.current_time
 
         # Adds to the plane by call sign and preset storage lists
@@ -204,16 +206,24 @@ class SimulationController:
     def end_simulation(self):
         if self.simulation_finished:
             return False
-
         self.simulation_finished = True
         RD.reportData.setFinishTime(self.current_time)
         RD.reportData.generateReport()
+        # Save preset with actual data
+        self.preset_controller.departure_runways = self.departure_runways
+        self.preset_controller.landing_runways = self.landing_runways
+        self.preset_controller.mixed_runways = self.mixed_runways
+        self.preset_controller.report = RD.reportData
+        self.preset_controller.savePreset()
         return False
 
+    def get_tick_time(self):
+        return self.ticks_elapsed
 
     # Update function called each tick, progresses the simulation by 5 minutes
     # Controls the movement of planes between queues and fuel usage/emergency generation
     def update(self) -> bool:
+        self.ticks_elapsed += 1
         # Definitions:
             # tick_minutes controls how much simulated time passes each frame.
             # Expected planes per tick = planes_per_hour × (tick_minutes / 60).
@@ -229,12 +239,15 @@ class SimulationController:
         self.current_time += timedelta(minutes=self.tick_minutes)
 
         # Updates the status for each of the planes
-        for plane in self.preset_controller.plane_list:
+        for plane in self.planes_by_call_sign.values():
             if not plane.left_simulation:
                 plane.decrease_fuel()
                 plane.update_emergency()
 
         # Process existing queue first — assign waiting planes to available runways
+        self.landing_queue.checkCancelTime()
+        self.departure_queue.checkCancelTime()
+
         self.landing_queue.checkRunways()
         self.departure_queue.checkRunways()
 

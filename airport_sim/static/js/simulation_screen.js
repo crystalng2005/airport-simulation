@@ -114,16 +114,16 @@ async function simulateFrame() {
       // console.log("emer"+planeID)
       letPlaneHaveEmergency(planeID);  
     }
+    // if the plane moved to a runway
+    else if(Number.isInteger(action))
+      movePlaneToRunway(planeID, action);
+
     // if the plane got diverted or cancelled or landed or taked-off from a runway
     // (aka the plan is done)
     else if(action == "kill"){
       // console.log("kill:"+planeID)
       killPlane(planeID);  
     }
-
-    // if the plane moved to a runway
-    else if(Number.isInteger(action))
-      movePlaneToRunway(planeID, action);
   }
 
   updateTimer();
@@ -240,6 +240,8 @@ function movePlaneToRunway(planeID, runwayID){
 
   const plane = document.getElementById('plane:' + planeID);
   const runway = document.getElementById('runway:' + runwayID);
+
+  if (!plane || !runway) return;
 
   // 1. Get positions before moving
   const planeRect = plane.getBoundingClientRect();
@@ -403,6 +405,7 @@ function updateTimer(){
 
 function letPlaneHaveEmergency(planeID){
   const plane = document.getElementById('plane:' + planeID);
+  if (!plane) return;
   plane.style.background = planeEmergencyColor;
 }
 
@@ -648,8 +651,3 @@ function showReport(report){
   `;
 }
 
-document.addEventListener('DOMContentLoaded', async function() {
-    const report = await getReport();
-    showReport(report);
-    loadResults();
-});

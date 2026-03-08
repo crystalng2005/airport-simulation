@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="static/css/result_screen.css">
 </head>
 <body>
-    <div class="container">
+    <!-- <div class="container"> -->
         <!-- Header -->
-        <header class="header">
+        <!-- <header class="header">
             <h1> View Simulation Results</h1>
-            <!-- <p class="subtitle">View the result of performance metrics</p> -->
-        </header>
+            <p class="subtitle">View the result of performance metrics</p>
+        </header> -->
 
         <!-- Main Content -->
         <main class="results-section">
@@ -94,26 +94,26 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2>Simulation Report</h2>
-                        <button class="close-btn" onclick="closeReport()">&times;</button>
+                        <!-- <button class="close-btn" onclick="closeReport()">&times;</button> -->
                     </div>
                     <div class="modal-body" id="reportContent">
                         <!-- Report will be inserted here -->
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-export" onclick="exportCurrentReport()">Export Report</button>
-                        <button class="btn btn-secondary" onclick="closeReport()">Close</button>
+                        <button class="btn btn-secondary" onclick="goToMenu()">Close</button>
                     </div>
                 </div>
             </div>
 
             <!-- Back Button -->
-            <div class="back-button-container">
+            <!-- <div class="back-button-container">
                 <button class="btn btn-secondary" onclick="goToMenu()">
                     Back to Main Menu
                 </button>
-            </div>
+            </div> -->
         </main>
-    </div>
+    <!-- </div> -->
 
     <script src="static/js/result_screen.js"></script>
 </body>

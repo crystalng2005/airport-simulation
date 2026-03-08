@@ -6,6 +6,8 @@ from logic.visualisation import VisualisationController
 from logic.report import PerformanceReport
 from datetime import datetime
 import logic.globals.reportData as RD
+
+
 app = Flask(
     __name__,
     template_folder=os.path.join(os.path.dirname(__file__), 'templates'),
@@ -35,42 +37,6 @@ def start_sim():
         controller.visualisation_controller.startSimulation(data)
 
         controller.is_available = False
-
-        # Save this configuration as a preset if requested
-        if data.get('save_as_preset', False):
-            try:
-                
-                
-                # Set preset controller values
-                controller.preset_controller.departure_runways = int(data.get('departure_runways'))
-                controller.preset_controller.landing_runways = int(data.get('landing_runways'))
-                controller.preset_controller.mixed_runways = int(data.get('mixed_runways'))
-                controller.preset_controller.plane_list = []
-                
-                
-                # Create report if it doesn't exist
-                if RD.reportData is None:
-                    start_time = datetime.now()
-                    
-                    RD.reportData = PerformanceReport(
-                        int(data.get('runways')),
-                        int(data.get('mixed_runways')),
-                        int(data.get('departure_runways')),
-                        int(data.get('landing_runways')),
-                        int(data.get('inbound_flow')),
-                        start_time
-                    )
-                    
-                else:
-                    print('Using existing RD.reportData')
-                
-                controller.preset_controller.report = RD.reportData
-                
-                # Save preset
-                preset_saved = controller.preset_controller.savePreset()
-                                
-            except Exception as preset_error:
-                print("error")
 
         return jsonify({'success': True, 'message': 'Simulation started'}), 200
 

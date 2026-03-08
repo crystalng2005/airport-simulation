@@ -43,23 +43,15 @@ class Plane:
     # Stores the total number of plane objects generated
     plane_num = 0
     
-    def __init__(self, is_departure: bool):
-        # Basic information relating to the plane
-        self.callsign = self.genCallsign()
-        self.origin = self.genOrigin()
-        self.destination = self.genDestination()
-        self.current_location = self.origin
-        self.is_departure = is_departure
-        self.fuel_level = self.genFuel()
-        self.emergency_status = self.genEmergencyOnSpawn()
-        self.target_time = self.genTargetTime()
-        self.actual_time = self.genActualTime()
-
+    def __init__(self, is_departure: bool, queue_controller, cancellation_time):
+        
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
         self.user_setting = False
         self.user_mechanical = 0
         self.user_medical = 0
         self.user_fuel = 0
+        self.queue_controller = queue_controller
+        self.cancellation_time = cancellation_time
 
         # Management variables
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
@@ -73,6 +65,17 @@ class Plane:
         self.generated_at = None
         self.left_simulation = False
         self.needsToBeRemoved = False
+
+        # Basic information relating to the plane
+        self.callsign = self.genCallsign()
+        self.origin = self.genOrigin()
+        self.destination = self.genDestination()
+        self.current_location = self.origin
+        self.is_departure = is_departure
+        self.fuel_level = self.genFuel()
+        self.emergency_status = self.genEmergencyOnSpawn()
+        self.target_time = self.genTargetTime()
+        self.actual_time = self.genActualTime()
 
         # Increments total number of planes
         Plane.plane_num += 1
@@ -172,7 +175,7 @@ class Plane:
 
     # Generates fuel based on the uniform distribution between 20 and 60 minutes
     def genFuel(self):
-        fuel = random.uniform(20,60)
+        fuel = round(random.uniform(20,60))
         return fuel
 
 
@@ -188,7 +191,7 @@ class Plane:
         secs = remaining % 60
 
         # Gets the target time in ticks
-        self.tickTargetTime = math.ceil(randMinutes/5)
+        self.tickTargetTime = round(math.ceil(randMinutes/5))
 
         # Returns in datetime format, converted to int
         return datetime.time(int(randHours), int(randMinutes), int(secs))
@@ -201,7 +204,7 @@ class Plane:
         # Applies normal distribution (with standard deviation of 5 minutes (300s))
         time = random.normal(actualSeconds, 5*60) 
         # Applies the normal distribution on the tick time
-        self.tickActualTime = random.normal(self.tickTargetTime, 5/MINUTES_PER_TICK)
+        self.tickActualTime = round(random.normal(self.tickTargetTime, 5/MINUTES_PER_TICK))
 
         # Converts the new time back into datetime and returns
         timeSeconds = int(time)
@@ -282,27 +285,32 @@ class Plane:
             self.needsToBeRemoved = False
             self.exit_simulation()
         # Checks if the plane is cancelled (don't need to decrease if it is)
-        if not self.cancelled:
-            self.fuel_level -= FUEL_USAGE_PER_TICK
+        if not self.left_simulation:
+            if not self.is_departure: self.fuel_level -= FUEL_USAGE_PER_TICK
+            if self.emergency_status != EmergencyStatus.NONE: self.emergency_time_left -= FUEL_USAGE_PER_TICK
+            if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK
             RD.reportData.tot_fuel_used += FUEL_USAGE_PER_TICK
             return True 
         return False
 
 
+
     # Directs a plane to the given runway
     def goToRunway(self, runway: int) -> bool:
-        if self.current_runway != runway:
-            self.current_runway = runway 
-            # Its now on a runway and will need to depart
-            self.needsToBeRemoved = True
-            return True 
-        else:
-            return False
+        if not self.left_simulation:
+            if self.current_runway != runway:
+                self.current_runway = runway 
+                # Its now on a runway and will need to depart
+                self.needsToBeRemoved = True
+                return True 
+            else:
+                return False
 
 
     # Cancels the plane and makes it leave the simulation
     def cancel(self):
         self.cancelled = True
+        #RD.reportData.cancellations += 1
         self.exit_simulation()
 
 
@@ -361,13 +369,15 @@ class Plane:
         if self.emergency_status == EmergencyStatus.NONE:
             if mechanical_val == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
+                self.queue_controller.planeEmergency(self)
             elif medical_val == 1:
                 self.emergency_status= EmergencyStatus.HEALTH
-            
+                self.queue_controller.planeEmergency(self)
             # Checks the fuel level and flags emergency if needed
             else:
                 if self.fuel_level < 20:
                     self.emergency_status = EmergencyStatus.FUEL
+                    self.queue_controller.planeEmergency(self)
             
         return self.emergency_status
 

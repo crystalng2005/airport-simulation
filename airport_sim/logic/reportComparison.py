@@ -7,12 +7,15 @@ from logic.presets import PresetController
 
 
 
+# TODO: do all the relevant commenting later, lots of unecessary functions in this file
+
+# Class for storing the summary of all results
 class ResultsSummary:
     def __init__(self, reports: list[PerformanceReport]):
         self.reports = reports 
         self.summarised = False
 
-
+    # Gets all the information from each report and puts it into lists
     def summariseAll(self):
         self.runways = []
         self.landings_per_hour = []
@@ -22,7 +25,7 @@ class ResultsSummary:
         self.mean_wait = []
         self.mean_fuel = []
 
-
+        # Adds to lists
         for report in self.reports:
             self.runways.append(report.runway_total)
             self.landings_per_hour.append(report.landings_per_hour)
@@ -34,7 +37,7 @@ class ResultsSummary:
 
         self.summarised = True
 
-
+    # Function to generate the plots
     def gen_plots(self):
         self.gen_runways_diversions()
         self.gen_runways_cancellations()
@@ -45,13 +48,13 @@ class ResultsSummary:
         
 
 
-
+    # Generates the graph for runways on x axis, diversions on y axis
     def gen_runways_diversions(self):
         if self.summarised:
             self.diversions_per_runway = []
             self.avg_diversions_per_runway = []
 
-
+            # Aggregates the results for each runway
             for i in range(0, len(self.runways)):
                 if i == 0:
                     self.diversions_per_runway.append([self.runways[i],[self.diversions[i]]])
@@ -60,12 +63,15 @@ class ResultsSummary:
                         if self.diversions_per_runway[j][0] == self.runways[i]:
                             self.diversions_per_runway[j][1].append(self.diversions[i])
             
+            # Sorts based on number of runways
             self.diversions_per_runway.sort(key = lambda entry: entry[0])
 
+            # Calculates the mean of all diversions per runway
             for i in range(0,len(self.diversions_per_runway)):
                 self.avg_diversions_per_runway[i][0] = self.diversions_per_runway[i][0]
                 self.avg_diversions_per_runway[i][1] = statistics.mean(self.diversions_per_runway[i][1])
 
+            # Plots the graph
             location = Path("./")
             filename = location / "runways_diversions.pdf"
 

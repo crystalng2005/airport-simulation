@@ -359,9 +359,10 @@ function showReportModal(report) {
     const content = document.getElementById('reportContent');
 
     // Backend already calculated everything
-    content.innerHTML = `
-        <h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${report.id} - Full Report</h3>
-        
+    content.innerHTML = 
+
+        // `<h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${report.id} - Full Report</h3>`+
+        `
         <div class="metric-cards">
             <div class="metric-card">
                 <div class="metric-label">Total Planes</div>
@@ -389,18 +390,15 @@ function showReportModal(report) {
             </div>
             <div class="metric-card">
                 <div class="metric-label">Total Fuel Used</div>
-                <div class="metric-value">${0}</div>`
-                // <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>
-                +
-                `
+                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>        
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Wait Time</div>
-                <div class="metric-value">${report.avg_wait_time} min</div>
+                <div class="metric-value">${report.avg_wait_time.toFixed(1)} min</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Fuel/Plane</div>
-                <div class="metric-value">${report.avg_fuel_per_plane}</div>
+                <div class="metric-value">${report.avg_fuel_per_plane.toFixed(1)}</div>
             </div>
         </div>
     `;

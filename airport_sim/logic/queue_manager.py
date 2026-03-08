@@ -1,5 +1,5 @@
 # QueueController Class
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 from typing import List
 from queue import Queue
 
@@ -9,6 +9,8 @@ from logic.plane import Plane, EmergencyStatus
 import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
 # from logic.simulation import SimulationController
+
+MINUTES_PER_TICK = 5
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
@@ -41,11 +43,14 @@ class QueueController:
                     removed.goToRunway(runway.runway_number)
                     currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                     # Assigns the holding queue exit time to the plane object
-                    removed.left_hold = self.sim.getSimulationTime()
-                    delay = (removed.left_hold - removed.entered_hold).total_seconds()
+                    removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
+                    delay = (removed.left_hold - removed.tickActualTime) 
+                    wait_time = removed.left_hold - removed.entered_hold
                 
-                    # Adds the delay time to the report and decrements current queue size
+                    # Adds the delay time and wait time to the report and decrements current queue size
                     RD.reportData.arrival_delay_times.append(delay)
+                    RD.reportData.wait_times.append(wait_time)
+                    RD.reportData.tot_wait_time += wait_time
                     RD.reportData.decQueueCurrent()
                 else:
                     checked += 1
@@ -59,7 +64,7 @@ class QueueController:
             self.plane_queue.append(p)
 
         # Assigns holding queue entry time to plane object and increments current queue size
-        p.entered_hold = self.sim.getSimulationTime()
+        p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
         RD.reportData.incQueueCurrent()
 
 
@@ -70,29 +75,33 @@ class QueueController:
         if len(self.plane_queue) == 0:
             return
 
-
         # If the emergency time exceeds the limit, diverts the plane
-        if not self.is_departure and self.plane_queue[0].emergency_status != EmergencyStatus.NONE and self.plane_queue[0].emergency_time_left <= 0:
-            # Cancels the plane (same logic for diversions)
-            self.plane_queue[0].cancel()
-            self.plane_queue.pop(0)
-            # Increments diversions in the report
-            RD.reportData.diversions += 1
+        for plane in self.plane_queue[:]:
+            if not self.is_departure and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
+                plane.divert()
+                self.plane_queue.remove(plane)
+                RD.reportData.diversions += 1
 
         # If the plane exceeds the cancellation time
-        cancellation_limit = timedelta(minutes=self.sim.cancellation_time)
-        for plane in list(self.plane_queue):
-            if (self.sim.getSimulationTime() - plane.entered_hold) > cancellation_limit:
-                # Cancels the plane and removes the queue
+        i = 0
+        while i < len(self.plane_queue):
+            plane = self.plane_queue[i]
+            if plane.cancellation_time <= 0:
                 plane.cancel()
-                self.plane_queue.remove(plane)
+                self.plane_queue.pop(i)
                 RD.reportData.cancellations += 1
+            else:
+                i += 1
 
 
 
     # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
     def planeEmergency(self, p: Plane):
         currentFrameActions.current_frame_actions.append([p.callsign, "emergency"])
+        if p in self.plane_queue:
+            self.plane_queue.remove(p)
+
+        # Assings time based on emergency status
         match (p.emergency_status):
             case EmergencyStatus.FUEL:
                 p.emergency_time_left = 10
@@ -100,6 +109,8 @@ class QueueController:
                 p.emergency_time_left = 20
             case EmergencyStatus.MECHANICAL:
                 p.emergency_time_left = 30
+        
+        # Uses emergency time left to modify its queue position
         inserted = False
         for i, plane in enumerate(self.plane_queue):
             if plane.emergency_time_left == 0 or plane.emergency_time_left >= p.emergency_time_left:

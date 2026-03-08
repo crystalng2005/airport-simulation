@@ -1,6 +1,7 @@
 from logic.plane import Plane, EmergencyStatus
 import json
 import os
+import tempfile
 from datetime import datetime, timezone
 from logic.report import PerformanceReport
 import logic.globals.reportData as RD
@@ -90,6 +91,8 @@ class PresetController:
             for key, val in report_dict.items():
                 if hasattr(val, 'isoformat'):
                     report_dict[key] = val.isoformat()
+                elif hasattr(val, 'total_seconds'):
+                    report_dict[key] = val.total_seconds()
                 elif isinstance(val, list):
                     report_dict[key] = [
                         v.total_seconds() if hasattr(v, 'total_seconds') else v
@@ -107,8 +110,16 @@ class PresetController:
                 "report": report_dict
             }
 
-            with open(self.preset_files[preset_id], 'w') as f:
-                json.dump(preset, f, indent=4)
+            # Atomic write: write to temp file first, then rename
+            dest = self.preset_files[preset_id]
+            fd, tmp_path = tempfile.mkstemp(dir=self.data_dir, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(preset, f, indent=4)
+                os.replace(tmp_path, dest)
+            except:
+                os.unlink(tmp_path)
+                raise
 
             for p in meta_data["presets"]:
                 if p["id"] == preset_id:
@@ -168,8 +179,11 @@ class PresetController:
     @staticmethod
     def _serialize_plane(plane):
         """Convert a Plane object to a JSON-serializable dict."""
+        skip = {'queue_controller'}
         d = {}
         for k, v in plane.__dict__.items():
+            if k in skip:
+                continue
             if hasattr(v, 'isoformat'):       # datetime / datetime.time
                 d[k] = v.isoformat()
             elif hasattr(v, 'value'):          # Enum
