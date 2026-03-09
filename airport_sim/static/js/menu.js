@@ -19,13 +19,6 @@ function viewResults() {
     window.location.href = '/results';
 }
 
-// Open Settings
-function openSettings() {
-    console.log("Opening settings...");
-    // TO DO: Navigate to settings page or call Flask route
-    alert("Settings\n\nThis will open the settings panel.");
-    // window.location.href = '/settings';
-}
 
 // Exit Application
 function exitApplication() {
