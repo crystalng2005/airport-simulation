@@ -31,7 +31,7 @@ class QueueController:
         while checked < len(self.runway_list):
             checked = 0
             for runway in self.runway_list:
-                if runway.maxPlanes < 5 and len(self.plane_queue) != 0:
+                if runway.maxPlanes < 5 and len(self.plane_queue) != 0 and runway.is_operational: # NOTE: added check for runway closure
                     # Alternates each tick who can use mixed mode (allowing departure to use it too)
                     if self.evenTurn == True and self.is_departure == False and runway.mixed_mode == True:
                         checked += 1
@@ -43,9 +43,9 @@ class QueueController:
                     removed.goToRunway(runway.runway_number)
                     currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                     # Assigns the holding queue exit time to the plane object
-                    removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
-                    delay = (removed.left_hold - removed.tickActualTime) 
-                    wait_time = removed.left_hold - removed.entered_hold
+                    removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
+                    delay = round(removed.left_hold - removed.tickActualTime) 
+                    wait_time = round(removed.left_hold - removed.entered_hold)
                 
                     # Adds the delay time and wait time to the report and decrements current queue size
                     RD.reportData.arrival_delay_times.append(delay)
@@ -64,7 +64,7 @@ class QueueController:
             self.plane_queue.append(p)
 
         # Assigns holding queue entry time to plane object and increments current queue size
-        p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
+        p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
         RD.reportData.incQueueCurrent()
 
 
@@ -77,7 +77,10 @@ class QueueController:
 
         # If the emergency time exceeds the limit, diverts the plane
         for plane in self.plane_queue[:]:
-            if not self.is_departure and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
+            # checkcode, appears that there are no planes with emergecnies where meregency time left is <= 0
+            if plane.emergency_time_left <= 0 and plane.emergency_status != EmergencyStatus.NONE:
+                print("!!!!")
+            if (not self.is_departure) and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
                 plane.divert()
                 self.plane_queue.remove(plane)
                 RD.reportData.diversions += 1
@@ -86,7 +89,7 @@ class QueueController:
         i = 0
         while i < len(self.plane_queue):
             plane = self.plane_queue[i]
-            if plane.cancellation_time <= 0:
+            if plane.cancellation_time <= 0 and self.is_departure:
                 plane.cancel()
                 self.plane_queue.pop(i)
                 RD.reportData.cancellations += 1

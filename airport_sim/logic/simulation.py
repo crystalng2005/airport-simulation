@@ -252,6 +252,7 @@ class SimulationController:
         self.departure_queue.checkRunways()
 
 
+
         # Extracts the planes from the preset planes instead of generating
         if self.preset_mode:
             planes_to_spawn = [p for p in self.preset_planes if p.generated_at <= self.current_time]

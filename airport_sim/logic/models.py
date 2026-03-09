@@ -30,9 +30,11 @@ class Runway:
     # Functions to open and close runways, can be called outside the class if necessary
     def openRunway(self):
         self.closed = False
+        self.is_operational = True
 
     def closeRunway(self):
         self.closed = True
+        self.is_operational = False
 
     # Returns the status of the runway
     def checkStatus(self):

@@ -288,7 +288,7 @@ class Plane:
         if not self.left_simulation:
             if not self.is_departure: self.fuel_level -= FUEL_USAGE_PER_TICK
             if self.emergency_status != EmergencyStatus.NONE: self.emergency_time_left -= FUEL_USAGE_PER_TICK
-            if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK
+            if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK #NOTE: What??
             RD.reportData.tot_fuel_used += FUEL_USAGE_PER_TICK
             return True 
         return False
@@ -370,14 +370,17 @@ class Plane:
             if mechanical_val == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
                 self.queue_controller.planeEmergency(self)
+                #print("emergency")
             elif medical_val == 1:
                 self.emergency_status= EmergencyStatus.HEALTH
                 self.queue_controller.planeEmergency(self)
+                #print("emergency")
             # Checks the fuel level and flags emergency if needed
             else:
                 if self.fuel_level < 20:
                     self.emergency_status = EmergencyStatus.FUEL
                     self.queue_controller.planeEmergency(self)
+                    #print("emergency")
             
         return self.emergency_status
 
