@@ -59,10 +59,10 @@ class Runway:
                 return self.closed
             else:
                 # Weather is the most likely, construction least likely
-                weather = random.randint(0,1000)
-                maintenance = random.randint(0,10000)
-                safety = random.randint(0,10000)
-                construction = random.randint(0,30000)
+                weather = random.randint(0,20)
+                maintenance = random.randint(0,20)
+                safety = random.randint(0,20)
+                construction = random.randint(0,20)
 
 
         # If user values have been set, uses these here

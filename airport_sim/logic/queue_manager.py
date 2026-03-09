@@ -31,6 +31,8 @@ class QueueController:
         while checked < len(self.runway_list):
             checked = 0
             for runway in self.runway_list:
+                #if not runway.is_operational:
+                #    print("closed11!!")
                 if runway.maxPlanes < 5 and len(self.plane_queue) != 0 and runway.is_operational: # NOTE: added check for runway closure
                     # Alternates each tick who can use mixed mode (allowing departure to use it too)
                     if self.evenTurn == True and self.is_departure == False and runway.mixed_mode == True:

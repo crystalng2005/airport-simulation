@@ -244,6 +244,12 @@ class SimulationController:
                 plane.decrease_fuel()
                 plane.update_emergency()
 
+        # Gives runways the chance to close/open
+        for runway in self.all_runways:
+            runway.updateStatus()
+            #if runway.checkStatus():
+            #    print("closed!!")
+
         # Process existing queue first — assign waiting planes to available runways
         self.landing_queue.checkCancelTime()
         self.departure_queue.checkCancelTime()
