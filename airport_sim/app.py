@@ -218,7 +218,15 @@ def get_full_report(sim_id):
    
     try:
         report = controller.visualisation_controller.getSimulationReport(sim_id)
-        return jsonify(report)
+        if report is None:
+            return jsonify({
+                "success": False,
+                "error": "Simulation report not found"
+            }), 404
+        return jsonify({
+            "success": True,
+            "report": report.get("report", {})
+        })
     except Exception as e:
         return jsonify({
             "success": False,
@@ -235,6 +243,26 @@ def compare_simulations():
     if comparison is None:
         return jsonify({"success": False, "error": "One or both simulation IDs not found"}), 404
     return jsonify({"success": True, "comparison": comparison})
+
+
+@app.route('/api/comparison-plots', methods=['POST'])
+def comparison_plots():
+    """Generate side-by-side bar chart plots comparing two simulation reports."""
+    data = request.get_json()
+    sim_id_1 = int(data.get('sim_id_1'))
+    sim_id_2 = int(data.get('sim_id_2'))
+    try:
+        r1 = controller.visualisation_controller.results_controller.getOneResult(sim_id_1)
+        r2 = controller.visualisation_controller.results_controller.getOneResult(sim_id_2)
+        if r1 is None or r2 is None:
+            return jsonify({'success': False, 'error': 'One or both simulation IDs not found'}), 404
+        plots = PerformanceReport.generate_comparison_plots_base64(
+            r1['report'], r2['report'],
+            label1=f'Sim #{sim_id_1}', label2=f'Sim #{sim_id_2}'
+        )
+        return jsonify({'success': True, 'plots': plots})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/export-current-report', methods=['GET'])
@@ -353,6 +381,33 @@ def get_report():
             return jsonify({'success': False, 'error': 'Report not ready'})
         return jsonify({'success': True, 'report': report})
     return jsonify({'success': False, 'error': 'No active simulation'})
+
+
+@app.route('/api/report-plots', methods=['GET'])
+def get_report_plots():
+    """Generate and return base64-encoded plot images for the current simulation report."""
+    if RD.reportData is None:
+        return jsonify({'success': False, 'error': 'No report available'}), 400
+    try:
+        RD.reportData.generateReport()
+        plots = RD.reportData.generate_plots_base64()
+        return jsonify({'success': True, 'plots': plots})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/report-plots/<int:sim_id>', methods=['GET'])
+def get_saved_report_plots(sim_id):
+    """Generate and return base64 plot images for a specific saved simulation report."""
+    try:
+        report = controller.visualisation_controller.results_controller.loadResults(sim_id)
+        if report is None:
+            return jsonify({'success': False, 'error': 'Simulation report not found'}), 404
+        report.generateReport()
+        plots = report.generate_plots_base64()
+        return jsonify({'success': True, 'plots': plots})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
     

@@ -80,8 +80,18 @@
                         <h2>Comparison Results</h2>
                         <button class="close-btn" onclick="closeComparison()">&times;</button>
                     </div>
+                    <div class="comparison-view-switch">
+                        <button id="comparisonResultsBtn" class="btn btn-primary" onclick="showComparisonResults()">View Results</button>
+                        <button id="comparisonPlotsBtn" class="btn btn-secondary" onclick="showComparisonPlots()">View Plots</button>
+                    </div>
                     <div class="modal-body" id="comparisonContent">
                         <!-- Comparison will be inserted here -->
+                    </div>
+                    <div class="modal-body" id="comparisonPlotsSection" style="display: none; padding-top: 0;">
+                        <h3 style="color: #1e3a8a; margin: 0 0 12px;">Comparison Charts</h3>
+                        <div id="comparisonPlotsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <!-- Comparison plot images will be inserted here -->
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="closeComparison()">Close</button>
@@ -96,8 +106,18 @@
                         <h2>Simulation Report</h2>
                         <button class="close-btn" onclick="closeReport()">&times;</button>
                     </div>
+                    <div class="comparison-view-switch">
+                        <button id="reportResultsBtn" class="btn btn-primary" onclick="showReportResults()">View Results</button>
+                        <button id="reportPlotsBtn" class="btn btn-secondary" onclick="showReportPlots()">View Plots</button>
+                    </div>
                     <div class="modal-body" id="reportContent">
                         <!-- Report will be inserted here -->
+                    </div>
+                    <div class="modal-body" id="reportPlotsSection" style="display: none; padding-top: 0;">
+                        <h3 style="color: #1e3a8a; margin: 0 0 12px;">Performance Plots</h3>
+                        <div id="reportPlotsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <!-- Report plot images will be inserted here -->
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-export" onclick="exportCurrentReport()">Export Report</button>

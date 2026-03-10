@@ -96,10 +96,22 @@
                         <h2>Simulation Report</h2>
                         <!-- <button class="close-btn" onclick="closeReport()">&times;</button> -->
                     </div>
-                    <div class="modal-body" id="reportContent">
-                        <!-- Report will be inserted here -->
+                    <div class="comparison-view-switch" style="padding: 10px 20px 0;">
+                        <button id="reportResultsBtn" class="btn btn-primary" onclick="showReportResults()">View Results</button>
+                        <button id="reportPlotsBtn" class="btn btn-secondary" onclick="showReportPlots()">View Plots</button>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-body" style="padding: 15px 20px; overflow-y: auto;">
+                        <div id="reportContent" style="display: block;">
+                            <!-- Report metrics will be inserted here -->
+                        </div>
+                        <div id="plotsSection" style="display: none; margin-top: 15px;">
+                            <h3 style="color: #1e3a8a; margin: 0 0 10px; font-size: 1rem;">Performance Plots</h3>
+                            <div id="plotsContainer" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                                <!-- Plot images will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding: 10px 20px;">
                         <button class="btn btn-export" onclick="exportCurrentReport()">Export Report</button>
                         <button class="btn btn-secondary" onclick="goToMenu()">Close</button>
                     </div>
