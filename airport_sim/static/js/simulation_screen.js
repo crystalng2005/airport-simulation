@@ -1,5 +1,6 @@
 // big simulation sittings
-let UPS = 1; // staring defult update rate 
+let UPS = 1; // staring default update rate
+const maxUPS = 10; // the maximum number of UPS that the simulation will allow
 let simulationTick = 0;
 const TICK_MINUTES = 5; // minutes per tick, must match backend
 
@@ -51,7 +52,7 @@ document.addEventListener("keydown", function(event) {
         newUPS -= 1;
     
     // decrease the UPS in next update
-    if (event.key === "ArrowRight")
+    if (event.key === "ArrowRight" && newUPS <= maxUPS)
       newUPS += 1;
   }  
 });
