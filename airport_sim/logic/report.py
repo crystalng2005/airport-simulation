@@ -78,7 +78,10 @@ class PerformanceReport:
 
     # Returns the duration in seconds as a formatted string
     def string_duration(self):
-        inSeconds = int(self.duration.total_seconds())
+        if hasattr(self.duration, 'total_seconds'):
+            inSeconds = int(self.duration.total_seconds())
+        else:
+            inSeconds = int(self.duration)
         hours, remainder = divmod(inSeconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
