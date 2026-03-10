@@ -7,8 +7,8 @@ from logic.models import Runway
 from logic.plane import Plane, EmergencyStatus
 
 import logic.globals.reportData as RD
-from logic.currentFrameActions import currentFrameActions
-# from logic.simulation import SimulationController
+from logic.simulation import SimulationController
+
 
 MINUTES_PER_TICK = 5
 
