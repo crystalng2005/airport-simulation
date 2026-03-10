@@ -7,6 +7,7 @@ from logic.models import Runway
 from logic.queue_manager import QueueController
 # from airport_sim.logic.report import PerformanceReport
 from logic.presets import PresetController
+from logic.results import ResultsController
 from logic.currentFrameActions import currentFrameActions
 
 import logic.globals.reportData as RD
@@ -215,6 +216,9 @@ class SimulationController:
         self.preset_controller.mixed_runways = self.mixed_runways
         self.preset_controller.report = RD.reportData
         self.preset_controller.savePreset()
+        # Save result to results history
+        self.results_controller = ResultsController()
+        self.results_controller.saveResult()
         return False
 
     def get_tick_time(self):

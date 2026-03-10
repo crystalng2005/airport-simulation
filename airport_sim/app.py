@@ -226,8 +226,11 @@ def get_full_report(sim_id):
         }), 500
 
 
-@app.route('/api/compare-simulations', methods=['POST']) # Is this used anywhere?
-def compare_simulations(self, sim_id_1, sim_id_2):
+@app.route('/api/compare-simulations', methods=['POST'])
+def compare_simulations():
+    data = request.get_json()
+    sim_id_1 = data.get('sim_id_1')
+    sim_id_2 = data.get('sim_id_2')
     comparison = controller.visualisation_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
     if comparison is None:
         return jsonify({"success": False, "error": "One or both simulation IDs not found"}), 404

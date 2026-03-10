@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
@@ -28,12 +28,24 @@ class ResultsController:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
 
-            now = datetime.now(datetime.timezone.utc).isoformat()
+            now = datetime.now(timezone.utc).isoformat()
             self.result = RD.reportData
+
+            report_dict = self.result.__dict__.copy()
+            for key, val in report_dict.items():
+                if hasattr(val, 'isoformat'):
+                    report_dict[key] = val.isoformat()
+                elif hasattr(val, 'total_seconds'):
+                    report_dict[key] = val.total_seconds()
+                elif isinstance(val, list):
+                    report_dict[key] = [
+                        v.total_seconds() if hasattr(v, 'total_seconds') else v
+                        for v in val
+                    ]
 
             results.append({
                 "saved_at": now,
-                "result": self.result.__dict__
+                "result": report_dict
             })
 
             # Keep only the last 50 results (pops the oldest one if necessary)
@@ -92,7 +104,7 @@ class ResultsController:
                 "report": report.outputReport_dict()
             })
 
-            return output
+        return output
 
     def getOneResult(self,id:int):
         try:
