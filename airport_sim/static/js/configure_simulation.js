@@ -3,15 +3,8 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Add validation listeners
     const runwayInputs = document.querySelectorAll(
-        '#departure_runways, #landing_runways, #mixed_runways, #total_runways'
+        '#departure_runways, #landing_runways, #mixed_runways'
     );
-    
-    runwayInputs.forEach(input => {
-        input.addEventListener('input', validateRunways);
-    });
-    
-    // Auto-validate on page load
-    validateRunways();
     
     // Load preset if coming from presets page
     loadPresetIntoForm();
@@ -19,29 +12,36 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Configuration form loaded successfully!');
 });
 
-/**
- * Validate that runway configuration adds up correctly
- * @returns {boolean} True if valid, false otherwise
- */
-function validateRunways() {
-    const total = parseInt(document.getElementById('total_runways').value) || 0;
-    const departure = parseInt(document.getElementById('departure_runways').value) || 0;
-    const landing = parseInt(document.getElementById('landing_runways').value) || 0;
-    const mixed = parseInt(document.getElementById('mixed_runways').value) || 0;
+// /**
+//  * Validate that runway configuration adds up correctly
+//  * @returns {boolean} True if valid, false otherwise
+//  */
+// function validateRunways() {
+//     const departure = parseInt(document.getElementById('departure_runways').value) || 0;
+//     const landing = parseInt(document.getElementById('landing_runways').value) || 0;
+//     const mixed = parseInt(document.getElementById('mixed_runways').value) || 0;
     
-    const sum = departure + landing + mixed;
-    const errorElement = document.getElementById('runway-error');
+//     const sum = departure + landing + mixed;
+//     const errorElement = document.getElementById('runway-error');
+
+//     // total_runways field is optional in current UI. If absent, require at least one runway.
+//     const totalElement = document.getElementById('total_runways');
+//     const total = totalElement ? (parseInt(totalElement.value) || 0) : sum;
     
-    if (sum !== total) {
-        errorElement.style.display = 'block';
-        errorElement.classList.add('show');
-        return false;
-    } else {
-        errorElement.style.display = 'none';
-        errorElement.classList.remove('show');
-        return true;
-    }
-}
+//     if (sum <= 0 || sum !== total) {
+//         if (errorElement) {
+//             errorElement.style.display = 'block';
+//             errorElement.classList.add('show');
+//         }
+//         return false;
+//     } else {
+//         if (errorElement) {
+//             errorElement.style.display = 'none';
+//             errorElement.classList.remove('show');
+//         }
+//         return true;
+//     }
+// }
 
 /**
  * Start simulation - main form submission handler
@@ -49,12 +49,6 @@ function validateRunways() {
  */
 async function startSimulation(event) {
     event.preventDefault();
-    
-    // Validate runways before proceeding
-    if (!validateRunways()) {
-        alert('Please fix the runway configuration before starting.\n\nThe sum of departure, landing, and mixed runways must equal the total runways.');
-        return;
-    }
     
     // Show loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -64,6 +58,13 @@ async function startSimulation(event) {
         // Gather form data
         const formData = new FormData(event.target);
         const data = Object.fromEntries(formData);
+
+        // Backend expects "runways" (total), not "total_runways" from form state.
+        data.runways = String(
+            (parseInt(data.departure_runways) || 0) +
+            (parseInt(data.landing_runways) || 0) +
+            (parseInt(data.mixed_runways) || 0)
+        );
         
         // Add flag to save this config as a preset
         data.save_as_preset = true;
@@ -106,7 +107,7 @@ async function startSimulation(event) {
         alert(
             'Failed to start simulation. Please try again.\n\n' +
             'Error: ' + error.message + '\n\n' +
-            'Make sure Flask server is running on port 5000.'
+            'Make sure Flask server is running on the same port shown in your URL.'
         );
     }
 }
@@ -135,7 +136,10 @@ function loadPresetIntoForm() {
         console.log('Loading preset into form:', config);
         
         // Populate form fields
-        document.getElementById('total_runways').value = config.runways;
+        const totalRunwaysEl = document.getElementById('total_runways');
+        if (totalRunwaysEl) {
+            totalRunwaysEl.value = config.runways;
+        }
         document.getElementById('departure_runways').value = config.departure_runways;
         document.getElementById('landing_runways').value = config.landing_runways;
         document.getElementById('mixed_runways').value = config.mixed_runways;
@@ -143,9 +147,6 @@ function loadPresetIntoForm() {
         document.getElementById('outbound_flow').value = config.outbound_flow;
         document.getElementById('cancellation_time').value = config.cancellation_time;
         document.getElementById('duration').value = config.duration;
-        
-        // Validate runways
-        validateRunways();
         
         // Clear sessionStorage
         sessionStorage.removeItem('presetConfig');

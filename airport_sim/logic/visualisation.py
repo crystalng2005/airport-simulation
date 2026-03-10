@@ -67,10 +67,7 @@ class VisualisationController:
         }
 
     def exportSimulationReport(self, sim_id):
-        if self.results_controller.exportResults(sim_id):
-            return os.path.dirname(__file__), '..', 'exports'
-        else:
-            return ""
+        return self.results_controller.exportResultById(sim_id)
         
 
     def getAvailablePresets(self):

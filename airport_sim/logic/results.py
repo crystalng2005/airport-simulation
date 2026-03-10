@@ -135,27 +135,63 @@ class ResultsController:
 
 
     # Given a specific report ID, exports it to the exports folder
-    def exportResults(self, id: int) -> bool:
-        return self.exportResults(self, self.loadResults(self, id))
+    def exportResultById(self, id: int):
+        report = self.loadResults(id)
+        if report is None:
+            return None
+        return self.exportReport(report)
 
-    # Given a specific report, exports it to the exports folder
-    def exportResults(self, PR: PerformanceReport) -> bool:
+    # Given a specific report, exports it to the exports folder and returns the file path
+    def exportReport(self, PR: PerformanceReport):
         export_dir = os.path.join(os.path.dirname(__file__), '..', 'exports')
 
         try:
             os.makedirs(export_dir, exist_ok=True)
 
-            now = datetime.now(datetime.timezone.utc).isoformat()
-            export_file = os.path.join(export_dir, f'results-{now}.json')
+            now = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
+            export_file = os.path.join(export_dir, f'simulation-report-{now}.txt')
 
-            result = PR.__dict__
+            report = PR.outputReport_dict()
 
-            with open(export_file, 'w') as f:
-                json.dump(result, f, indent=4)
+            content = (
+                'AIRPORT SIMULATION REPORT\n'
+                '=========================\n\n'
+                'Summary\n'
+                '-------\n'
+                f"Start time: {report.get('start_time', 'N/A')}\n"
+                f"End time: {report.get('completed_at', 'N/A')}\n"
+                f"Total duration: {report.get('duration', 'N/A')}\n\n"
+                'Overall outcome\n'
+                '---------------\n'
+                f"Total flights handled: {report.get('total_planes', 0)}\n"
+                f"Flights diverted: {report.get('diversions', 0)}\n"
+                f"Flights cancelled: {report.get('cancellations', 0)}\n"
+                f"Operational efficiency: {report.get('efficiency', 0)}%\n\n"
+                'Queue and holding overview\n'
+                '--------------------------\n'
+                f"Longest runway queue: {report.get('queue_max', 0)} flights\n"
+                f"Longest holding pattern queue: {report.get('holding_max', 0)} flights\n\n"
+                'Fuel and delays\n'
+                '---------------\n'
+                f"Total fuel used: {report.get('tot_fuel_used', 0):.1f} units\n"
+                f"Average fuel used per flight: {report.get('avg_fuel_per_plane', 0):.1f} units\n"
+                f"Average wait before runway access: {report.get('avg_wait_time', 0)} minutes\n"
+                f"Average holding time: {report.get('avg_hold_time', 0)} minutes\n"
+                f"Average take-off delay: {report.get('avg_takeoff_time', 0)} minutes\n"
+                f"Average arrival delay: {report.get('avg_arrival_time', 0)} minutes\n\n"
+                'Detail notes\n'
+                '------------\n'
+                'Lower diversion and cancellation counts are better.\n'
+                'A higher efficiency percentage means more flights were completed successfully.\n'
+                'Use this report to compare runway setups and traffic flow settings.\n'
+            )
 
-            return True
+            with open(export_file, 'w', encoding='utf-8') as f:
+                f.write(content)
+
+            return export_file
         except (Exception, IOError):
-            return False
+            return None
 
     def reset(self) -> bool:
         self.result = None

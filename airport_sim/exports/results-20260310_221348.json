@@ -1,0 +1,41 @@
+{
+    "runway_total": 1,
+    "runways_mixed": 1,
+    "runways_departure": 0,
+    "runways_landing": 0,
+    "landings_per_hour": 10,
+    "start_time": "2000-01-01T00:00:00",
+    "diversions": 0,
+    "cancellations": 0,
+    "total_planes": 3,
+    "tot_wait_time": 5,
+    "tot_fuel_used": 5,
+    "wait_times": [
+        5
+    ],
+    "hold_times": [],
+    "take_off_delays": [],
+    "arrival_delay_times": [
+        7
+    ],
+    "queue_max": 2,
+    "queue_current": 2,
+    "holding_max": 0,
+    "holding_current": 0,
+    "finish_time": "2000-01-01T00:10:00",
+    "duration": 600.0,
+    "efficiency": 100,
+    "max_wait": 5,
+    "max_hold": 0,
+    "max_take_off": 0,
+    "max_arrival": 7,
+    "mean_wait": 5,
+    "mean_hold": 0,
+    "mean_take_off": 0,
+    "mean_arrival": 7,
+    "std_wait": 0,
+    "std_hold": 0,
+    "std_take_off": 0,
+    "std_arrival": 0,
+    "fuel_avg": 1.6666666666666667
+}
