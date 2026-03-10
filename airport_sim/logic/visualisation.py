@@ -31,13 +31,38 @@ class VisualisationController:
         if sim1 is None or sim2 is None:
             return None
 
+        r1 = sim1["report"]
+        r2 = sim2["report"]
+
+        def metric(val1, val2, lower_is_better=True):
+            diff = val2 - val1
+            if lower_is_better:
+                improved = diff < 0
+            else:
+                improved = diff > 0
+            sign = "+" if diff > 0 else ""
+            return {"is_improvement": improved, "text": f"{sign}{diff}"}
+
+        eff1 = r1.get("efficiency", 0)
+        eff2 = r2.get("efficiency", 0)
+        eff_diff = eff2 - eff1
+        eff_sign = "+" if eff_diff > 0 else ""
+
         return {
-            "sim_1": sim1,
-            "sim_2": sim2,
-            "delta": {
-                "diversions": sim2["report"]["diversions"] - sim1["report"]["diversions"],
-                "cancellations": sim2["report"]["cancellations"] - sim1["report"]["cancellations"],
-                "efficiency": sim2["report"]["efficiency"] - sim1["report"]["efficiency"]
+            "simulation_1": sim1,
+            "simulation_2": sim2,
+            "metrics": {
+                "diversions": metric(r1.get("diversions", 0), r2.get("diversions", 0)),
+                "cancellations": metric(r1.get("cancellations", 0), r2.get("cancellations", 0)),
+                "queue_max": metric(r1.get("queue_max", 0), r2.get("queue_max", 0)),
+                "holding_max": metric(r1.get("holding_max", 0), r2.get("holding_max", 0)),
+                "fuel_used": metric(r1.get("tot_fuel_used", 0), r2.get("tot_fuel_used", 0)),
+                "efficiency": {
+                    "is_improvement": eff_diff > 0,
+                    "text": f"{eff_sign}{eff_diff:.1f}%",
+                    "sim1_value": eff1,
+                    "sim2_value": eff2
+                }
             }
         }
 
