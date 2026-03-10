@@ -177,7 +177,7 @@ class SimulationController:
     def get_runway_statuses(self):
         statuses = []
         for runway in self.all_runways:
-            statuses.append(runway.checkStatus())
+            statuses.append(not (runway.checkClosed()))
 
         return statuses
     

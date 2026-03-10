@@ -424,7 +424,7 @@ async function updateRunwaysStatus(){
       runway.style.border = "3px solid rgb(0, 0, 0)";
 
     else
-      runway.style.border = "3px solid "+ runwayEmergencyColor;
+      runway.style.border = "3px solid rgb(209, 58, 58)";//+ runwayEmergencyColor;
   }
 }
 

@@ -33,11 +33,12 @@ class Runway:
         self.is_operational = True
 
     def closeRunway(self):
+        #print("closed!")
         self.closed = True
         self.is_operational = False
 
     # Returns the status of the runway
-    def checkStatus(self):
+    def checkClosed(self):
         return self.closed
     
 
@@ -59,10 +60,10 @@ class Runway:
                 return self.closed
             else:
                 # Weather is the most likely, construction least likely
-                weather = random.randint(0,20)
-                maintenance = random.randint(0,20)
-                safety = random.randint(0,20)
-                construction = random.randint(0,20)
+                weather = random.randint(0,1000)
+                maintenance = random.randint(0,7000)
+                safety = random.randint(0,15000)
+                construction = random.randint(0,30000)
 
 
         # If user values have been set, uses these here
