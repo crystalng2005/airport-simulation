@@ -237,9 +237,24 @@ def compare_simulations():
     return jsonify({"success": True, "comparison": comparison})
 
 
+@app.route('/api/export-current-report', methods=['GET'])
+def export_current_report():
+    """Export the current simulation report (from result screen after sim ends)"""
+    try:
+        from flask import send_file
+        if RD.reportData is None:
+            return jsonify({'success': False, 'error': 'No report available'}), 400
+        
+        filepath = controller.visualisation_controller.results_controller.exportReport(RD.reportData)
+        if filepath and os.path.exists(filepath):
+            return send_file(filepath, as_attachment=True, download_name='simulation_report.txt')
+        return jsonify({'success': False, 'error': 'Failed to generate report'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/export-report/<int:sim_id>', methods=['GET'])
 def export_report(sim_id):  
-    
     try:
         from flask import send_file
         
@@ -249,7 +264,7 @@ def export_report(sim_id):
             return send_file(
                 filepath,
                 as_attachment=True,
-                download_name=f"simulation_{sim_id}_report.txt"
+                download_name=f'simulation_{sim_id}_report.txt'
             )
         else:
             return jsonify({
@@ -343,4 +358,5 @@ def get_report():
     
    
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('FLASK_RUN_PORT', os.environ.get('PORT', 8080)))
+    app.run(host='127.0.0.1', port=port, debug=True)

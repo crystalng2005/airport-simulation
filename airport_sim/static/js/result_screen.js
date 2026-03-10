@@ -408,17 +408,12 @@ function showReportModal(report) {
 
 // Export current report
 function exportCurrentReport() {
-    if (currentReportId) {
-        exportReport(currentReportId);
-    }
+    window.location.href = '/api/export-current-report';
 }
 
 // Export report - backend handles file generation
 function exportReport(simId) {
     window.location.href = `/api/export-report/${simId}`;
-    setTimeout(() => {
-        alert('Report exported successfully!');
-    }, 500);
 }
 
 
