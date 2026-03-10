@@ -1,7 +1,63 @@
 // big simulation sittings
-const FPS = 1;
+let UPS = 1; // staring default update rate
+const maxUPS = 10; // the maximum number of UPS that the simulation will allow
 let simulationTick = 0;
 const TICK_MINUTES = 5; // minutes per tick, must match backend
+
+// runways sittings
+const runway_size = 100;
+const runway_border_thinkness = 4;
+const runwayEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
+
+// planes sittings
+let planeSpawnSlideDuration = 0.3 / UPS; //in sec
+let planeRunwaySlideDuration = 0.5 / UPS; //in sec
+let planeFadeOutDuration = 0.2 / UPS; //in sec
+let planesQueueSlideDuration = 1 / UPS; //in sec
+const planeEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
+
+// plane info screen sittings
+const showInfoScreenAllTime = false;
+
+
+// global variables section. 
+let numberOfRunways = 10; 
+let changeUPS_nextUpdate = false;
+let newUPS = UPS;
+let turnSimulationOFF = false; // simulation stops if its true, runs otherwise
+let simulationHasStoped = false;
+
+// If the user press some keys
+document.addEventListener("keydown", function(event) {
+
+
+  // stop/start the simulation temporary after pressing the spacebar
+  if (event.code === "Space"){    
+    if(simulationHasStoped){
+      turnSimulationOFF = false;
+      simulationHasStoped = false;
+      startSimulation();
+    }
+    else
+      turnSimulationOFF = true;
+  }
+
+  // if the simulation is on and the key pressed is right or left arrow
+  if(!turnSimulationOFF && (event.key === "ArrowLeft" || event.key === "ArrowRight")){
+    
+    changeUPS_nextUpdate = true;
+
+    // increase the UPS in next update
+    if (event.key === "ArrowLeft" && newUPS > 1)
+        newUPS -= 1;
+    
+    // decrease the UPS in next update
+    if (event.key === "ArrowRight" && newUPS <= maxUPS)
+      newUPS += 1;
+  }  
+});
+
+
 
 // Simulation is already started by configure_simulation.js calling /start
 // Just initialize the screen and begin the loop
@@ -19,29 +75,6 @@ const TICK_MINUTES = 5; // minutes per tick, must match backend
     console.error('Error initializing simulation screen:', error);
   }
 })();
-
-
-// runways sittings
-const runway_size = 100;
-const runway_border_thinkness = 4;
-let numberOfRunways = 10; // will be updated from backend
-const runwayEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
-
-// planes sittings
-const planeSpawnSlideDuration = 0.3 / FPS; //in sec
-const planeRunwaySlideDuration = 0.5 / FPS; //in sec
-const planeFadeOutDuration = 0.2 / FPS; //in sec
-const planesQueueSlideDuration = 1 / FPS; //in sec
-const planeEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
-
-// plane info screen sittings
-const showInfoScreenAllTime = false;
-
-
-// const container = document.getElementById("container");
-
-//call resizeCanvas() if the windo size is changing
-window.addEventListener("resize", resizeWindoUpdate);
 
 
 
@@ -71,31 +104,51 @@ class Aircraft{
 // Function Difinitions Section:
 // ________________________________________________________________________________________________________
 async function startSimulation(){
-  // ask the back-end to calculate frame
-  await goToNextFrame();
+  // ask the back-end to calculate update
+  await goToNextUpdate();
   simulationTick++;
 
-  // visualize current frame
-  await simulateFrame();
+  // visualize current Update
+  await simulateUpdate();
 
-
+  // if the simulation hasn't ended
   if(!(await stopSimulationCheck())){
-    // go to next frame after waiting for 1/FPS seconds
-    setTimeout(startSimulation,1000/FPS);
-  } else {
+
+    if(changeUPS_nextUpdate){
+      // update the UPS value and all other variables that depends on UPS 
+      changeUPS_nextUpdate = false;
+      UPS = newUPS;
+      planeSpawnSlideDuration = 0.3 / UPS; 
+      planeRunwaySlideDuration = 0.5 / UPS; 
+      planeFadeOutDuration = 0.2 / UPS; 
+      planesQueueSlideDuration = 1 / UPS; 
+    }
+    
+    // if simulation is on, go to next Update after waiting for 1/UPS seconds
+    if(!turnSimulationOFF)
+      setTimeout(startSimulation,1000/UPS);
+
+    else
+      simulationHasStoped = true;
+    
+  } 
+
+  // if the simulation has ended
+  else {
+    // go to the simulation result page
     window.location.href = '/result-screen'; 
   }
 }
 
-async function simulateFrame() {
+async function simulateUpdate() {
 
-  let currentFrameActions = await getCurrentFrameActions();
+  let currentUpdateActions = await getCurrentUpdateActions();
 
-  // for every plane that did something in current frame
-  for(let i = 0; i<currentFrameActions.length; i++){
+  // for every plane that did something in current Update
+  for(let i = 0; i<currentUpdateActions.length; i++){
 
-    let planeID = currentFrameActions[i][0];   // currentFrameActions[i][0];
-    let action = currentFrameActions[i][1];// currentFrameActions[i][1];
+    let planeID = currentUpdateActions[i][0];   
+    let action = currentUpdateActions[i][1];
 
     // if the plane spawn in the holding pattern
     if(action == "spawnLanding"){
@@ -128,16 +181,6 @@ async function simulateFrame() {
 
   updateTimer();
   await updateRunwaysStatus();
-
-}
-
-// unused
-function resizeWindoUpdate() {
-  // canvas.width = window.innerWidth;
-  // canvas.height = window.innerHeight;
-
-  // container.style.width = (window.innerWidth * 0.9) + 'px';
-  // container.style.height = (window.innerHeight/2) + 'px';
 
 }
 
@@ -458,7 +501,7 @@ async function updateInfoScreenContent(planeID){
 
 
 // should return a dictionary or a 2D list of size Nx2 where N is the 
-// number of actions that happened in current frame and  
+// number of actions that happened in current Update and  
 // every list inside the big list is = [planeID, action].
 
 //  result ex: [[planeID_1, action_1],
@@ -467,17 +510,17 @@ async function updateInfoScreenContent(planeID){
 //              [planeID_4, action_4],
 //              [planeID_5, action_5]]
 // where 'action' is a string or (an integer to represent a runway index)
-function getCurrentFrameActions(){
+function getCurrentUpdateActions(){
     return fetch('/api/current-frame-actions')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 return data.actions;
             }
-            throw new Error('Failed to get frame actions');
+            throw new Error('Failed to get Update actions');
         })
         .catch(error => {
-            console.error('Error fetching frame actions:', error);
+            console.error('Error fetching Update actions:', error);
             return [];
         });
 }
@@ -498,17 +541,17 @@ function getCurrentTime(){
         });
 }
 
-// tells the back-end to calculate the next frame.
+// tells the back-end to calculate the next Update.
 // i don't know if this function is needed or not
-async function goToNextFrame(){
+async function goToNextUpdate(){
     try {
         const response = await fetch('/api/next-frame', { method: 'POST' });
         const data = await response.json();
         if (data.success) {
-            console.log('Frame advanced');
+            console.log('Update advanced');
         }
     } catch (error) {
-        console.error('Error advancing frame:', error);
+        console.error('Error advancing Update:', error);
     }
 }
 
