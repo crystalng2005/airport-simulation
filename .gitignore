@@ -1,1 +1,9 @@
 **/__pycache__/
+
+# Airport sim generated presets
+airport_sim/data/preset[0-2].json
+
+# Below may be untracked? Maybe?
+# airport_sim/data/preset_meta.json
+# airport_sim/data/preset.json
+# airport_sim/data/results.json

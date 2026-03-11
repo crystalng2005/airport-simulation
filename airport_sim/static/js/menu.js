@@ -1,11 +1,9 @@
 
 
 // Start New Simulation
+// Change this function:
 function startNewSimulation() {
-    console.log("Starting new simulation...");
-    // TO DO: Navigate to configuration page or call Flask route
-    alert("Starting New Simulation\n\nThis will open the configuration screen.");
-    // window.location.href = '/configure';
+    window.location.href = '/configure-simulation';  // Changed!
 }
 
 // Load Preset
@@ -21,13 +19,6 @@ function viewResults() {
     window.location.href = '/results';
 }
 
-// Open Settings
-function openSettings() {
-    console.log("Opening settings...");
-    // TO DO: Navigate to settings page or call Flask route
-    alert("Settings\n\nThis will open the settings panel.");
-    // window.location.href = '/settings';
-}
 
 // Exit Application
 function exitApplication() {

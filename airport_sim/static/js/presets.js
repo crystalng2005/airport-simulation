@@ -1,4 +1,5 @@
 
+
 // Load presets when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadPresets();
@@ -6,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 /**
  * Main function to load and display presets
- * USES: VisualisationController.getAvailablePresets()
  */
 async function loadPresets() {
     const loadingIndicator = document.getElementById('loadingIndicator');
@@ -14,7 +14,6 @@ async function loadPresets() {
     const noPresetsMessage = document.getElementById('noPresetsMessage');
 
     try {
-        // PRESUMED METHOD: Get preset metadata from backend via VisualisationController
         const response = await fetch('/api/get-presets');
         const data = await response.json();
         
@@ -38,11 +37,10 @@ async function loadPresets() {
 
 /**
  * Display preset cards in the grid
- * @param {Array} presets - Array of preset objects from backend
  */
 function displayPresets(presets) {
     const presetsContainer = document.getElementById('presetsContainer');
-    presetsContainer.innerHTML = ''; // Clear existing content
+    presetsContainer.innerHTML = '';
 
     // Sort by saved_at date (most recent first)
     presets.sort((a, b) => new Date(b.saved_at) - new Date(a.saved_at));
@@ -58,8 +56,6 @@ function displayPresets(presets) {
 
 /**
  * Create a preset card element
- * @param {Object} preset - Preset data object
- * @param {Number} index - Index for labeling (0=Most Recent, 1=2nd, 2=3rd)
  */
 function createPresetCard(preset, index) {
     const card = document.createElement('div');
@@ -92,9 +88,8 @@ function createPresetCard(preset, index) {
             <div class="preset-badge">${presetLabel}</div>
         </div>
 
-        <div class="preset-date"> Saved: ${formattedDate}</div>
+        <div class="preset-date">Saved: ${formattedDate}</div>
 
-        <!-- Runway Configuration -->
         <div class="preset-section">
             <div class="preset-section-title">Runway Configuration</div>
             <div class="preset-details">
@@ -117,7 +112,6 @@ function createPresetCard(preset, index) {
             </div>
         </div>
 
-        <!-- Simulation Results Summary -->
         <div class="preset-section">
             <div class="preset-section-title">Simulation Results</div>
             <div class="results-summary">
@@ -138,7 +132,6 @@ function createPresetCard(preset, index) {
             </div>
         </div>
 
-        <!-- Queue Statistics -->
         <div class="preset-section">
             <div class="preset-section-title">Queue Statistics</div>
             <div class="preset-details">
@@ -153,7 +146,6 @@ function createPresetCard(preset, index) {
             </div>
         </div>
 
-        <!-- Load Button -->
         <div class="load-button-container">
             <button class="btn-load" onclick="loadPreset(${preset.id})">
                 Load This Preset
@@ -165,44 +157,42 @@ function createPresetCard(preset, index) {
 }
 
 /**
- * Load selected preset and start simulation
- * USES: VisualisationController.loadPresetIntoSimulation(presetId)
- * @param {Number} presetId - ID of the preset to load (0, 1, or 2)
+ * Load preset into configuration form
  */
 async function loadPreset(presetId) {
-    console.log(`Loading preset ${presetId}...`);
-
     try {
-        // Show loading state
         const button = event.target;
         const originalText = button.innerHTML;
         button.innerHTML = 'Loading...';
         button.disabled = true;
 
-        // PRESUMED METHOD: Send request to backend to load preset
-        const response = await fetch('/api/load-preset', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ preset_id: presetId })
-        });
-
+        // Get preset data
+        const response = await fetch(`/api/get-preset-data/${presetId}`);
         const data = await response.json();
 
         if (data.success) {
-            // Success! Redirect to simulation screen
-            button.innerHTML = 'Loaded!';
+            button.innerHTML = 'Loaded';
             
-            // Store preset ID in session for simulation screen to use
-            sessionStorage.setItem('loadedPresetId', presetId);
+            // Create config object from preset
+            const config = {
+                runways: (data.vars.departure_runways || 0) + (data.vars.landing_runways || 0) + (data.vars.mixed_runways || 0),
+                departure_runways: data.vars.departure_runways || 0,
+                landing_runways: data.vars.landing_runways || 0,
+                mixed_runways: data.vars.mixed_runways || 0,
+                inbound_flow: 10,
+                outbound_flow: 10,
+                cancellation_time: 30,
+                duration: 100
+            };
             
-            // Redirect to simulation screen after short delay
+            // Store in sessionStorage
+            sessionStorage.setItem('presetConfig', JSON.stringify(config));
+            
+            // Redirect to config form
             setTimeout(() => {
-                window.location.href = '/simulation';
-            }, 1000);
+                window.location.href = '/configure-simulation';
+            }, 500);
         } else {
-            // Error
             alert('Error loading preset: ' + (data.error || 'Unknown error'));
             button.innerHTML = originalText;
             button.disabled = false;
@@ -221,25 +211,3 @@ async function loadPreset(presetId) {
 function goToMenu() {
     window.location.href = '/';
 }
-
-/* ===================================
-   
-   PRESUMED VisualisationController METHODS:
-   
-   1. getAvailablePresets()
-      - Returns list of the 3 most recent presets
-      - Calls PresetController.getPresetSaveTimes()
-      - Returns preset metadata
-   
-   2. getPresetData(presetId)
-      - Returns full preset data for a specific preset
-      - Calls PresetController.loadPreset(presetId)
-      - Returns configuration, planes, and report data
-   
-   3. loadPresetIntoSimulation(presetId)
-      - Loads preset into SimulationController
-      - Restores runway configuration
-      - Restores plane list
-      - Prepares simulation to run with this preset
-   
-   =================================== */

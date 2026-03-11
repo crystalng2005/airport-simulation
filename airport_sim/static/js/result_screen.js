@@ -1,21 +1,56 @@
-
-
 let selectedSimulations = [];
-let allSimulations = [];
 let currentReportId = null;
 
-document.addEventListener('DOMContentLoaded', function() {
-    loadResults();
+document.addEventListener('DOMContentLoaded', async function() {
+    const report = await getReport();
+    showReportModal(report);
+    await loadPlots();
+    showReportResults();
 });
 
-/**
- * Load all simulation results from backend
- * Backend returns ALL calculated data
- */
+async function getReport(){
+  try {
+    const response = await fetch('/api/report');
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error('Failed to get report:', data.errors || data.error);
+      return null;
+    }
+
+    return data.report;
+  } catch (error) {
+    console.error('Error fetching report:', error);
+    return null;
+  }
+}
+
+function showReport(report){
+  if (!report) return;
+
+  // For Turki to change
+  const reportBox = document.querySelector('.report-container');
+  if (!reportBox) {
+    console.log('Final report:', report);
+    return;
+  }
+
+  reportBox.innerHTML = `
+    <h3>Simulation Report</h3>
+    <p>Total planes: ${report.total_planes}</p>
+    <p>Diversions: ${report.diversions}</p>
+    <p>Cancellations: ${report.cancellations}</p>
+    <p>Efficiency: ${report.efficiency}</p>
+    <p>Avg wait: ${report.avg_wait_time}</p>
+    <p>Max hold: ${report.max_hold_time}</p>
+  `;
+}
+
+
+// Load all simulation results from backend
+// Backend returns ALL calculated data
 async function loadResults() {
-    const loadingIndicator = document.getElementById('loadingIndicator');
     const resultsContainer = document.getElementById('resultsContainer');
-    const noResultsMessage = document.getElementById('noResultsMessage');
 
     try {
         // Get data from VisualisationController
@@ -27,10 +62,9 @@ async function loadResults() {
         if (!data.success || !data.results || data.results.length === 0) {
             noResultsMessage.style.display = 'block';
         } else {
-            allSimulations = data.results; // Already limited to 50 by backend
-            document.getElementById('totalCount').textContent = allSimulations.length;
+            // document.getElementById('totalCount').textContent = allSimulations.length;
             resultsContainer.style.display = 'block';
-            displayResults(allSimulations);
+            displayResults(data.results);
         }
     } catch (error) {
         console.error('Error loading results:', error);
@@ -39,38 +73,31 @@ async function loadResults() {
     }
 }
 
-/**
- * Display results in table - just rendering
- */
-function displayResults(results) {
+// Display results in table - just rendering
+function displayResults(result) {
     const tbody = document.getElementById('resultsTableBody');
     tbody.innerHTML = '';
 
-    // Backend already sorted by most recent
-    results.forEach((result) => {
-        const row = createResultRow(result);
-        tbody.appendChild(row);
-    });
+    const row = createResultRow(result);
+    tbody.appendChild(row);
 }
 
-/**
- * Create table row - just display data from backend
- */
+// Create table row - just display data from backend
 function createResultRow(result) {
     const row = document.createElement('tr');
-    row.dataset.simId = result.id;
+    // row.dataset.simId = result.id;
 
     // Format date for display
-    const date = new Date(result.completed_at);
-    const formattedDate = date.toLocaleDateString('en-GB', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    });
-    const formattedTime = date.toLocaleTimeString('en-GB', {
-        hour: '2-digit',
-        minute: '2-digit'
-    });
+    // const date = new Date(result.completed_at);
+    // const formattedDate = date.toLocaleDateString('en-GB', {
+    //     year: 'numeric',
+    //     month: 'short',
+    //     day: 'numeric'
+    // });
+    // const formattedTime = date.toLocaleTimeString('en-GB', {
+    //     hour: '2-digit',
+    //     minute: '2-digit'
+    // });
 
     const report = result.report;
     const config = result.config;
@@ -78,16 +105,11 @@ function createResultRow(result) {
     row.innerHTML = `
         <td>
             <input type="checkbox" class="select-checkbox" 
-                   onchange="toggleSelection('${result.id}')" 
-                   id="checkbox-${result.id}">
         </td>
-        <td class="number">#${result.id}</td>
         <td>
             <div>${formattedDate}</div>
             <div style="font-size: 0.8rem; color: #64748b;">${formattedTime}</div>
         </td>
-        <td>${result.duration}</td>
-        <td class="number">${config.total_runways}</td>
         <td class="number">${report.total_planes}</td>
         <td class="${report.diversions > 0 ? 'highlight' : 'number'}">${report.diversions}</td>
         <td class="${report.cancellations > 0 ? 'highlight' : 'number'}">${report.cancellations}</td>
@@ -105,9 +127,7 @@ function createResultRow(result) {
     return row;
 }
 
-/**
- * Toggle simulation selection
- */
+// Toggle simulation selection
 function toggleSelection(simId) {
     const checkbox = document.getElementById(`checkbox-${simId}`);
     const row = document.querySelector(`tr[data-sim-id="${simId}"]`);
@@ -128,9 +148,7 @@ function toggleSelection(simId) {
     updateCompareButton();
 }
 
-/**
- * Update compare button
- */
+// Update compare button
 function updateCompareButton() {
     const compareBtn = document.getElementById('compareBtn');
     const count = selectedSimulations.length;
@@ -139,9 +157,7 @@ function updateCompareButton() {
     compareBtn.disabled = count !== 2;
 }
 
-/**
- * Clear selection
- */
+// Clear selection
 function clearSelection() {
     selectedSimulations.forEach(simId => {
         const checkbox = document.getElementById(`checkbox-${simId}`);
@@ -154,10 +170,9 @@ function clearSelection() {
     updateCompareButton();
 }
 
-/**
- * Compare selected simulations
- * Backend does ALL calculations
- */
+
+// Compare selected simulations
+// Backend does ALL calculations
 async function compareSelected() {
     if (selectedSimulations.length !== 2) {
         alert('Please select exactly 2 simulations to compare');
@@ -183,7 +198,6 @@ async function compareSelected() {
         if (data.success) {
             // Just display the pre-calculated data
             showComparisonModal(data.comparison);
-            loadComparisonPlots(selectedSimulations[0], selectedSimulations[1]);
         } else {
             alert('Error comparing simulations: ' + data.error);
         }
@@ -193,9 +207,7 @@ async function compareSelected() {
     }
 }
 
-/**
- * Show comparison modal - just display backend data
- */
+// Show comparison modal - just display backend data
 function showComparisonModal(comparison) {
     const modal = document.getElementById('comparisonModal');
     const content = document.getElementById('comparisonContent');
@@ -318,49 +330,10 @@ function showComparisonModal(comparison) {
         </div>
     `;
 
-    showComparisonResults();
     modal.style.display = 'flex';
 }
 
-function showComparisonResults() {
-    const content = document.getElementById('comparisonContent');
-    const plotsSection = document.getElementById('comparisonPlotsSection');
-    const resultsBtn = document.getElementById('comparisonResultsBtn');
-    const plotsBtn = document.getElementById('comparisonPlotsBtn');
-
-    if (content) content.style.display = 'block';
-    if (plotsSection) plotsSection.style.display = 'none';
-    if (resultsBtn) {
-        resultsBtn.classList.remove('btn-secondary');
-        resultsBtn.classList.add('btn-primary');
-    }
-    if (plotsBtn) {
-        plotsBtn.classList.remove('btn-primary');
-        plotsBtn.classList.add('btn-secondary');
-    }
-}
-
-function showComparisonPlots() {
-    const content = document.getElementById('comparisonContent');
-    const plotsSection = document.getElementById('comparisonPlotsSection');
-    const resultsBtn = document.getElementById('comparisonResultsBtn');
-    const plotsBtn = document.getElementById('comparisonPlotsBtn');
-
-    if (content) content.style.display = 'none';
-    if (plotsSection) plotsSection.style.display = 'block';
-    if (resultsBtn) {
-        resultsBtn.classList.remove('btn-primary');
-        resultsBtn.classList.add('btn-secondary');
-    }
-    if (plotsBtn) {
-        plotsBtn.classList.remove('btn-secondary');
-        plotsBtn.classList.add('btn-primary');
-    }
-}
-
-/**
- * View full report - backend provides all data
- */
+// View full report - backend provides all data
 async function viewReport(simId) {
     currentReportId = simId;
     
@@ -369,38 +342,28 @@ async function viewReport(simId) {
         const response = await fetch(`/api/get-full-report/${simId}`);
         const data = await response.json();
 
-        if (data.success === false) {
-            alert('Error loading report: ' + (data.error || 'Unknown error'));
-            return;
+        if (data.success) {
+            // Just display the data
+            showReportModal(data.report);
+        } else {
+            alert('Error loading report: ' + data.error);
         }
-
-        const report = data.report || (data.success ? data.report : null);
-        if (!report) {
-            alert('Error loading report: Report data missing');
-            return;
-        }
-
-        // Display report and matching plots for this specific simulation
-        showReportModal(report, simId);
-        await loadSavedReportPlots(simId);
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to load report');
     }
 }
 
-/**
- * Show report modal - just display backend data
- */
-function showReportModal(report, simId = null) {
+// Show report modal - just display backend data
+function showReportModal(report) {
     const modal = document.getElementById('reportModal');
     const content = document.getElementById('reportContent');
-    const displayId = simId !== null ? simId : (report.id ?? 'N/A');
 
     // Backend already calculated everything
-    content.innerHTML = `
-        <h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${displayId} - Full Report</h3>
-        
+    content.innerHTML = 
+
+        // `<h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${report.id} - Full Report</h3>`+
+        `
         <div class="metric-cards">
             <div class="metric-card">
                 <div class="metric-label">Total Planes</div>
@@ -428,15 +391,15 @@ function showReportModal(report, simId = null) {
             </div>
             <div class="metric-card">
                 <div class="metric-label">Total Fuel Used</div>
-                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>
+                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>        
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Wait Time</div>
-                <div class="metric-value">${report.avg_wait_time} min</div>
+                <div class="metric-value">${report.avg_wait_time.toFixed(1)} min</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">Avg Fuel/Plane</div>
-                <div class="metric-value">${report.avg_fuel_per_plane}</div>
+                <div class="metric-value">${report.avg_fuel_per_plane.toFixed(1)}</div>
             </div>
         </div>
     `;
@@ -446,12 +409,12 @@ function showReportModal(report, simId = null) {
 }
 
 function showReportResults() {
-    const content = document.getElementById('reportContent');
-    const plotsSection = document.getElementById('reportPlotsSection');
+    const reportContent = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('plotsSection');
     const resultsBtn = document.getElementById('reportResultsBtn');
     const plotsBtn = document.getElementById('reportPlotsBtn');
 
-    if (content) content.style.display = 'block';
+    if (reportContent) reportContent.style.display = 'block';
     if (plotsSection) plotsSection.style.display = 'none';
     if (resultsBtn) {
         resultsBtn.classList.remove('btn-secondary');
@@ -464,12 +427,12 @@ function showReportResults() {
 }
 
 function showReportPlots() {
-    const content = document.getElementById('reportContent');
-    const plotsSection = document.getElementById('reportPlotsSection');
+    const reportContent = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('plotsSection');
     const resultsBtn = document.getElementById('reportResultsBtn');
     const plotsBtn = document.getElementById('reportPlotsBtn');
 
-    if (content) content.style.display = 'none';
+    if (reportContent) reportContent.style.display = 'none';
     if (plotsSection) plotsSection.style.display = 'block';
     if (resultsBtn) {
         resultsBtn.classList.remove('btn-primary');
@@ -481,19 +444,25 @@ function showReportPlots() {
     }
 }
 
-async function loadSavedReportPlots(simId) {
+// Export current report
+function exportCurrentReport() {
+    window.location.href = '/api/export-current-report';
+}
+
+// Load and display performance plots
+async function loadPlots() {
     try {
-        const response = await fetch(`/api/report-plots/${simId}`);
+        const response = await fetch('/api/report-plots');
         const data = await response.json();
 
-        const plotsContainer = document.getElementById('reportPlotsContainer');
-        if (!plotsContainer) return;
-        plotsContainer.innerHTML = '';
-
         if (!data.success || !data.plots || Object.keys(data.plots).length === 0) {
-            plotsContainer.innerHTML = '<p style="color:#64748b;">No plots available for this simulation.</p>';
+            console.log('No plots available');
             return;
         }
+
+        const plotsSection = document.getElementById('plotsSection');
+        const plotsContainer = document.getElementById('plotsContainer');
+        plotsContainer.innerHTML = '';
 
         const plotLabels = {
             wait_times: 'Wait Times',
@@ -513,7 +482,7 @@ async function loadSavedReportPlots(simId) {
             label.style.fontWeight = 'bold';
             label.style.marginBottom = '4px';
             label.style.color = '#1e3a8a';
-            label.style.fontSize = '0.85rem';
+            label.style.fontSize = '0.8rem';
 
             const img = document.createElement('img');
             img.src = 'data:image/png;base64,' + base64;
@@ -526,110 +495,32 @@ async function loadSavedReportPlots(simId) {
             wrapper.appendChild(img);
             plotsContainer.appendChild(wrapper);
         }
+
+        plotsSection.style.overflow = 'auto';
     } catch (error) {
-        console.error('Error loading report plots:', error);
+        console.error('Error loading plots:', error);
     }
 }
 
-/**
- * Export current report
- */
-function exportCurrentReport() {
-    if (currentReportId) {
-        exportReport(currentReportId);
-    }
-}
-
-/**
- * Export report - backend handles file generation
- */
+// Export report - backend handles file generation
 function exportReport(simId) {
     window.location.href = `/api/export-report/${simId}`;
-    setTimeout(() => {
-        alert('Report exported successfully!');
-    }, 500);
 }
 
-/**
- * Close modals
- */
+
+// Close modals
+ 
 function closeComparison() {
     document.getElementById('comparisonModal').style.display = 'none';
-    // Clear plots when closing
-    const plotsSection = document.getElementById('comparisonPlotsSection');
-    const plotsContainer = document.getElementById('comparisonPlotsContainer');
-    if (plotsSection) plotsSection.style.display = 'none';
-    if (plotsContainer) plotsContainer.innerHTML = '';
-    showComparisonResults();
-}
-
-/**
- * Load and display comparison charts
- */
-async function loadComparisonPlots(simId1, simId2) {
-    try {
-        const response = await fetch('/api/comparison-plots', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sim_id_1: simId1, sim_id_2: simId2 })
-        });
-        const data = await response.json();
-
-        if (!data.success || !data.plots) {
-            console.log('No comparison plots available');
-            return;
-        }
-
-        const plotsSection = document.getElementById('comparisonPlotsSection');
-        const plotsContainer = document.getElementById('comparisonPlotsContainer');
-        plotsContainer.innerHTML = '';
-
-        const plotLabels = {
-            key_counts: 'Planes, Diversions & Cancellations',
-            queues: 'Queue & Holding',
-            times: 'Average Times',
-            fuel_efficiency: 'Fuel & Efficiency'
-        };
-
-        for (const [key, base64] of Object.entries(data.plots)) {
-            const wrapper = document.createElement('div');
-            wrapper.style.textAlign = 'center';
-
-            const label = document.createElement('div');
-            label.textContent = plotLabels[key] || key;
-            label.style.fontWeight = 'bold';
-            label.style.marginBottom = '4px';
-            label.style.color = '#1e3a8a';
-            label.style.fontSize = '0.85rem';
-
-            const img = document.createElement('img');
-            img.src = 'data:image/png;base64,' + base64;
-            img.alt = plotLabels[key] || key;
-            img.style.width = '100%';
-            img.style.borderRadius = '6px';
-            img.style.border = '1px solid #e2e8f0';
-
-            wrapper.appendChild(label);
-            wrapper.appendChild(img);
-            plotsContainer.appendChild(wrapper);
-        }
-
-    } catch (error) {
-        console.error('Error loading comparison plots:', error);
-    }
 }
 
 function closeReport() {
     document.getElementById('reportModal').style.display = 'none';
     currentReportId = null;
-    const plotsContainer = document.getElementById('reportPlotsContainer');
-    if (plotsContainer) plotsContainer.innerHTML = '';
     showReportResults();
 }
 
-/**
- * Go to menu
- */
+// Go to menu
 function goToMenu() {
     window.location.href = '/';
 }
@@ -646,3 +537,82 @@ window.onclick = function(event) {
         closeReport();
     }
 }
+
+
+
+/*
+document.addEventListener("DOMContentLoaded", () => {
+    const simId = getSimulationId();
+    loadSimulation(simId);
+});
+
+function getSimulationId() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("id");
+}
+
+async function loadSimulation(simId) {
+
+    const loading = document.getElementById("loadingIndicator");
+    const content = document.getElementById("resultContent");
+
+    try {
+
+        const response = await fetch(`/api/get-full-report/${simId}`);
+        const data = await response.json();
+
+        loading.style.display = "none";
+
+        if (!data.success) {
+            content.innerHTML = "<p>Failed to load simulation</p>";
+            content.style.display = "block";
+            return;
+        }
+
+        const report = data.report;
+
+        content.innerHTML = `
+        <h2>Simulation #${report.id}</h2>
+
+        <div class="metric-cards">
+
+            <div class="metric-card">
+                <div class="metric-label">Total Planes</div>
+                <div class="metric-value">${report.total_planes}</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Diversions</div>
+                <div class="metric-value">${report.diversions}</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Cancellations</div>
+                <div class="metric-value">${report.cancellations}</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Efficiency</div>
+                <div class="metric-value">${report.efficiency}%</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Max Queue</div>
+                <div class="metric-value">${report.queue_max}</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-label">Fuel Used</div>
+                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>
+            </div>
+
+        </div>
+        `;
+
+        content.style.display = "block";
+
+    } catch (error) {
+        console.error(error);
+    }
+}
+*/

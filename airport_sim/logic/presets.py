@@ -1,7 +1,8 @@
-from logic.plane import Plane
+from logic.plane import Plane, EmergencyStatus
 import json
 import os
-from datetime import datetime
+import tempfile
+from datetime import datetime, timezone
 from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
@@ -13,6 +14,8 @@ class PresetController:
         self.departure_runways = 0
         self.landing_runways = 0
         self.mixed_runways = 0
+        self.runway_closure_prob = []
+        self.plane_emergency_prob = []
 
         self.report = None  # Initialised before saving, goto line 75
 
@@ -27,7 +30,7 @@ class PresetController:
 
         self.init_meta()
 
-    # --- Meta file functions --- (Meta file keeps track of preset ID's and when they were saved)
+    # --- Meta file functions ---  (Meta file keeps track of preset ID's and when they were saved)
     def init_meta(self):
         if not os.path.exists(self.meta_file):
             meta = {
@@ -41,37 +44,62 @@ class PresetController:
                 json.dump(meta, f, indent=4)
 
     def load_meta(self):
-        with open(self.meta_file, 'r') as f:
-            return json.load(f)
+        try:
+            with open(self.meta_file, 'r') as f:
+                return json.load(f)
+        except (IOError, json.JSONDecodeError):
+            return {"presets": []}
 
     def save_meta(self, meta):
         with open(self.meta_file, 'w') as f:
             json.dump(meta, f, indent=4)
 
     def getPresetSaveTimes(self) -> list[tuple[int, str]]:
-        meta = self.load_meta()["presets"]
+        meta = self.load_meta().get("presets", [])
 
         return [
             (p["id"], p["last_saved"])
             for p in meta
-            if p["last_saved"] is not None
+            if p.get("last_saved") is not None
         ]
-
 
     # --- Preset functions ---
 
-    def savePreset(self) -> bool:
+    def savePreset(self):
         try:
-            # Load oldest preset
-            meta = self.load_meta()["presets"]
-            unused = [p for p in meta if p["last_saved"] is None]
-            if unused:
-                return unused[0]["id"]
-            meta.sort(key=lambda p: p["last_saved"])
-            preset_id = meta[0]["id"]
+            print('savePreset called')
+            
+            meta_data = self.load_meta()
+            presets = meta_data.get("presets", [])
 
-            now = datetime.now(datetime.timezone.utc).isoformat()
+            unused = [p for p in presets if p.get("last_saved") is None]
+            if unused:
+                preset_id = unused[0]["id"]
+            else:
+                presets_with_time = [p for p in presets if p.get("last_saved") is not None]
+                presets_with_time.sort(key=lambda p: p["last_saved"])
+                preset_id = presets_with_time[0]["id"]
+
+            now = datetime.now(timezone.utc).isoformat()
+
+            if RD.reportData is None:
+                return False
+
             self.report = RD.reportData
+            
+            report_dict = self.report.__dict__.copy()
+            
+            # Convert any datetime objects to ISO strings for JSON serialization
+            for key, val in report_dict.items():
+                if hasattr(val, 'isoformat'):
+                    report_dict[key] = val.isoformat()
+                elif hasattr(val, 'total_seconds'):
+                    report_dict[key] = val.total_seconds()
+                elif isinstance(val, list):
+                    report_dict[key] = [
+                        v.total_seconds() if hasattr(v, 'total_seconds') else v
+                        for v in val
+                    ]
 
             preset = {
                 "saved_at": now,
@@ -79,26 +107,42 @@ class PresetController:
                     "departure_runways": self.departure_runways,
                     "landing_runways": self.landing_runways,
                     "mixed_runways": self.mixed_runways,
+                    "plane_emergency_prob" : self.plane_emergency_prob,
+                    "runway_closure_prob" : self.runway_closure_prob,
                 },
-                "planes": [plane.__dict__ for plane in self.plane_list],
-                "report": self.report.__dict__
+                "planes": [self._serialize_plane(plane) for plane in self.plane_list],
+                "report": report_dict
             }
 
-            with open(self.preset_files[preset_id], 'w') as f:
-                json.dump(preset, f, indent=4)
+            # Atomic write: write to temp file first, then rename
+            dest = self.preset_files[preset_id]
+            fd, tmp_path = tempfile.mkstemp(dir=self.data_dir, suffix='.tmp')
+            try:
+                with os.fdopen(fd, 'w') as f:
+                    json.dump(preset, f, indent=4)
+                os.replace(tmp_path, dest)
+            except:
+                os.unlink(tmp_path)
+                raise
 
-            # Updates meta file, making
-            meta = self.load_meta()
-            for p in meta["presets"]:
+            for p in meta_data["presets"]:
                 if p["id"] == preset_id:
                     p["last_saved"] = now
-            self.save_meta(meta)
 
+            self.save_meta(meta_data)
+            print('Preset saved successfully!')
             return True
-        except IOError:
+
+        except (IOError, IndexError, KeyError, TypeError) as e:
+            print(f'Error in savePreset: {e}')
+            import traceback
+            traceback.print_exc()
             return False
 
     def loadPreset(self, preset_id: int) -> bool:
+        if not (0 <= preset_id < len(self.preset_files)):
+            return False
+
         try:
             with open(self.preset_files[preset_id], 'r') as f:
                 data = json.load(f)
@@ -107,27 +151,51 @@ class PresetController:
             self.departure_runways = vars_data["departure_runways"]
             self.landing_runways = vars_data["landing_runways"]
             self.mixed_runways = vars_data["mixed_runways"]
+            self.plane_emergency_prob = vars_data["plane_emergency_prob"]
+            self.runway_closure_prob = vars_data["runway_closure_prob"]
 
             # Loads planes by initiating new objects and importing their data from the preset
             self.plane_list = []
             for plane_data in data["planes"]:
                 plane = Plane.__new__(Plane)
                 plane.__dict__.update(plane_data)
+                # Restore enum from int
+                if isinstance(plane.emergency_status, int):
+                    plane.emergency_status = EmergencyStatus(plane.emergency_status)
                 self.plane_list.append(plane)
 
             report = PerformanceReport.__new__(PerformanceReport)
-            report.__dict__.update(vars_data["report"])
+            report.__dict__.update(data["report"])
+            self.report = report
+            RD.reportData = report
 
             return True
-        except (IOError, KeyError, IndexError): # Common file errors
+        except (IOError, KeyError, IndexError, TypeError):
             return False
-
     # Resets file to save new preset info
     # To be called when new simulation runs
     def reset(self) -> bool:
         self.departure_runways = 0
         self.landing_runways = 0
         self.mixed_runways = 0
+        self.plane_emergency_prob = []
+        self.runway_closure_prob = []
         self.plane_list.clear()
         self.report = None
         return True
+
+    @staticmethod
+    def _serialize_plane(plane):
+        """Convert a Plane object to a JSON-serializable dict."""
+        skip = {'queue_controller'}
+        d = {}
+        for k, v in plane.__dict__.items():
+            if k in skip:
+                continue
+            if hasattr(v, 'isoformat'):       # datetime / datetime.time
+                d[k] = v.isoformat()
+            elif hasattr(v, 'value'):          # Enum
+                d[k] = v.value
+            else:
+                d[k] = v
+        return d

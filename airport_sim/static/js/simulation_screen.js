@@ -1,66 +1,93 @@
 // big simulation sittings
-const FPS = 1;
+let UPS = 1; // staring default update rate
+const maxUPS = 10; // the maximum number of UPS that the simulation will allow
+let simulationTick = 0;
+const TICK_MINUTES = 5; // minutes per tick, must match backend
 
 // runways sittings
 const runway_size = 100;
 const runway_border_thinkness = 4;
-const numberOfRunways = 5;
+const runwayEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
 
 // planes sittings
-const planeSpawnSlideDuration = 1 / FPS; //in sec
-const planeRunwaySlideDuration = 1 / FPS; //in sec
-const planeFadeOutDuration = 0.5 / FPS; //in sec
-const planesQueueSlideDuration = 1 / FPS; //in sec
+let planeSpawnSlideDuration = 0.3 / UPS; //in sec
+let planeRunwaySlideDuration = 0.5 / UPS; //in sec
+let planeFadeOutDuration = 0.2 / UPS; //in sec
+let planesQueueSlideDuration = 1 / UPS; //in sec
 const planeEmergencyColor = 'linear-gradient(0, #ff7070, #d13a3a)';
 
 // plane info screen sittings
 const showInfoScreenAllTime = false;
 
 
-// const container = document.getElementById("container");
+// global variables section. 
+let numberOfRunways = 10; 
+let changeUPS_nextUpdate = false;
+let newUPS = UPS;
+let turnSimulationOFF = false; // simulation stops if its true, runs otherwise
+let simulationHasStoped = false;
 
-//call resizeCanvas() if the windo size is changing
-window.addEventListener("resize", resizeWindoUpdate);
-
-
-
-// TEST :::::::::::::::::::::::::::::::::::::::::::::::::
-
-
-createRunways(numberOfRunways);
+// If the user press some keys
+document.addEventListener("keydown", function(event) {
 
 
-updateTimer(0);
+  // stop/start the simulation temporary after pressing the spacebar
+  if (event.code === "Space"){    
+    if(simulationHasStoped){
+      turnSimulationOFF = false;
+      simulationHasStoped = false;
+      startSimulation();
+    }
+    else
+      turnSimulationOFF = true;
+  }
 
-for(let i =0 ;i<10;i++){
-  spawnPlane(i+10, false);
-  spawnPlane(i+20, true);
-}
+  // if the simulation is on and the key pressed is right or left arrow
+  if(!turnSimulationOFF && (event.key === "ArrowLeft" || event.key === "ArrowRight")){
+    
+    changeUPS_nextUpdate = true;
 
-letPlaneHaveEmergency(14);
-letPlaneHaveEmergency(21);
+    // increase the UPS in next update
+    if (event.key === "ArrowLeft" && newUPS > 1)
+        newUPS -= 1;
+    
+    // decrease the UPS in next update
+    if (event.key === "ArrowRight" && newUPS <= maxUPS)
+      newUPS += 1;
+  }  
+});
 
-setTimeout(() => {
 
-  movePlaneToRunway(11,2);
-  movePlaneToRunway(21,1);
 
-}, 2*1000);
+// Simulation is already started by configure_simulation.js calling /start
+// Just initialize the screen and begin the loop
+(async function init() {
+  try {
+    // Get runway count from the already-running simulation
+    const res = await fetch('/api/number-of-runways');
+    const data = await res.json();
+    if (data.success) {
+      numberOfRunways = data.number;
+    }
+    await createRunways(numberOfRunways);
+    startSimulation();
+  } catch (error) {
+    console.error('Error initializing simulation screen:', error);
+  }
+})();
 
-setTimeout(() => {
 
-  killPlane(20);
-  killPlane(11);
 
-}, 2*1000 + 1000);
+
+// startSimulation() is now called after the /start fetch completes (see above)
 
 
 // ________________________________________________________________________________________________________
 // Classes Difinitions Section :
 // ________________________________________________________________________________________________________
 class Aircraft{
-  constructor(ID,c,o,d,i,f,e,t,a,cu){
-    this.id = ID;
+  constructor(c,o,d,i,f,e,t,a,cu){
+    // this.id = ID;
     this.callsign = c;
     this.origin = o;
     this.destination = d;
@@ -76,62 +103,91 @@ class Aircraft{
 // ________________________________________________________________________________________________________
 // Function Difinitions Section:
 // ________________________________________________________________________________________________________
-function startSimulation(){
-  // generate current frame
-  simulateFrame();
+async function startSimulation(){
+  // ask the back-end to calculate update
+  await goToNextUpdate();
+  simulationTick++;
 
-  updateTimer(0);
+  // visualize current Update
+  await simulateUpdate();
 
-  // go to next frame after waiting for 1/FPS seconds
-  setTimeout(startSimulation,1000/FPS);
-}
+  // if the simulation hasn't ended
+  if(!(await stopSimulationCheck())){
 
-function simulateFrame() {
+    if(changeUPS_nextUpdate){
+      // update the UPS value and all other variables that depends on UPS 
+      changeUPS_nextUpdate = false;
+      UPS = newUPS;
+      planeSpawnSlideDuration = 0.3 / UPS; 
+      planeRunwaySlideDuration = 0.5 / UPS; 
+      planeFadeOutDuration = 0.2 / UPS; 
+      planesQueueSlideDuration = 1 / UPS; 
+    }
+    
+    // if simulation is on, go to next Update after waiting for 1/UPS seconds
+    if(!turnSimulationOFF)
+      setTimeout(startSimulation,1000/UPS);
 
-  let currentFrameActions = getCurrentFrameActions();
+    else
+      simulationHasStoped = true;
+    
+  } 
 
-  // for every plane that did something in current frame
-  for(let i = 0; i<currentFrameActions.length; i++){
-
-    let planeID = currentFrameActions[i]["ID"];
-    let action = currentFrameActions[i]["action"];
-
-    // if the plane spawn in the holding pattern
-    if(action == "something1")
-      spawnPlane(planeID,true);
-
-    // if the plane spawn in the take-off
-    else if(action == "something2")
-      spawnPlane(planeID,true);
-
-    // if the plane got an emergency
-    else if(action == "something3")
-      letPlaneHaveEmergency(planeID);  
-
-    // if the plane got diverted or cancelled or landed or taked-off from a runway
-    // (aka the plan is done)
-    else if(action == "something4")
-      killPlane(planeID);  
-
-    // if the plane moved to a runway
-    else if(action == "some runway Index")
-      movePlaneToRunway(planeID, action + 1);
+  // if the simulation has ended
+  else {
+    // go to the simulation result page
+    window.location.href = '/result-screen'; 
   }
 }
 
-// unused
-function resizeWindoUpdate() {
-  // canvas.width = window.innerWidth;
-  // canvas.height = window.innerHeight;
+async function simulateUpdate() {
 
-  // container.style.width = (window.innerWidth * 0.9) + 'px';
-  // container.style.height = (window.innerHeight/2) + 'px';
+  let currentUpdateActions = await getCurrentUpdateActions();
+
+  // for every plane that did something in current Update
+  for(let i = 0; i<currentUpdateActions.length; i++){
+
+    let planeID = currentUpdateActions[i][0];   
+    let action = currentUpdateActions[i][1];
+
+    // if the plane spawn in the holding pattern
+    if(action == "spawnLanding"){
+      // console.log("Land"+planeID)
+      spawnPlane(planeID,true);
+    }
+
+    // if the plane spawn in the take-off
+    else if(action == "spawnDeparture"){
+      // console.log("Derp"+planeID)
+      spawnPlane(planeID,false);
+    }
+
+    // if the plane got an emergency
+    else if(action == "emergency"){
+      // console.log("emer"+planeID)
+      letPlaneHaveEmergency(planeID);  
+    }
+    // if the plane moved to a runway
+    else if(Number.isInteger(action))
+      movePlaneToRunway(planeID, action);
+
+    // if the plane got diverted or cancelled or landed or taked-off from a runway
+    // (aka the plan is done)
+    else if(action == "kill"){
+      // console.log("kill:"+planeID)
+      killPlane(planeID);  
+    }
+  }
+
+  updateTimer();
+  await updateRunwaysStatus();
 
 }
 
-function createRunways(num) {
+async function createRunways(num) {
+
   const container = document.getElementById("container");
-  // const count = document.getElementById("runwayCount").value;
+  const runwaysModes = await getRunwaysMode();
 
   // Clear previous runwayes
   container.innerHTML = "";
@@ -141,20 +197,27 @@ function createRunways(num) {
     runway.classList.add("runway");
     runway.id = 'runway:'+String(i + 1);
 
-    runway.style.border = runway_border_thinkness + 'px solid rgba(0, 0, 0, 1)';
-    runway.style.width = runway_size + 'px';
-    runway.style.height = runway_size + 'px';
-
     const runwayHat = document.createElement("div");
     runwayHat.classList.add("runway-hat");
-    runwayHat.style.width = (runway_size / 2) + 'px';
-    runwayHat.style.height = (runway_size / 2) + 'px';;
-    
-
 
     runway.appendChild(runwayHat);
 
     container.appendChild(runway);
+
+    runwayHat.style.width = (runway.getBoundingClientRect().width / 2) + 'px';
+    runwayHat.style.height = runwayHat.style.width;    
+
+    if(runwaysModes[i] >= 0){
+      const runwayHatBlue = document.createElement("div");
+      runwayHatBlue.classList.add("runway-hat-blue");    
+      runwayHat.appendChild(runwayHatBlue);
+    }
+  
+    if(runwaysModes[i] <= 0){
+      const runwayHatRed = document.createElement("div");
+      runwayHatRed.classList.add("runway-hat-red");    
+      runwayHat.appendChild(runwayHatRed);
+    }
   }
 }
 
@@ -220,6 +283,8 @@ function movePlaneToRunway(planeID, runwayID){
 
   const plane = document.getElementById('plane:' + planeID);
   const runway = document.getElementById('runway:' + runwayID);
+
+  if (!plane || !runway) return;
 
   // 1. Get positions before moving
   const planeRect = plane.getBoundingClientRect();
@@ -354,17 +419,18 @@ function killPlane(planeID){
   };
 }
 
-function updateTimer(numOfMinutes){
-  const timer = document.querySelector(".timer");
-  // const timer = document.getElementsByName('timer');
+function updateTimer(){
 
-  let totalHours = Math.floor(numOfMinutes / 60);
+  const timer = document.querySelector(".timer");
+
+  // Calculate elapsed simulated time from tick count
+  let totalMinutes = simulationTick * TICK_MINUTES;
+
+  let totalHours = Math.floor(totalMinutes / 60);
+  let numOfMinutes = totalMinutes % 60;
 
   let totalDays = Math.floor(totalHours / 24);
-
-  numOfMinutes %= 60;
-
-  totalHours %= 24;
+  totalHours = totalHours % 24;
 
   if(totalHours < 10) totalHours = '0'+totalHours;
   else totalHours = ''+totalHours;
@@ -382,70 +448,249 @@ function updateTimer(numOfMinutes){
 
 function letPlaneHaveEmergency(planeID){
   const plane = document.getElementById('plane:' + planeID);
+  if (!plane) return;
   plane.style.background = planeEmergencyColor;
 }
+
+async function updateRunwaysStatus(){
+  const runwayStatus = await getRunwaysStatus();
+
+  if (!runwayStatus) {
+    return;
+  }
+
+  for(let i = 0; i < numberOfRunways; i++){
+    const runway = document.getElementById('runway:'+String(i + 1));
+    if (!runway) continue;
+
+    if(runwayStatus[i])
+      runway.style.border = "3px solid rgb(0, 0, 0)";
+
+    else
+      runway.style.border = "3px solid rgb(209, 58, 58)";//+ runwayEmergencyColor;
+  }
+}
+
 
 // ________________________________________________________________________________________________________
 // Unfinishe Function Difinitions Section:
 // ________________________________________________________________________________________________________
 
-// must finish getAircraft(planeID) first.
-function updateInfoScreenContent(planeID){
-
+async function updateInfoScreenContent(planeID){
   const planeInfoScreen = document.querySelector('.display-info-screen');
- 
+  const air = await getAircraft(planeID);
 
-  // get the Aircraft object from the list of Aricrafts??? maybe 
+  if (!air) {
+    planeInfoScreen.innerHTML = `Aircraft ${planeID} Info: unavailable`;
+    return;
+  }
 
-  // const air = getAircraft(planeID);
-  // planeInfoScreen.innerHTML = "Aircraft "+planeID+" Info:\
-  //     <ul>\
-  //       <li>Callsign: "+ air.callsign +"</li>\
-  //       <li>Origin: "+ air.origin +"</li>\
-  //       <li>Destination: "+ air.destination +"</li>\
-  //       <li>Is departure: "+ air.is_departure +"</li>\
-  //       <li>Fuel level: "+ air.fuel_level +"</li>\
-  //       <li>Emergency status: "+ air.emergency_status +"</li>\
-  //       <li>Target time: "+ air.target_time +"</li>\
-  //       <li>Actual time: "+ air.actual_time +"</li>\
-  //       <li>Current location: "+ air.current_location +"</li>\
-  //     </ul> ";
-
-  planeInfoScreen.innerHTML = "Aircraft "+planeID+" Info:\
-    <ul>\
-      <li>Callsign: "+ 1 +"</li>\
-      <li>Origin: "+ 1 +"</li>\
-      <li>Destination: "+ 1 +"</li>\
-      <li>Is departure: "+ 1 +"</li>\
-      <li>Fuel level: "+ 1 +"</li>\
-      <li>Emergency status: "+ 1+ "</li>\
-      <li>Target time: "+ 1 +"</li>\
-      <li>Actual time: "+ 1 +"</li>\
-      <li>Current location: "+ 1 +"</li>\
-    </ul> ";
+  planeInfoScreen.innerHTML = `Aircraft ${planeID} Info:
+    <ul>
+      <li>Callsign: ${air.callsign}</li>
+      <li>Origin: ${air.origin}</li>
+      <li>Destination: ${air.destination}</li>
+      <li>Is departure: ${air.is_departure}</li>
+      <li>Fuel level: ${air.fuel_level.toFixed(1)}</li>
+      <li>Emergency status: ${air.emergency_status}</li>
+      <li>Target time: ${air.target_time}</li>
+      <li>Actual time: ${air.actual_time}</li>
+      <li>Current location: ${air.current_location}</li>
+    </ul>`;
 }
 
 
 // should return a dictionary or a 2D list of size Nx2 where N is the 
-// number of actions that happened in current frame and  
+// number of actions that happened in current Update and  
 // every list inside the big list is = [planeID, action].
-function getCurrentFrameActions(){
-  // .....
+
+//  result ex: [[planeID_1, action_1],
+//              [planeID_2, action_2],
+//              [planeID_3, action_3],
+//              [planeID_4, action_4],
+//              [planeID_5, action_5]]
+// where 'action' is a string or (an integer to represent a runway index)
+function getCurrentUpdateActions(){
+    return fetch('/api/current-frame-actions')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.actions;
+            }
+            throw new Error('Failed to get Update actions');
+        })
+        .catch(error => {
+            console.error('Error fetching Update actions:', error);
+            return [];
+        });
 }
 
-// used for the clock/timer on the top left corner 
+// used for the clock/timer on the top left corner
 function getCurrentTime(){
-  // .....
+    return fetch('/api/current-time')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return new Date(data.time);
+            }
+            throw new Error('Failed to get current time');
+        })
+        .catch(error => {
+            console.error('Error fetching time:', error);
+            return null;
+        });
 }
 
-// tells the back-end to calculate the next frame.
+// tells the back-end to calculate the next Update.
 // i don't know if this function is needed or not
-function goToNextFrame(){
-  // .....
+async function goToNextUpdate(){
+    try {
+        const response = await fetch('/api/next-frame', { method: 'POST' });
+        const data = await response.json();
+        if (data.success) {
+            console.log('Update advanced');
+        }
+    } catch (error) {
+        console.error('Error advancing Update:', error);
+    }
 }
 
-// return an Aircraft object from the back-end using the plane 2 digit ID
-function getAircraft(planeID){
-  // .....
-  return new Aircraft(0,1,2,3,4,5,6,7,8,9);
+function getAircraft(planeCallSign){
+    return fetch(`/api/aircraft/${planeCallSign}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const air = data.aircraft;
+                return new Aircraft(
+                    air.callsign,
+                    air.origin,
+                    air.destination,
+                    air.is_departure,
+                    air.fuel_level,
+                    air.emergency_status,
+                    air.target_time,
+                    air.actual_time,
+                    air.current_location
+                );
+            }
+            return null;
+        })
+    .catch(error => {
+      console.error('Error fetching aircraft:', error);
+      return null;
+    });
 }
+
+
+// return true if the simulation has ended
+async function stopSimulationCheck(){
+  try {
+    const response = await fetch('/api/simulation-finished');
+    const data = await response.json();
+    if (data.success) {
+      return data.finished;
+    }
+  } catch (error) {
+    console.error('Error checking simulation status:', error);
+  }
+  return false;
+}
+
+function getNumberOfRunways(){
+  // can also access directly from simulation controller
+  // call get_runway_num from simulation controller
+    return fetch('/api/number-of-runways')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.number;
+            }
+            throw new Error('Failed to get number of runways');
+        })
+        .catch(error => {
+            console.error('Error fetching number of runways:', error);
+            return null;
+        });
+}
+
+// returns a list of booleans where list[i] value represents the runway_i status
+// list[i] = true of the runway is operational false otherwise
+// output ex: if the total number of runways is 6 then the output is for example = [true, false, true, true, true, false] -> sooo, both the second and last runway are offline 
+function getRunwaysStatus(){
+  // call get_runway_statuses from the simulation controller class on the simulation object
+
+    return fetch('/api/runway-statuses')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.status;
+            }
+            throw new Error('Failed to get runway statuses');
+        })
+        .catch(error => {
+            console.error('Error fetching statuses:', error);
+            return null;
+        });
+  // return [true, true, true, true, true, true, true, true, true]
+}
+
+// returns a list where list[i] value represents the runway_i Mode
+// list[i] = -1 -> the runway is for Take-off only
+// list[i] =  0 -> the runway is for Both Modes
+// list[i] =  1 -> the runway is for Arrival only
+// output ex: if the total number of runways is 6 then the output is for example = [1, 0, -1, 1, 0, 1] 
+function getRunwaysMode(){
+  // call get_runway_modes from simulation controller
+    return fetch('/api/runway-modes')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                return data.mode;
+            }
+            throw new Error('Failed to get runway modes');
+        })
+        .catch(error => {
+            console.error('Error fetching modes:', error);
+            return null;
+        });
+  // return [1,1,-1,1,0,1,1,1,1]
+}
+
+async function getReport(){
+  try {
+    const response = await fetch('/api/report');
+    const data = await response.json();
+
+    if (!data.success) {
+      console.error('Failed to get report:', data.errors || data.error);
+      return null;
+    }
+
+    return data.report;
+  } catch (error) {
+    console.error('Error fetching report:', error);
+    return null;
+  }
+}
+
+function showReport(report){
+  if (!report) return;
+
+  // For Turki to change
+  const reportBox = document.querySelector('.report-container');
+  if (!reportBox) {
+    console.log('Final report:', report);
+    return;
+  }
+
+  reportBox.innerHTML = `
+    <h3>Simulation Report</h3>
+    <p>Total planes: ${report.total_planes}</p>
+    <p>Diversions: ${report.diversions}</p>
+    <p>Cancellations: ${report.cancellations}</p>
+    <p>Efficiency: ${report.efficiency}</p>
+    <p>Avg wait: ${report.avg_wait_time}</p>
+    <p>Max hold: ${report.max_hold_time}</p>
+  `;
+}
+

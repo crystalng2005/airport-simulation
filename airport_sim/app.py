@@ -1,9 +1,12 @@
 # Flask Entry Point (MainController logic)
 import os
-from flask import Flask, render_template, request, jsonify
-from logic.simulation import SimulationController
+from flask import Flask, render_template, request, jsonify, session
 from logic.presets import PresetController
 from logic.visualisation import VisualisationController
+from logic.report import PerformanceReport
+from datetime import datetime
+import logic.globals.reportData as RD
+
 
 app = Flask(
     __name__,
@@ -13,7 +16,6 @@ app = Flask(
 
 class MainController:
     def __init__(self):
-        self.simulation = None
         self.is_available = True
         self.preset_controller = PresetController()
         self.visualisation_controller = VisualisationController()
@@ -30,29 +32,11 @@ def index():
 
 @app.route('/start', methods=['POST'])
 def start_sim():
-    
     try:
         data = request.get_json()
+        controller.visualisation_controller.startSimulation(data)
 
-        runways = data.get('runways')
-        inbound_flow = data.get('inbound_flow')
-        outbound_flow = data.get('outbound_flow')
-        departure_runways = data.get('departure_runways')
-        landing_runways = data.get('landing_runways')
-        mixed_runways = data.get('mixed_runways')
-        cancellation_time = data.get('cancellation_time')
-
-        controller.simulation = SimulationController(
-            departures_per_hour=int(outbound_flow),
-            landings_per_hour=int(inbound_flow),
-            total_runways=int(runways),
-            departure_runways=int(departure_runways),
-            landing_runways=int(landing_runways),
-            mixed_runways=int(mixed_runways),
-            cancellation_time=int(cancellation_time)
-        )
-
-        controller.is_available = False # Simulation is ongoing
+        controller.is_available = False
 
         return jsonify({'success': True, 'message': 'Simulation started'}), 200
 
@@ -62,18 +46,76 @@ def start_sim():
 
 @app.route('/tick', methods=['POST'])
 def tick():
-    if not controller.is_available or controller.simulation is None:
+    if controller.is_available or not controller.visualisation_controller.hasSimulation():
         return jsonify({'success': False, 'errors': ['No active simulation']}), 400
-    
-    controller.simulation.update()
+
+    controller.visualisation_controller.tick()
     return jsonify({'success': True, 'message': 'Tick processed'}), 200
     
-@app.route('/visualisation/data', methods=['GET'])
-def getVisualisationData():
+# @app.route('/visualisation/data', methods=['GET'])
+# def getVisualisationData():
     
-    aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
-    return jsonify({'success': True, 'data': aircraft_data}), 200
+#     aircraft_data = controller.visualisation_controller.getAircraftData(controller.simulation)
+#     return jsonify({'success': True, 'data': aircraft_data}), 200
 
+#Simulation screen Routes
+@app.route('/simulation-screen')
+def simulation_page():
+    """Display simulation screen page"""
+    return render_template('simulation_screen.html')
+
+@app.route('/configure-simulation')
+def configure_simulation_page():
+    return render_template('configure_simulation.html')
+
+@app.route('/api/runway-count', methods=['GET'])
+def get_runway_count():
+    """Get total number of runways in current simulation"""
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'error': 'No active simulation'}), 400
+
+    return jsonify({
+        'success': True,
+        'count': controller.visualisation_controller.getNumberOfRunways()
+    }), 200
+
+
+@app.route('/api/simulation-finished', methods=['GET'])
+def is_simulation_finished():
+    """Check if simulation has finished"""
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'error': 'No active simulation'}), 400
+
+    return jsonify({
+        'success': True,
+        'finished': controller.visualisation_controller.isSimulationFinished()
+    }), 200
+
+
+@app.route('/api/get-preset-data/<int:preset_id>', methods=['GET'])
+def get_preset_data(preset_id):
+    """Get full preset data for configuration form"""
+    try:
+        preset_data = controller.visualisation_controller.getPresetData(preset_id)
+        
+        if preset_data:
+            return jsonify({
+                "success": True,
+                "vars": preset_data.get("vars", {}),
+                "planes": preset_data.get("planes", []),
+                "report": preset_data.get("report", {})
+            })
+        else:
+            return jsonify({
+                "success": False,
+                "error": "Preset not found"
+            }), 404
+            
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 #Presets Routes
 
 @app.route('/presets')
@@ -84,10 +126,12 @@ def presets_page():
 
 @app.route('/api/get-presets', methods=['GET'])
 def get_presets():
-    
+    """Get available presets for the presets page"""
     try:
+        print('🔍 /api/get-presets called')
         
-        presets = vis_controller.getAvailablePresets()
+        presets = controller.visualisation_controller.getAvailablePresets()
+        
         
         return jsonify({
             "success": True,
@@ -115,9 +159,9 @@ def load_preset():
             }), 400
         
    
-        preset_data = vis_controller.loadPresetData(preset_id)
+        preset_data = controller.visualisation_controller.getPresetData(preset_id)
         
-        if preset_data["success"]:
+        if preset_data and "vars" in preset_data:
             # Store in session
             session['preset_mode'] = True
             session['preset_id'] = preset_id
@@ -147,12 +191,16 @@ def results_page():
     """Display results page"""
     return render_template('results.html')
 
+@app.route('/result-screen')
+def result_screen_page():
+    return render_template('result_screen.html')
+
 
 @app.route('/api/get-all-results', methods=['GET'])
 def get_all_results():
     
     try:
-        results = vis_controller.getAllSimulationResults()
+        results = controller.visualisation_controller.getAllSimulationResults()
         
         return jsonify({
             "success": True,
@@ -169,8 +217,16 @@ def get_all_results():
 def get_full_report(sim_id):
    
     try:
-        report = vis_controller.getSimulationReport(sim_id)
-        return jsonify(report)
+        report = controller.visualisation_controller.getSimulationReport(sim_id)
+        if report is None:
+            return jsonify({
+                "success": False,
+                "error": "Simulation report not found"
+            }), 404
+        return jsonify({
+            "success": True,
+            "report": report.get("report", {})
+        })
     except Exception as e:
         return jsonify({
             "success": False,
@@ -180,41 +236,63 @@ def get_full_report(sim_id):
 
 @app.route('/api/compare-simulations', methods=['POST'])
 def compare_simulations():
-   
+    data = request.get_json()
+    sim_id_1 = data.get('sim_id_1')
+    sim_id_2 = data.get('sim_id_2')
+    comparison = controller.visualisation_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
+    if comparison is None:
+        return jsonify({"success": False, "error": "One or both simulation IDs not found"}), 404
+    return jsonify({"success": True, "comparison": comparison})
+
+
+@app.route('/api/comparison-plots', methods=['POST'])
+def comparison_plots():
+    """Generate side-by-side bar chart plots comparing two simulation reports."""
+    data = request.get_json()
+    sim_id_1 = int(data.get('sim_id_1'))
+    sim_id_2 = int(data.get('sim_id_2'))
     try:
-        data = request.get_json()
-        sim_id_1 = data.get('sim_id_1')
-        sim_id_2 = data.get('sim_id_2')
-        
-        if sim_id_1 is None or sim_id_2 is None:
-            return jsonify({
-                "success": False,
-                "error": "Both simulation IDs required"
-            }), 400
-        
-        comparison = vis_controller.compareSimulations(int(sim_id_1), int(sim_id_2))
-        return jsonify(comparison)
-        
+        r1 = controller.visualisation_controller.results_controller.getOneResult(sim_id_1)
+        r2 = controller.visualisation_controller.results_controller.getOneResult(sim_id_2)
+        if r1 is None or r2 is None:
+            return jsonify({'success': False, 'error': 'One or both simulation IDs not found'}), 404
+        plots = PerformanceReport.generate_comparison_plots_base64(
+            r1['report'], r2['report'],
+            label1=f'Sim #{sim_id_1}', label2=f'Sim #{sim_id_2}'
+        )
+        return jsonify({'success': True, 'plots': plots})
     except Exception as e:
-        return jsonify({
-            "success": False,
-            "error": str(e)
-        }), 500
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/export-current-report', methods=['GET'])
+def export_current_report():
+    """Export the current simulation report (from result screen after sim ends)"""
+    try:
+        from flask import send_file
+        if RD.reportData is None:
+            return jsonify({'success': False, 'error': 'No report available'}), 400
+        
+        filepath = controller.visualisation_controller.results_controller.exportReport(RD.reportData)
+        if filepath and os.path.exists(filepath):
+            return send_file(filepath, as_attachment=True, download_name='simulation_report.txt')
+        return jsonify({'success': False, 'error': 'Failed to generate report'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 @app.route('/api/export-report/<int:sim_id>', methods=['GET'])
-def export_report(sim_id):
-    
+def export_report(sim_id):  
     try:
         from flask import send_file
         
-        filepath = vis_controller.exportSimulationReport(sim_id, format="txt")
+        filepath = controller.visualisation_controller.exportSimulationReport(sim_id)
         
         if filepath and os.path.exists(filepath):
             return send_file(
                 filepath,
                 as_attachment=True,
-                download_name=f"simulation_{sim_id}_report.txt"
+                download_name=f'simulation_{sim_id}_report.txt'
             )
         else:
             return jsonify({
@@ -227,8 +305,111 @@ def export_report(sim_id):
             "success": False,
             "error": str(e)
         }), 500
-
     
-   
+@app.route('/api/current-frame-actions', methods=['GET'])
+def get_current_frame_actions():
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    actions = controller.visualisation_controller.getCurrentFrameActions()
+    return jsonify({'success': True, 'actions': actions}), 200
+
+@app.route('/api/current-time', methods=['GET'])
+def get_current_time():
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+
+    return jsonify({
+        'success': True,
+        'time': controller.visualisation_controller.getCurrentTime()
+    }), 200
+
+@app.route('/api/next-frame', methods=['POST'])
+def next_frame():
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+
+    controller.visualisation_controller.tick()
+    return jsonify({'success': True, 'message': 'Frame advanced'}), 200
+
+@app.route('/api/aircraft/<plane_call_sign>', methods=['GET'])
+def get_aircraft(plane_call_sign):
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+    
+    aircraft = controller.visualisation_controller.getAircraftByCallSign(plane_call_sign)
+    if not aircraft:
+        return jsonify({'success': False, 'errors': ['Aircraft not found']}), 404
+    
+    return jsonify({'success': True, 'aircraft': aircraft.return_data()}), 200
+
+@app.route('/api/number-of-runways', methods=['GET'])
+def get_number_of_runways():
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+
+    return jsonify({
+        'success': True,
+        'number': controller.visualisation_controller.getNumberOfRunways()
+    }), 200
+
+@app.route('/api/runway-statuses', methods=['GET'])
+def get_runway_status():
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+
+    return jsonify({
+        'success': True,
+        'status': controller.visualisation_controller.getRunwayStatuses()
+    }), 200
+
+@app.route('/api/runway-modes', methods=['GET'])
+def get_runway_modes():
+    if not controller.visualisation_controller.hasSimulation():
+        return jsonify({'success': False, 'errors': ['No active simulation']}), 400
+
+    return jsonify({
+        'success': True,
+        'mode': controller.visualisation_controller.getRunwayModes()
+    }), 200
+
+@app.route('/api/report', methods=['GET'])
+def get_report():
+    if controller.visualisation_controller.hasSimulation():
+        report = controller.visualisation_controller.getCurrentSimulationReport()
+        if report is None:
+            return jsonify({'success': False, 'error': 'Report not ready'})
+        return jsonify({'success': True, 'report': report})
+    return jsonify({'success': False, 'error': 'No active simulation'})
+
+
+@app.route('/api/report-plots', methods=['GET'])
+def get_report_plots():
+    """Generate and return base64-encoded plot images for the current simulation report."""
+    if RD.reportData is None:
+        return jsonify({'success': False, 'error': 'No report available'}), 400
+    try:
+        RD.reportData.generateReport()
+        plots = RD.reportData.generate_plots_base64()
+        return jsonify({'success': True, 'plots': plots})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/report-plots/<int:sim_id>', methods=['GET'])
+def get_saved_report_plots(sim_id):
+    """Generate and return base64 plot images for a specific saved simulation report."""
+    try:
+        report = controller.visualisation_controller.results_controller.loadResults(sim_id)
+        if report is None:
+            return jsonify({'success': False, 'error': 'Simulation report not found'}), 404
+        report.generateReport()
+        plots = report.generate_plots_base64()
+        return jsonify({'success': True, 'plots': plots})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('FLASK_RUN_PORT', os.environ.get('PORT', 8080)))
+    app.run(host='127.0.0.1', port=port, debug=True)

@@ -3,22 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View & Compare Results - Airport Simulation</title>
-    <link rel="stylesheet" href="static/css/results.css">
+    <title>View Simulation Result - Airport Simulation</title>
+    <link rel="stylesheet" href="static/css/result_screen.css">
 </head>
 <body>
-    <div class="container">
+    <!-- <div class="container"> -->
         <!-- Header -->
-        <header class="header">
-            <h1> View & Compare Results</h1>
-            <p class="subtitle">View past 50 simulations and compare performance metrics</p>
-        </header>
+        <!-- <header class="header">
+            <h1> View Simulation Results</h1>
+            <p class="subtitle">View the result of performance metrics</p>
+        </header> -->
 
         <!-- Main Content -->
         <main class="results-section">
             
             <!-- Action Bar -->
-            <div class="action-bar">
+            <!-- <div class="action-bar">
                 <div class="info-section">
                     <h2>Past Simulations (<span id="totalCount">0</span>)</h2>
                     <p class="help-text">Select any simulation to view results, or select 2 to compare</p>
@@ -31,13 +31,13 @@
                         Clear Selection
                     </button>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Loading Indicator -->
-            <div id="loadingIndicator" class="loading">
+            <!-- <div id="loadingIndicator" class="loading">
                 <div class="spinner"></div>
                 <p>Loading simulation results...</p>
-            </div>
+            </div> -->
 
             <!-- Results Table -->
             <div id="resultsContainer" class="results-container" style="display: none;">
@@ -63,7 +63,7 @@
             </div>
 
             <!-- No Results Message -->
-            <div id="noResultsMessage" class="no-results" style="display: none;">
+            <!-- <div id="noResultsMessage" class="no-results" style="display: none;">
                 <div class="no-results-icon"></div>
                 <h3>No Simulation Results</h3>
                 <p>You haven't completed any simulations yet.</p>
@@ -71,7 +71,7 @@
                 <button class="btn btn-primary" onclick="goToMenu()">
                     Back to Menu
                 </button>
-            </div>
+            </div> -->
 
             <!-- Comparison Modal -->
             <div id="comparisonModal" class="modal" style="display: none;">
@@ -80,18 +80,8 @@
                         <h2>Comparison Results</h2>
                         <button class="close-btn" onclick="closeComparison()">&times;</button>
                     </div>
-                    <div class="comparison-view-switch">
-                        <button id="comparisonResultsBtn" class="btn btn-primary" onclick="showComparisonResults()">View Results</button>
-                        <button id="comparisonPlotsBtn" class="btn btn-secondary" onclick="showComparisonPlots()">View Plots</button>
-                    </div>
                     <div class="modal-body" id="comparisonContent">
                         <!-- Comparison will be inserted here -->
-                    </div>
-                    <div class="modal-body" id="comparisonPlotsSection" style="display: none; padding-top: 0;">
-                        <h3 style="color: #1e3a8a; margin: 0 0 12px;">Comparison Charts</h3>
-                        <div id="comparisonPlotsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <!-- Comparison plot images will be inserted here -->
-                        </div>
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" onclick="closeComparison()">Close</button>
@@ -104,37 +94,39 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2>Simulation Report</h2>
-                        <button class="close-btn" onclick="closeReport()">&times;</button>
+                        <!-- <button class="close-btn" onclick="closeReport()">&times;</button> -->
                     </div>
-                    <div class="comparison-view-switch">
+                    <div class="comparison-view-switch" style="padding: 10px 20px 0;">
                         <button id="reportResultsBtn" class="btn btn-primary" onclick="showReportResults()">View Results</button>
                         <button id="reportPlotsBtn" class="btn btn-secondary" onclick="showReportPlots()">View Plots</button>
                     </div>
-                    <div class="modal-body" id="reportContent">
-                        <!-- Report will be inserted here -->
-                    </div>
-                    <div class="modal-body" id="reportPlotsSection" style="display: none; padding-top: 0;">
-                        <h3 style="color: #1e3a8a; margin: 0 0 12px;">Performance Plots</h3>
-                        <div id="reportPlotsContainer" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <!-- Report plot images will be inserted here -->
+                    <div class="modal-body" style="padding: 15px 20px; overflow-y: auto;">
+                        <div id="reportContent" style="display: block;">
+                            <!-- Report metrics will be inserted here -->
+                        </div>
+                        <div id="plotsSection" style="display: none; margin-top: 15px;">
+                            <h3 style="color: #1e3a8a; margin: 0 0 10px; font-size: 1rem;">Performance Plots</h3>
+                            <div id="plotsContainer" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px;">
+                                <!-- Plot images will be inserted here -->
+                            </div>
                         </div>
                     </div>
-                    <div class="modal-footer">
+                    <div class="modal-footer" style="padding: 10px 20px;">
                         <button class="btn btn-export" onclick="exportCurrentReport()">Export Report</button>
-                        <button class="btn btn-secondary" onclick="closeReport()">Close</button>
+                        <button class="btn btn-secondary" onclick="goToMenu()">Close</button>
                     </div>
                 </div>
             </div>
 
             <!-- Back Button -->
-            <div class="back-button-container">
+            <!-- <div class="back-button-container">
                 <button class="btn btn-secondary" onclick="goToMenu()">
                     Back to Main Menu
                 </button>
-            </div>
+            </div> -->
         </main>
-    </div>
+    <!-- </div> -->
 
-    <script src="static/js/results.js"></script>
+    <script src="static/js/result_screen.js"></script>
 </body>
 </html>
