@@ -25,6 +25,13 @@ class SimulationController:
         mixed_runways: int,
         cancellation_time: int,
         total_simulation_minutes: int,
+        mechanical_emergency_prob: float,
+        health_emergency_prob: float,
+        fuel_emergency_prob: float,
+        weather_closure_prob: float,
+        maintenance_closure_prob: float,
+        safety_closure_prob: float,
+        construction_closure_prob: float,
         tick_minutes: int = 5
     ):
         # Values defining the simulation
@@ -37,6 +44,10 @@ class SimulationController:
         self.mixed_runways = mixed_runways
         self.all_runways = []
 
+        # Probabilities for plane emergencies and runway closures
+        self.plane_emergency_prob = [mechanical_emergency_prob, health_emergency_prob, fuel_emergency_prob]
+        self.runway_closure_prob = [weather_closure_prob, maintenance_closure_prob, safety_closure_prob, construction_closure_prob]
+        
         # Times for the simulation
         self.cancellation_time = cancellation_time
         self.current_time = datetime(2000, 1, 1, 0, 0)
@@ -79,6 +90,7 @@ class SimulationController:
         self.departure_runways = preset_controller.departure_runways
         self.landing_runways = preset_controller.landing_runways
         self.mixed_runways = preset_controller.mixed_runways
+        #self.runway_closure_prob = preset_controller.runway_closure_prob
 
         # Generate runways and queues based on loaded data
         self.generateRunway()
@@ -105,8 +117,8 @@ class SimulationController:
     # Generates a plane and adds it to the plane list
     def generatePlane(self, is_departure: bool) -> bool:
         # Generates depending on departure or not
-        if is_departure: p = Plane(is_departure, self.departure_queue, self.cancellation_time)
-        else: p = Plane(is_departure, self.landing_queue, self.cancellation_time)
+        if is_departure: p = Plane(is_departure, self.departure_queue, self.cancellation_time, self.plane_emergency_prob)
+        else: p = Plane(is_departure, self.landing_queue, self.cancellation_time, self.plane_emergency_prob)
         p.generated_at = self.current_time
 
         # Adds to the plane by call sign and preset storage lists
@@ -152,21 +164,21 @@ class SimulationController:
 
         # Departure runways
         for i in range(self.departure_runways):
-            runway = Runway(True, False, runway_num, True, True)
+            runway = Runway(True, False, runway_num, True, True, self.runway_closure_prob)
             self.departure_list.append(runway)
             self.all_runways.append(runway)
             runway_num += 1
 
         # Landing runways
         for i in range(self.landing_runways):
-            runway = Runway(False, False, runway_num, True, True)
+            runway = Runway(False, False, runway_num, True, True, self.runway_closure_prob)
             self.landing_list.append(runway)
             self.all_runways.append(runway)
             runway_num += 1
         
         # Mixed mode runways
         for i in range(self.mixed_runways):
-            temp = Runway(True, True, runway_num, True, True)
+            temp = Runway(True, True, runway_num, True, True, self.runway_closure_prob)
             self.landing_list.append(temp)
             self.departure_list.append(temp)
             self.all_runways.append(temp)

@@ -147,7 +147,14 @@ function loadPresetIntoForm() {
         document.getElementById('outbound_flow').value = config.outbound_flow;
         document.getElementById('cancellation_time').value = config.cancellation_time;
         document.getElementById('duration').value = config.duration;
-        
+        document.getElementById('health_emergency_p').value = config.health_emergency_prob;
+        document.getElementById('mechanical_emergency_p').value = config.mechanical_emergency_prob;
+        document.getElementById('fuel_emergency_p').value = config.fuel_emergency_prob;
+        document.getElementById('medical_emergency_p').value = config.medical_emergency_prob;
+        document.getElementById('weather_closure_prob').value = config.weather_closure_prob;
+        document.getElementById('safety_closure_prob').value = config.safety_closure_prob;
+        document.getElementById('construction_closure_prob').value = config.construction_closure_prob;
+        document.getElementById('maintenance_closure_prob').value = config.maintenance_closure_prob;
         // Clear sessionStorage
         sessionStorage.removeItem('presetConfig');
         

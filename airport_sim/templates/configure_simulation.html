@@ -27,19 +27,19 @@
 
                         <div class="form-group">
                             <label for="departure_runways">Departure-Only Runways</label>
-                            <input type="number" id="departure_runways" name="departure_runways"  required>
+                            <input type="number" id="departure_runways" name="departure_runways" value="1" required>
                             <small>Runways dedicated to departures only</small>
                         </div>
 
                         <div class="form-group">
                             <label for="landing_runways">Landing-Only Runways</label>
-                            <input type="number" id="landing_runways" name="landing_runways"  required>
+                            <input type="number" id="landing_runways" name="landing_runways" value="1" required>
                             <small>Runways dedicated to landings only</small>
                         </div>
 
                         <div class="form-group">
                             <label for="mixed_runways">Mixed-Use Runways</label>
-                            <input type="number" id="mixed_runways" name="mixed_runways"  required>
+                            <input type="number" id="mixed_runways" name="mixed_runways" value="1" required>
                             <small>Runways that can handle both landings and departures</small>
                         </div>
 
@@ -70,25 +70,25 @@
                         
                         <div class="form-group">
                             <label for="medical_emergency_prob">Medical Emergency Probability</label>
-                            <input type="number" id="medical_emergency_prob" name="medical_emergency_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="medical_emergency_prob" name="medical_emergency_prob" value="0.00012" min="0" max="1" step="0.000001" required>
                             <small>Probability of a medical emergency occurring</small>
                         </div>
 
                         <div class="form-group">
                             <label for="health_emergency_prob">Health Emergency Probability</label>
-                            <input type="number" id="health_emergency_prob" name="health_emergency_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="health_emergency_prob" name="health_emergency_prob" value="0.05" min="0" max="1" step="0.000001" required>
                             <small>Probability of a health-related emergency occurring</small>
                         </div>
 
                         <div class="form-group">
                             <label for="fuel_emergency_prob">Fuel Emergency Probability</label>
-                            <input type="number" id="fuel_emergency_prob" name="fuel_emergency_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="fuel_emergency_prob" name="fuel_emergency_prob" value="0.000004" min="0" max="1" step="0.000001" required>
                             <small>Probability of a fuel emergency occurring</small>
                         </div>
 
                         <div class="form-group">
                             <label for="mechanical_emergency_prob">Mechanical Emergency Probability</label>
-                            <input type="number" id="mechanical_emergency_prob" name="mechanical_emergency_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="mechanical_emergency_prob" name="mechanical_emergency_prob" value="0.00004" min="0" max="1" step="0.000001" required>
                             <small>Probability of a mechanical emergency occurring</small>
                         </div>
 
@@ -102,25 +102,25 @@
 
                         <div class="form-group">
                             <label for="weather_closure_prob">Weather Closure Probability</label>
-                            <input type="number" id="weather_closure_prob" name="weather_closure_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="weather_closure_prob" name="weather_closure_prob" value="0.001" min="0" max="1" step="0.000001" required>
                             <small>Probability of runway closure due to weather</small>
                         </div>
 
                         <div class="form-group">
                             <label for="safety_closure_prob">Safety Closure Probability</label>
-                            <input type="number" id="safety_closure_prob" name="safety_closure_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="safety_closure_prob" name="safety_closure_prob" value="0.000067" min="0" max="1" step="0.000001" required>
                             <small>Probability of runway closure due to safety concerns</small>
                         </div>
 
                         <div class="form-group">
                             <label for="construction_closure_prob">Construction Closure Probability</label>
-                            <input type="number" id="construction_closure_prob" name="construction_closure_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="construction_closure_prob" name="construction_closure_prob" value="0.000033" min="0" max="1" step="0.000001" required>
                             <small>Probability of runway closure due to construction</small>
                         </div>
 
                         <div class="form-group">
                             <label for="maintenance_closure_prob">Maintenance Closure Probability</label>
-                            <input type="number" id="maintenance_closure_prob" name="maintenance_closure_prob" value="0.05" min="0" max="1" step="0.01" required>
+                            <input type="number" id="maintenance_closure_prob" name="maintenance_closure_prob" value="0.00014" min="0" max="1" step="0.000001" required>
                             <small>Probability of runway closure due to maintenance</small>
                         </div>
 

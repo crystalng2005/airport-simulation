@@ -152,6 +152,13 @@ class VisualisationController:
             mixed_runways=int(data.get('mixed_runways')),
             cancellation_time=int(data.get('cancellation_time')),
             total_simulation_minutes=int(data.get('duration', 100)),
+            mechanical_emergency_prob= float(data.get('maintenance_closure_prob')),
+            health_emergency_prob=float(data.get('health_emergency_prob')),
+            fuel_emergency_prob=float(data.get('fuel_emergency_prob')),
+            weather_closure_prob=float(data.get('weather_closure_prob')),
+            maintenance_closure_prob= float(data.get('maintenance_closure_prob')),
+            safety_closure_prob=float(data.get('safety_closure_prob')),
+            construction_closure_prob=float(data.get('construction_closure_prob')),
             tick_minutes=5
         )
         return True
