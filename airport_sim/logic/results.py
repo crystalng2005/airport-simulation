@@ -154,38 +154,57 @@ class ResultsController:
             report = PR.outputReport_dict()
 
             content = (
+                '===========================================================\n'
                 'AIRPORT SIMULATION REPORT\n'
-                '=========================\n\n'
+                '===========================================================\n\n'
+
+                '-----------------------------------------------------------\n'
                 'Summary\n'
-                '-------\n'
+                '-----------------------------------------------------------\n'
                 f"Start time: {report.get('start_time', 'N/A')}\n"
                 f"End time: {report.get('completed_at', 'N/A')}\n"
                 f"Total duration: {report.get('duration', 'N/A')}\n\n"
+
+                '-----------------------------------------------------------\n'
                 'Overall outcome\n'
-                '---------------\n'
+                '-----------------------------------------------------------\n'
                 f"Total flights handled: {report.get('total_planes', 0)}\n"
                 f"Flights diverted: {report.get('diversions', 0)}\n"
                 f"Flights cancelled: {report.get('cancellations', 0)}\n"
                 f"Operational efficiency: {report.get('efficiency', 0)}%\n\n"
+
+                '-----------------------------------------------------------\n'
                 'Queue and holding overview\n'
-                '--------------------------\n'
+                '-----------------------------------------------------------\n'
                 f"Longest runway queue: {report.get('queue_max', 0)} flights\n"
                 f"Longest holding pattern queue: {report.get('holding_max', 0)} flights\n\n"
+
+                '-----------------------------------------------------------\n'
                 'Fuel and delays\n'
-                '---------------\n'
+                '-----------------------------------------------------------\n'
                 f"Total fuel used: {report.get('tot_fuel_used', 0):.1f} units\n"
                 f"Average fuel used per flight: {report.get('avg_fuel_per_plane', 0):.1f} units\n"
+
                 f"Average wait before runway access: {report.get('avg_wait_time', 0)} minutes\n"
                 f"Average holding time: {report.get('avg_hold_time', 0)} minutes\n"
                 f"Average take-off delay: {report.get('avg_takeoff_time', 0)} minutes\n"
                 f"Average arrival delay: {report.get('avg_arrival_time', 0)} minutes\n\n"
-                '---------------\n'
+
+                '-----------------------------------------------------------\n'
+                'Additional metrics\n'
+                '-----------------------------------------------------------\n'
+                f"Maximum hold time: {report.get('max_hold_time', 0)} minutes\n"
+                f"Maximum take-off time: {report.get('max_takeoff_time', 0)} minutes\n"
+                f"Maximum arrival time: {report.get('max_arrival_time', 0)} minutes\n\n"
+
                 f"Standard deviation of wait times: {report.get('std_wait_time', 0)} minutes\n"
                 f"Standard deviation of hold times: {report.get('std_hold_time', 0)} minutes\n"
-                f"Standard deviation of take-off times: {report.get('std_take_off_time', 0)} minutes\n"
-                f"Standard deviation of arrival times: {report.get('std_arrival_time', 0)} minutes\n\n"
-                'Detail notes\n'
-                '------------\n'
+                f"Standard deviation of take-off delays: {report.get('std_take_off_time', 0)} minutes\n"
+                f"Standard deviation of arrival delays: {report.get('std_arrival_time', 0)} minutes\n\n"
+
+                '-----------------------------------------------------------\n'
+                'Notes on data\n'
+                '-----------------------------------------------------------\n'
                 'Lower diversion and cancellation counts are better.\n'
                 'A higher efficiency percentage means more flights were completed successfully.\n'
                 'Use this report to compare runway setups and traffic flow settings.\n'

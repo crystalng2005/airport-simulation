@@ -76,6 +76,7 @@ class PerformanceReport:
             self.fuel_avg = round(self.tot_fuel_used / self.total_planes)
 
 
+
     # Returns the duration in seconds as a formatted string
     def string_duration(self):
         if hasattr(self.duration, 'total_seconds'):
