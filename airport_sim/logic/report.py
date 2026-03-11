@@ -100,7 +100,7 @@ class PerformanceReport:
             "cancellations": self.cancellations,
 
             "tot_fuel_used": self.tot_fuel_used,
-            "avg_fuel_per_plane" : self.fuel_avg,
+            "avg_fuel_per_plane" : round(self.fuel_avg),
 
             "holding_max": self.holding_max,
             "queue_max": self.queue_max,
