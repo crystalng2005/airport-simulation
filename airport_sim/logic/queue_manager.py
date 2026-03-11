@@ -6,11 +6,13 @@ from queue import Queue
 from logic.models import Runway
 from logic.plane import Plane, EmergencyStatus
 
-import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
-# from logic.simulation import SimulationController
+import logic.globals.reportData as RD
+#from logic.simulation import SimulationController
+
 
 MINUTES_PER_TICK = 5
+
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
@@ -31,7 +33,9 @@ class QueueController:
         while checked < len(self.runway_list):
             checked = 0
             for runway in self.runway_list:
-                if runway.maxPlanes < 5 and len(self.plane_queue) != 0:
+                #if not runway.is_operational:
+                #    print("closed11!!")
+                if runway.maxPlanes < 5 and len(self.plane_queue) != 0 and runway.is_operational: # NOTE: added check for runway closure
                     # Alternates each tick who can use mixed mode (allowing departure to use it too)
                     if self.evenTurn == True and self.is_departure == False and runway.mixed_mode == True:
                         checked += 1
@@ -43,12 +47,16 @@ class QueueController:
                     removed.goToRunway(runway.runway_number)
                     currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                     # Assigns the holding queue exit time to the plane object
-                    removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
-                    delay = (removed.left_hold - removed.tickActualTime) 
-                    wait_time = removed.left_hold - removed.entered_hold
+                    removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
+                    delay = round(removed.left_hold - removed.tickActualTime) 
+                    wait_time = round(removed.left_hold - removed.entered_hold)
                 
                     # Adds the delay time and wait time to the report and decrements current queue size
-                    RD.reportData.arrival_delay_times.append(delay)
+                    if removed.is_departure:
+                        RD.reportData.take_off_delays.append(delay)
+                    else:
+                        RD.reportData.arrival_delay_times.append(delay)
+
                     RD.reportData.wait_times.append(wait_time)
                     RD.reportData.tot_wait_time += wait_time
                     RD.reportData.decQueueCurrent()
@@ -64,7 +72,7 @@ class QueueController:
             self.plane_queue.append(p)
 
         # Assigns holding queue entry time to plane object and increments current queue size
-        p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK * 60
+        p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
         RD.reportData.incQueueCurrent()
 
 
@@ -77,7 +85,7 @@ class QueueController:
 
         # If the emergency time exceeds the limit, diverts the plane
         for plane in self.plane_queue[:]:
-            if not self.is_departure and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
+            if (not self.is_departure) and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
                 plane.divert()
                 self.plane_queue.remove(plane)
                 RD.reportData.diversions += 1
@@ -86,7 +94,7 @@ class QueueController:
         i = 0
         while i < len(self.plane_queue):
             plane = self.plane_queue[i]
-            if plane.cancellation_time <= 0:
+            if plane.cancellation_time <= 0 and self.is_departure:
                 plane.cancel()
                 self.plane_queue.pop(i)
                 RD.reportData.cancellations += 1

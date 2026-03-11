@@ -183,6 +183,7 @@ async function compareSelected() {
         if (data.success) {
             // Just display the pre-calculated data
             showComparisonModal(data.comparison);
+            loadComparisonPlots(selectedSimulations[0], selectedSimulations[1]);
         } else {
             alert('Error comparing simulations: ' + data.error);
         }
@@ -317,7 +318,44 @@ function showComparisonModal(comparison) {
         </div>
     `;
 
+    showComparisonResults();
     modal.style.display = 'flex';
+}
+
+function showComparisonResults() {
+    const content = document.getElementById('comparisonContent');
+    const plotsSection = document.getElementById('comparisonPlotsSection');
+    const resultsBtn = document.getElementById('comparisonResultsBtn');
+    const plotsBtn = document.getElementById('comparisonPlotsBtn');
+
+    if (content) content.style.display = 'block';
+    if (plotsSection) plotsSection.style.display = 'none';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-secondary');
+        resultsBtn.classList.add('btn-primary');
+    }
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-primary');
+        plotsBtn.classList.add('btn-secondary');
+    }
+}
+
+function showComparisonPlots() {
+    const content = document.getElementById('comparisonContent');
+    const plotsSection = document.getElementById('comparisonPlotsSection');
+    const resultsBtn = document.getElementById('comparisonResultsBtn');
+    const plotsBtn = document.getElementById('comparisonPlotsBtn');
+
+    if (content) content.style.display = 'none';
+    if (plotsSection) plotsSection.style.display = 'block';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-primary');
+        resultsBtn.classList.add('btn-secondary');
+    }
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-secondary');
+        plotsBtn.classList.add('btn-primary');
+    }
 }
 
 /**
@@ -331,12 +369,20 @@ async function viewReport(simId) {
         const response = await fetch(`/api/get-full-report/${simId}`);
         const data = await response.json();
 
-        if (data.success) {
-            // Just display the data
-            showReportModal(data.report);
-        } else {
-            alert('Error loading report: ' + data.error);
+        if (data.success === false) {
+            alert('Error loading report: ' + (data.error || 'Unknown error'));
+            return;
         }
+
+        const report = data.report || (data.success ? data.report : null);
+        if (!report) {
+            alert('Error loading report: Report data missing');
+            return;
+        }
+
+        // Display report and matching plots for this specific simulation
+        showReportModal(report, simId);
+        await loadSavedReportPlots(simId);
     } catch (error) {
         console.error('Error:', error);
         alert('Failed to load report');
@@ -346,13 +392,14 @@ async function viewReport(simId) {
 /**
  * Show report modal - just display backend data
  */
-function showReportModal(report) {
+function showReportModal(report, simId = null) {
     const modal = document.getElementById('reportModal');
     const content = document.getElementById('reportContent');
+    const displayId = simId !== null ? simId : (report.id ?? 'N/A');
 
     // Backend already calculated everything
     content.innerHTML = `
-        <h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${report.id} - Full Report</h3>
+        <h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${displayId} - Full Report</h3>
         
         <div class="metric-cards">
             <div class="metric-card">
@@ -394,7 +441,94 @@ function showReportModal(report) {
         </div>
     `;
 
+    showReportResults();
     modal.style.display = 'flex';
+}
+
+function showReportResults() {
+    const content = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('reportPlotsSection');
+    const resultsBtn = document.getElementById('reportResultsBtn');
+    const plotsBtn = document.getElementById('reportPlotsBtn');
+
+    if (content) content.style.display = 'block';
+    if (plotsSection) plotsSection.style.display = 'none';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-secondary');
+        resultsBtn.classList.add('btn-primary');
+    }
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-primary');
+        plotsBtn.classList.add('btn-secondary');
+    }
+}
+
+function showReportPlots() {
+    const content = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('reportPlotsSection');
+    const resultsBtn = document.getElementById('reportResultsBtn');
+    const plotsBtn = document.getElementById('reportPlotsBtn');
+
+    if (content) content.style.display = 'none';
+    if (plotsSection) plotsSection.style.display = 'block';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-primary');
+        resultsBtn.classList.add('btn-secondary');
+    }
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-secondary');
+        plotsBtn.classList.add('btn-primary');
+    }
+}
+
+async function loadSavedReportPlots(simId) {
+    try {
+        const response = await fetch(`/api/report-plots/${simId}`);
+        const data = await response.json();
+
+        const plotsContainer = document.getElementById('reportPlotsContainer');
+        if (!plotsContainer) return;
+        plotsContainer.innerHTML = '';
+
+        if (!data.success || !data.plots || Object.keys(data.plots).length === 0) {
+            plotsContainer.innerHTML = '<p style="color:#64748b;">No plots available for this simulation.</p>';
+            return;
+        }
+
+        const plotLabels = {
+            wait_times: 'Wait Times',
+            hold_times: 'Hold Times',
+            takeoff_delays: 'Take-off Delays',
+            arrival_delays: 'Arrival Delays',
+            outcome_summary: 'Outcome Summary',
+            operations_snapshot: 'Operations Snapshot'
+        };
+
+        for (const [key, base64] of Object.entries(data.plots)) {
+            const wrapper = document.createElement('div');
+            wrapper.style.textAlign = 'center';
+
+            const label = document.createElement('div');
+            label.textContent = plotLabels[key] || key;
+            label.style.fontWeight = 'bold';
+            label.style.marginBottom = '4px';
+            label.style.color = '#1e3a8a';
+            label.style.fontSize = '0.85rem';
+
+            const img = document.createElement('img');
+            img.src = 'data:image/png;base64,' + base64;
+            img.alt = plotLabels[key] || key;
+            img.style.width = '100%';
+            img.style.borderRadius = '6px';
+            img.style.border = '1px solid #e2e8f0';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(img);
+            plotsContainer.appendChild(wrapper);
+        }
+    } catch (error) {
+        console.error('Error loading report plots:', error);
+    }
 }
 
 /**
@@ -421,11 +555,76 @@ function exportReport(simId) {
  */
 function closeComparison() {
     document.getElementById('comparisonModal').style.display = 'none';
+    // Clear plots when closing
+    const plotsSection = document.getElementById('comparisonPlotsSection');
+    const plotsContainer = document.getElementById('comparisonPlotsContainer');
+    if (plotsSection) plotsSection.style.display = 'none';
+    if (plotsContainer) plotsContainer.innerHTML = '';
+    showComparisonResults();
+}
+
+/**
+ * Load and display comparison charts
+ */
+async function loadComparisonPlots(simId1, simId2) {
+    try {
+        const response = await fetch('/api/comparison-plots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sim_id_1: simId1, sim_id_2: simId2 })
+        });
+        const data = await response.json();
+
+        if (!data.success || !data.plots) {
+            console.log('No comparison plots available');
+            return;
+        }
+
+        const plotsSection = document.getElementById('comparisonPlotsSection');
+        const plotsContainer = document.getElementById('comparisonPlotsContainer');
+        plotsContainer.innerHTML = '';
+
+        const plotLabels = {
+            key_counts: 'Planes, Diversions & Cancellations',
+            queues: 'Queue & Holding',
+            times: 'Average Times',
+            fuel_efficiency: 'Fuel & Efficiency'
+        };
+
+        for (const [key, base64] of Object.entries(data.plots)) {
+            const wrapper = document.createElement('div');
+            wrapper.style.textAlign = 'center';
+
+            const label = document.createElement('div');
+            label.textContent = plotLabels[key] || key;
+            label.style.fontWeight = 'bold';
+            label.style.marginBottom = '4px';
+            label.style.color = '#1e3a8a';
+            label.style.fontSize = '0.85rem';
+
+            const img = document.createElement('img');
+            img.src = 'data:image/png;base64,' + base64;
+            img.alt = plotLabels[key] || key;
+            img.style.width = '100%';
+            img.style.borderRadius = '6px';
+            img.style.border = '1px solid #e2e8f0';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(img);
+            plotsContainer.appendChild(wrapper);
+        }
+
+    } catch (error) {
+        console.error('Error loading comparison plots:', error);
+    }
 }
 
 function closeReport() {
     document.getElementById('reportModal').style.display = 'none';
     currentReportId = null;
+    const plotsContainer = document.getElementById('reportPlotsContainer');
+    if (plotsContainer) plotsContainer.innerHTML = '';
+    showReportResults();
 }
 
 /**

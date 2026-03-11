@@ -20,34 +20,29 @@
                     
                     <div class="form-section">
                         <h3>Runway Configuration</h3>
-                        
-                        <div class="form-group">
-                            <label for="total_runways">Total Runways</label>
-                            <input type="number" id="total_runways" name="runways" value="5" min="1" max="10" required>
-                            <small>Total number of runways at the airport (1-10)</small>
+
+                        <div class="info-box">
+                            <h4>Runway Setup</h4>
                         </div>
 
                         <div class="form-group">
                             <label for="departure_runways">Departure-Only Runways</label>
-                            <input type="number" id="departure_runways" name="departure_runways" value="2" min="0" max="10" required>
+                            <input type="number" id="departure_runways" name="departure_runways" value="1" required>
                             <small>Runways dedicated to departures only</small>
                         </div>
 
                         <div class="form-group">
                             <label for="landing_runways">Landing-Only Runways</label>
-                            <input type="number" id="landing_runways" name="landing_runways" value="2" min="0" max="10" required>
+                            <input type="number" id="landing_runways" name="landing_runways" value="1" required>
                             <small>Runways dedicated to landings only</small>
                         </div>
 
                         <div class="form-group">
                             <label for="mixed_runways">Mixed-Use Runways</label>
-                            <input type="number" id="mixed_runways" name="mixed_runways" value="1" min="0" max="10" required>
+                            <input type="number" id="mixed_runways" name="mixed_runways" value="1" required>
                             <small>Runways that can handle both landings and departures</small>
                         </div>
 
-                        <div class="validation-error" id="runway-error">
-                            Runway sum must equal total runways!
-                        </div>
                     </div>
 
                     <div class="form-section">
@@ -63,6 +58,74 @@
                             <label for="outbound_flow">Outbound Flow (planes/hour)</label>
                             <input type="number" id="outbound_flow" name="outbound_flow" value="10" min="1" max="100" required>
                             <small>Number of departing planes per hour</small>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Plane Emergency Probabilities</h3>
+
+                        <div class="info-box">
+                            <h4>Probability Input</h4>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="medical_emergency_prob">Medical Emergency Probability</label>
+                            <input type="number" id="medical_emergency_prob" name="medical_emergency_prob" value="0.00012" min="0" max="1" step="0.000001" required>
+                            <small>Probability of a medical emergency occurring</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="health_emergency_prob">Health Emergency Probability</label>
+                            <input type="number" id="health_emergency_prob" name="health_emergency_prob" value="0.05" min="0" max="1" step="0.000001" required>
+                            <small>Probability of a health-related emergency occurring</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fuel_emergency_prob">Fuel Emergency Probability</label>
+                            <input type="number" id="fuel_emergency_prob" name="fuel_emergency_prob" value="0.000004" min="0" max="1" step="0.000001" required>
+                            <small>Probability of a fuel emergency occurring</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="mechanical_emergency_prob">Mechanical Emergency Probability</label>
+                            <input type="number" id="mechanical_emergency_prob" name="mechanical_emergency_prob" value="0.00004" min="0" max="1" step="0.000001" required>
+                            <small>Probability of a mechanical emergency occurring</small>
+                        </div>
+
+                        <div class="validation-error" id="emergency-prob-error">
+                            All emergency probabilities must be between 0 and 1.
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Runway Closure Probabilities</h3>
+
+                        <div class="form-group">
+                            <label for="weather_closure_prob">Weather Closure Probability</label>
+                            <input type="number" id="weather_closure_prob" name="weather_closure_prob" value="0.001" min="0" max="1" step="0.000001" required>
+                            <small>Probability of runway closure due to weather</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="safety_closure_prob">Safety Closure Probability</label>
+                            <input type="number" id="safety_closure_prob" name="safety_closure_prob" value="0.000067" min="0" max="1" step="0.000001" required>
+                            <small>Probability of runway closure due to safety concerns</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="construction_closure_prob">Construction Closure Probability</label>
+                            <input type="number" id="construction_closure_prob" name="construction_closure_prob" value="0.000033" min="0" max="1" step="0.000001" required>
+                            <small>Probability of runway closure due to construction</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="maintenance_closure_prob">Maintenance Closure Probability</label>
+                            <input type="number" id="maintenance_closure_prob" name="maintenance_closure_prob" value="0.00014" min="0" max="1" step="0.000001" required>
+                            <small>Probability of runway closure due to maintenance</small>
+                        </div>
+
+                        <div class="validation-error" id="closure-prob-error">
+                            All runway closure probabilities must be between 0 and 1.
                         </div>
                     </div>
 
@@ -99,7 +162,7 @@
         <div class="loading-content">
             <div class="spinner"></div>
             <h2>Starting Simulation...</h2>
-            <p>Please wait while we initialize your airport</p>
+            <p>Please wait while we initialise your airport</p>
         </div>
     </div>
 

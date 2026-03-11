@@ -2,9 +2,10 @@ let selectedSimulations = [];
 let currentReportId = null;
 
 document.addEventListener('DOMContentLoaded', async function() {
-    console.log('helloooo');
     const report = await getReport();
     showReportModal(report);
+    await loadPlots();
+    showReportResults();
 });
 
 async function getReport(){
@@ -403,22 +404,107 @@ function showReportModal(report) {
         </div>
     `;
 
+    showReportResults();
     modal.style.display = 'flex';
+}
+
+function showReportResults() {
+    const reportContent = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('plotsSection');
+    const resultsBtn = document.getElementById('reportResultsBtn');
+    const plotsBtn = document.getElementById('reportPlotsBtn');
+
+    if (reportContent) reportContent.style.display = 'block';
+    if (plotsSection) plotsSection.style.display = 'none';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-secondary');
+        resultsBtn.classList.add('btn-primary');
+    }
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-primary');
+        plotsBtn.classList.add('btn-secondary');
+    }
+}
+
+function showReportPlots() {
+    const reportContent = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('plotsSection');
+    const resultsBtn = document.getElementById('reportResultsBtn');
+    const plotsBtn = document.getElementById('reportPlotsBtn');
+
+    if (reportContent) reportContent.style.display = 'none';
+    if (plotsSection) plotsSection.style.display = 'block';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-primary');
+        resultsBtn.classList.add('btn-secondary');
+    }
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-secondary');
+        plotsBtn.classList.add('btn-primary');
+    }
 }
 
 // Export current report
 function exportCurrentReport() {
-    if (currentReportId) {
-        exportReport(currentReportId);
+    window.location.href = '/api/export-current-report';
+}
+
+// Load and display performance plots
+async function loadPlots() {
+    try {
+        const response = await fetch('/api/report-plots');
+        const data = await response.json();
+
+        if (!data.success || !data.plots || Object.keys(data.plots).length === 0) {
+            console.log('No plots available');
+            return;
+        }
+
+        const plotsSection = document.getElementById('plotsSection');
+        const plotsContainer = document.getElementById('plotsContainer');
+        plotsContainer.innerHTML = '';
+
+        const plotLabels = {
+            wait_times: 'Wait Times',
+            hold_times: 'Hold Times',
+            takeoff_delays: 'Take-off Delays',
+            arrival_delays: 'Arrival Delays',
+            outcome_summary: 'Outcome Summary',
+            operations_snapshot: 'Operations Snapshot'
+        };
+
+        for (const [key, base64] of Object.entries(data.plots)) {
+            const wrapper = document.createElement('div');
+            wrapper.style.textAlign = 'center';
+
+            const label = document.createElement('div');
+            label.textContent = plotLabels[key] || key;
+            label.style.fontWeight = 'bold';
+            label.style.marginBottom = '4px';
+            label.style.color = '#1e3a8a';
+            label.style.fontSize = '0.8rem';
+
+            const img = document.createElement('img');
+            img.src = 'data:image/png;base64,' + base64;
+            img.alt = plotLabels[key] || key;
+            img.style.width = '100%';
+            img.style.borderRadius = '6px';
+            img.style.border = '1px solid #e2e8f0';
+
+            wrapper.appendChild(label);
+            wrapper.appendChild(img);
+            plotsContainer.appendChild(wrapper);
+        }
+
+        plotsSection.style.overflow = 'auto';
+    } catch (error) {
+        console.error('Error loading plots:', error);
     }
 }
 
 // Export report - backend handles file generation
 function exportReport(simId) {
     window.location.href = `/api/export-report/${simId}`;
-    setTimeout(() => {
-        alert('Report exported successfully!');
-    }, 500);
 }
 
 
@@ -431,6 +517,7 @@ function closeComparison() {
 function closeReport() {
     document.getElementById('reportModal').style.display = 'none';
     currentReportId = null;
+    showReportResults();
 }
 
 // Go to menu

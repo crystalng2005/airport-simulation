@@ -43,13 +43,14 @@ class Plane:
     # Stores the total number of plane objects generated
     plane_num = 0
     
-    def __init__(self, is_departure: bool, queue_controller, cancellation_time):
+    def __init__(self, is_departure: bool, queue_controller, cancellation_time, probabilities):
         
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
-        self.user_setting = False
+        self.set_user_settings(probabilities)
+        """self.user_setting = False
         self.user_mechanical = 0
-        self.user_medical = 0
-        self.user_fuel = 0
+        self.user_health = 0
+        self.user_fuel = 0"""
         self.queue_controller = queue_controller
         self.cancellation_time = cancellation_time
 
@@ -231,10 +232,9 @@ class Plane:
         0.00004
     
     """
+    """
 
-  
-    def genEmergencyOnSpawn(self):
-        # Placeholders
+# Placeholders
         mechanical_val = 2
         fuel_val = 2
         medical_val = 2
@@ -242,7 +242,7 @@ class Plane:
         if not self.user_setting:
             # Chances per flight (based on flight per year data)
             medical_p = 0.00012
-            fuel_p = 0.000003458
+            fuel_p = 0.0000035
             mechanical_p = 0.00004
             
             # Only one emergency is tracked, so the highest one is picked
@@ -253,9 +253,25 @@ class Plane:
 
         # If the user has set values for probabilities
         else:
-            mechanical_val = random.randint(1,int(1/self.user_mechanical))
-            fuel_val = random.randint(1,int(1/self.user_fuel))
-            medical_val = random.randint(1,int(1/self.user_medical))
+
+
+
+    """
+
+    # Lets user set emergencies and defines that user settings have been set
+    def set_user_settings(self, probabilities):
+        self.user_setting = True
+        self.user_mechanical = probabilities[0]
+        self.user_health = probabilities[1]
+        self.user_fuel = probabilities[2]
+
+
+  
+    def genEmergencyOnSpawn(self):
+        mechanical_val = random.randint(1,int(1/self.user_mechanical))
+        fuel_val = random.randint(1,int(1/self.user_fuel))
+        medical_val = random.randint(1,int(1/self.user_health))
+
 
         # Goes through and checks if any emergencies have been generated
         if mechanical_val == 1:
@@ -267,12 +283,7 @@ class Plane:
         else:
             return EmergencyStatus.NONE
         
-    # Lets user set emergencies and defines that user settings have been set
-    def set_user_emergencies(self, mechanical, medical, fuel):
-        self.user_setting = True
-        self.user_mechanical = mechanical
-        self.user_medical = medical
-        self.user_fuel = fuel
+    
 
 
 
@@ -288,7 +299,7 @@ class Plane:
         if not self.left_simulation:
             if not self.is_departure: self.fuel_level -= FUEL_USAGE_PER_TICK
             if self.emergency_status != EmergencyStatus.NONE: self.emergency_time_left -= FUEL_USAGE_PER_TICK
-            if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK
+            if self.is_departure: self.cancellation_time -= FUEL_USAGE_PER_TICK #NOTE: What??
             RD.reportData.tot_fuel_used += FUEL_USAGE_PER_TICK
             return True 
         return False
@@ -347,37 +358,30 @@ class Plane:
     # Called every tick to give every plane a chance of generating an emergency
     # Fuel emergencies are excluded, as these are based on current fuel level, not random generation
     def update_emergency(self):
-        # If no user values have been given
-        if not self.user_setting:
-            # Gets the probability per tick
-            mechanical_per_tick = 0.0000085/MINUTES_PER_TICK
-            medical_per_tick = 0.00004819/MINUTES_PER_TICK
+        # Gets the probability per tick
+        mechanical_per_tick = self.user_mechanical/MINUTES_PER_TICK
+        medical_per_tick = self.user_health/MINUTES_PER_TICK
 
-            # Ordered in terms of priorities
-            mechanical_val = random.randint(1,int(1/mechanical_per_tick))
-            medical_val = random.randint(1,int(1/medical_per_tick))
-        
-        # If user values given, use these
-        else:
-            mechanical_per_tick = self.user_mechanical/MINUTES_PER_TICK
-            medical_per_tick = self.user_medical/MINUTES_PER_TICK
-
-            mechanical_val = random.randint(1,int(1/mechanical_per_tick))
-            medical_val = random.randint(1,int(1/medical_per_tick))
+        # Ordered in terms of priorities
+        mechanical_val = random.randint(1,int(1/mechanical_per_tick))
+        medical_val = random.randint(1,int(1/medical_per_tick))
 
         # Sets the emergency status based on generated values
         if self.emergency_status == EmergencyStatus.NONE:
             if mechanical_val == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
                 self.queue_controller.planeEmergency(self)
+                #print("emergency")
             elif medical_val == 1:
                 self.emergency_status= EmergencyStatus.HEALTH
                 self.queue_controller.planeEmergency(self)
+                #print("emergency")
             # Checks the fuel level and flags emergency if needed
             else:
                 if self.fuel_level < 20:
                     self.emergency_status = EmergencyStatus.FUEL
                     self.queue_controller.planeEmergency(self)
+                    #print("emergency")
             
         return self.emergency_status
 
