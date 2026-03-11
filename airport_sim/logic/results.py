@@ -179,6 +179,11 @@ class ResultsController:
                 f"Average holding time: {report.get('avg_hold_time', 0)} minutes\n"
                 f"Average take-off delay: {report.get('avg_takeoff_time', 0)} minutes\n"
                 f"Average arrival delay: {report.get('avg_arrival_time', 0)} minutes\n\n"
+                '---------------\n'
+                f"Standard deviation of wait times: {report.get('std_wait_time', 0)} minutes\n"
+                f"Standard deviation of hold times: {report.get('std_hold_time', 0)} minutes\n"
+                f"Standard deviation of take-off times: {report.get('std_take_off_time', 0)} minutes\n"
+                f"Standard deviation of arrival times: {report.get('std_arrival_time', 0)} minutes\n\n"
                 'Detail notes\n'
                 '------------\n'
                 'Lower diversion and cancellation counts are better.\n'

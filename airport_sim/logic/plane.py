@@ -358,23 +358,13 @@ class Plane:
     # Called every tick to give every plane a chance of generating an emergency
     # Fuel emergencies are excluded, as these are based on current fuel level, not random generation
     def update_emergency(self):
-        # If no user values have been given
-        if not self.user_setting:
-            # Gets the probability per tick
-            mechanical_per_tick = 0.0000085/MINUTES_PER_TICK
-            medical_per_tick = 0.000048/MINUTES_PER_TICK
+        # Gets the probability per tick
+        mechanical_per_tick = self.user_mechanical/MINUTES_PER_TICK
+        medical_per_tick = self.user_health/MINUTES_PER_TICK
 
-            # Ordered in terms of priorities
-            mechanical_val = random.randint(1,int(1/mechanical_per_tick))
-            medical_val = random.randint(1,int(1/medical_per_tick))
-        
-        # If user values given, use these
-        else:
-            mechanical_per_tick = self.user_mechanical/MINUTES_PER_TICK
-            medical_per_tick = self.user_health/MINUTES_PER_TICK
-
-            mechanical_val = random.randint(1,int(1/mechanical_per_tick))
-            medical_val = random.randint(1,int(1/medical_per_tick))
+        # Ordered in terms of priorities
+        mechanical_val = random.randint(1,int(1/mechanical_per_tick))
+        medical_val = random.randint(1,int(1/medical_per_tick))
 
         # Sets the emergency status based on generated values
         if self.emergency_status == EmergencyStatus.NONE:

@@ -73,7 +73,7 @@ class PerformanceReport:
         # Calculated the average fuel used per plane, checks if total planes are 0
         self.fuel_avg = 0
         if self.total_planes > 0:
-            self.fuel_avg = self.tot_fuel_used / self.total_planes
+            self.fuel_avg = round(self.tot_fuel_used / self.total_planes)
 
 
     # Returns the duration in seconds as a formatted string

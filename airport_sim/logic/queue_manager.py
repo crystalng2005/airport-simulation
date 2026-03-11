@@ -13,6 +13,7 @@ import logic.globals.reportData as RD
 
 MINUTES_PER_TICK = 5
 
+
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
         self.plane_queue = plane_queue # A list, treated as a queue
@@ -51,7 +52,11 @@ class QueueController:
                     wait_time = round(removed.left_hold - removed.entered_hold)
                 
                     # Adds the delay time and wait time to the report and decrements current queue size
-                    RD.reportData.arrival_delay_times.append(delay)
+                    if removed.is_departure:
+                        RD.reportData.take_off_delays.append(delay)
+                    else:
+                        RD.reportData.arrival_delay_times.append(delay)
+
                     RD.reportData.wait_times.append(wait_time)
                     RD.reportData.tot_wait_time += wait_time
                     RD.reportData.decQueueCurrent()
@@ -80,9 +85,6 @@ class QueueController:
 
         # If the emergency time exceeds the limit, diverts the plane
         for plane in self.plane_queue[:]:
-            # checkcode, appears that there are no planes with emergecnies where meregency time left is <= 0
-            if plane.emergency_time_left <= 0 and plane.emergency_status != EmergencyStatus.NONE:
-                print("!!!!")
             if (not self.is_departure) and plane.emergency_status != EmergencyStatus.NONE and plane.emergency_time_left <= 0:
                 plane.divert()
                 self.plane_queue.remove(plane)
