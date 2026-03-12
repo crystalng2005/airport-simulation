@@ -155,6 +155,7 @@ function loadPresetIntoForm() {
         document.getElementById('safety_closure_prob').value = config.safety_closure_prob;
         document.getElementById('construction_closure_prob').value = config.construction_closure_prob;
         document.getElementById('maintenance_closure_prob').value = config.maintenance_closure_prob;
+        document.getElementById('runway_opening_prob').value = config.runway_opening_prob;
         // Clear sessionStorage
         sessionStorage.removeItem('presetConfig');
         

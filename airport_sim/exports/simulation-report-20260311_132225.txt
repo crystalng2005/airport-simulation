@@ -1,0 +1,53 @@
+===========================================================
+AIRPORT SIMULATION REPORT
+===========================================================
+
+-----------------------------------------------------------
+Summary
+-----------------------------------------------------------
+Start time: 2000-01-01 00:00:00
+End time: 2000-01-01 01:40:00
+Total duration: 1 hours, 40 minutes, 0 seconds
+
+-----------------------------------------------------------
+Overall outcome
+-----------------------------------------------------------
+Total flights handled: 34
+Flights diverted: 0
+Flights cancelled: 0
+Operational efficiency: 100%
+
+-----------------------------------------------------------
+Queue and holding overview
+-----------------------------------------------------------
+Longest runway queue: 2 flights
+Longest holding pattern queue: 0 flights
+
+-----------------------------------------------------------
+Fuel and delays
+-----------------------------------------------------------
+Total fuel used: 165.0 units
+Average fuel used per flight: 5.0 units
+Average wait before runway access: 5 minutes
+Average holding time: 0 minutes
+Average take-off delay: 49 minutes
+Average arrival delay: 49 minutes
+
+-----------------------------------------------------------
+Additional metrics
+-----------------------------------------------------------
+Maximum hold time: 0 minutes
+Maximum take-off time: 97 minutes
+Maximum arrival time: 94 minutes
+
+Standard deviation of wait times: 0 minutes
+Standard deviation of hold times: 0 minutes
+Standard deviation of take-off delays: 28 minutes
+Standard deviation of arrival delays: 29 minutes
+
+-----------------------------------------------------------
+Notes on data
+-----------------------------------------------------------
+Lower diversion and cancellation counts are better.
+A higher efficiency percentage means more flights were completed successfully.
+Use this report to compare runway setups and traffic flow settings.
