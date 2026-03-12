@@ -16,6 +16,7 @@ class PresetController:
         self.mixed_runways = 0
         self.runway_closure_prob = []
         self.plane_emergency_prob = []
+        self.runway_opening_prob = 1
 
         self.report = None  # Initialised before saving, goto line 75
 
@@ -109,6 +110,7 @@ class PresetController:
                     "mixed_runways": self.mixed_runways,
                     "plane_emergency_prob" : self.plane_emergency_prob,
                     "runway_closure_prob" : self.runway_closure_prob,
+                    "runway_opening_prob" : self.runway_opening_prob,
                 },
                 "planes": [self._serialize_plane(plane) for plane in self.plane_list],
                 "report": report_dict
@@ -153,6 +155,7 @@ class PresetController:
             self.mixed_runways = vars_data["mixed_runways"]
             self.plane_emergency_prob = vars_data["plane_emergency_prob"]
             self.runway_closure_prob = vars_data["runway_closure_prob"]
+            self.runway_opening_prob = vars_data["runway_opening_prob"]
 
             # Loads planes by initiating new objects and importing their data from the preset
             self.plane_list = []
@@ -180,6 +183,7 @@ class PresetController:
         self.mixed_runways = 0
         self.plane_emergency_prob = []
         self.runway_closure_prob = []
+        self.runway_opening_prob = 1
         self.plane_list.clear()
         self.report = None
         return True

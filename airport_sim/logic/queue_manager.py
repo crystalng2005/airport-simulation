@@ -49,7 +49,7 @@ class QueueController:
                     # Assigns the holding queue exit time to the plane object
                     removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
                     delay = round(removed.left_hold - removed.tickActualTime) 
-                    wait_time = round(removed.left_hold - removed.entered_hold)
+                    hold_time = round(removed.left_hold - removed.entered_hold)
                 
                     # Adds the delay time and wait time to the report and decrements current queue size
                     if removed.is_departure:
@@ -57,8 +57,8 @@ class QueueController:
                     else:
                         RD.reportData.arrival_delay_times.append(delay)
 
-                    RD.reportData.wait_times.append(wait_time)
-                    RD.reportData.tot_wait_time += wait_time
+                    RD.reportData.hold_times.append(hold_time)
+                    RD.reportData.tot_wait_time += hold_time
                     RD.reportData.decQueueCurrent()
                 else:
                     checked += 1

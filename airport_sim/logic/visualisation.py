@@ -159,6 +159,7 @@ class VisualisationController:
             maintenance_closure_prob= float(data.get('maintenance_closure_prob')),
             safety_closure_prob=float(data.get('safety_closure_prob')),
             construction_closure_prob=float(data.get('construction_closure_prob')),
+            runway_opening_prob=float(data.get('runway_opening_prob')),
             tick_minutes=5
         )
         return True

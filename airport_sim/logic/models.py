@@ -5,7 +5,7 @@ from datetime import datetime
 import random
 
 class Runway:
-    def __init__(self, is_departure: bool, mixed_mode: bool, runway_number: int, is_available: bool, is_operational: bool, probabilities):
+    def __init__(self, is_departure: bool, mixed_mode: bool, runway_number: int, is_available: bool, is_operational: bool, probabilities, opening: float):
         # Values for defining the runway
         self.is_departure = is_departure
         self.mixed_mode = mixed_mode
@@ -18,6 +18,7 @@ class Runway:
 
         # User settings
         self.set_user_settings(probabilities)
+        self.opening_probability = opening
 
         # Maximum number of planes that have passed through this runway (?)
         self.maxPlanes = 0 # (?)
@@ -50,15 +51,15 @@ class Runway:
     def updateStatus(self):
         # Chance of opening closed runway randomly
         if self.closed:
-            val = random.randint(0,100)
-            if val <= 10:
+            opening = random.randint(0,int(1/self.opening_probability)) if self.opening_probability !=0 else 2
+            if opening == 1:
                 self.openRunway()
             return self.closed
         else:
-            weather = random.randint(0,int(1/self.user_weather))
-            maintenance = random.randint(0,int(1/self.user_maintenance))
-            safety = random.randint(0,int(1/self.user_safety))
-            construction = random.randint(0,int(1/self.user_construction))
+            weather = random.randint(0,int(1/self.user_weather)) if self.user_weather != 0 else 2
+            maintenance = random.randint(0,int(1/self.user_maintenance)) if self.user_maintenance != 0 else 2
+            safety = random.randint(0,int(1/self.user_safety)) if self.user_safety != 0 else 2
+            construction = random.randint(0,int(1/self.user_construction)) if self.user_safety != 0 else 2
 
             # Checks if any closures have been generated
             if weather == 1:

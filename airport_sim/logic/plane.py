@@ -268,9 +268,10 @@ class Plane:
 
   
     def genEmergencyOnSpawn(self):
-        mechanical_val = random.randint(1,int(1/self.user_mechanical))
-        fuel_val = random.randint(1,int(1/self.user_fuel))
-        medical_val = random.randint(1,int(1/self.user_health))
+
+        mechanical_val = random.randint(1,int(1/self.user_mechanical)) if self.user_mechanical != 0 else 2
+        fuel_val = random.randint(1,int(1/self.user_fuel)) if self.user_fuel != 0 else 2
+        medical_val = random.randint(1,int(1/self.user_health)) if self.user_health != 0 else 2
 
 
         # Goes through and checks if any emergencies have been generated
