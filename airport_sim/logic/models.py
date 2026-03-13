@@ -68,7 +68,7 @@ class Runway:
                 self.closeRunway()
             elif safety == 1 or self.user_safety == 1:
                 self.closeRunway()
-            elif construction == 1 or self.user_construction:
+            elif construction == 1 or self.user_construction == 1:
                 self.closeRunway()
                 
         return self.closed
