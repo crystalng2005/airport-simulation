@@ -308,13 +308,17 @@ function movePlaneToRunway(planeID, runwayID){
   plane.style.margin = 0;
   plane.style.transform = 'none'; 
 
-  const shift = (runwayRect.width - planeRect.width)/4;
+  // 7. Calculate runway center positions values
+  const borderWidth = 2 * parseFloat(window.getComputedStyle(plane).borderTopWidth);
+  
+  const horizontalShift = (runwayRect.width-planeRect.width-borderWidth)/2;
+  const verticalShift = (runwayRect.height-planeRect.height-borderWidth)/2;
 
   // 6. Animate into runway final position (0,0)
   plane.animate(
     [
-      { left: `${relativeLeft}px`, top: `${relativeTop + shift}px` },
-      { left: `${shift}px`, top: `${shift}px`}
+      { left: `${relativeLeft}px`, top: `${relativeTop}px` }
+      ,{ left: `${horizontalShift}px`, top: `${verticalShift}px`}
     ],
     {
       duration: planeRunwaySlideDuration * 1000,
