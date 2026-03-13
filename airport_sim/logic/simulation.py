@@ -69,6 +69,8 @@ class SimulationController:
         self.generateRunway()
         self.generateQueue()
 
+        Plane.reset_plane_num()
+
         # Initialises the reportData global variable
         RD.init(total_runways, mixed_runways, departure_runways, landing_runways, landings_per_hour, self.current_time)
 
