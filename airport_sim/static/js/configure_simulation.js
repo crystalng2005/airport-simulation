@@ -1,3 +1,4 @@
+const MAX_RUNWAYS = 10;
 
 // Initialise on page load
 document.addEventListener('DOMContentLoaded', function() {
@@ -5,43 +6,48 @@ document.addEventListener('DOMContentLoaded', function() {
     const runwayInputs = document.querySelectorAll(
         '#departure_runways, #landing_runways, #mixed_runways'
     );
-    
+
+    runwayInputs.forEach(input => {
+        input.addEventListener('input', enforceRunwayLimit);
+    });
+
     // Load preset if coming from presets page
     loadPresetIntoForm();
     
     console.log('Configuration form loaded successfully!');
 });
 
-// /**
-//  * Validate that runway configuration adds up correctly
-//  * @returns {boolean} True if valid, false otherwise
-//  */
-// function validateRunways() {
-//     const departure = parseInt(document.getElementById('departure_runways').value) || 0;
-//     const landing = parseInt(document.getElementById('landing_runways').value) || 0;
-//     const mixed = parseInt(document.getElementById('mixed_runways').value) || 0;
-    
-//     const sum = departure + landing + mixed;
-//     const errorElement = document.getElementById('runway-error');
+/**
+ * Check total runways and show/hide an error message.
+ */
+function enforceRunwayLimit() {
+    const dep = parseInt(document.getElementById('departure_runways').value) || 0;
+    const lnd = parseInt(document.getElementById('landing_runways').value) || 0;
+    const mix = parseInt(document.getElementById('mixed_runways').value) || 0;
+    const total = dep + lnd + mix;
 
-//     // total_runways field is optional in current UI. If absent, require at least one runway.
-//     const totalElement = document.getElementById('total_runways');
-//     const total = totalElement ? (parseInt(totalElement.value) || 0) : sum;
-    
-//     if (sum <= 0 || sum !== total) {
-//         if (errorElement) {
-//             errorElement.style.display = 'block';
-//             errorElement.classList.add('show');
-//         }
-//         return false;
-//     } else {
-//         if (errorElement) {
-//             errorElement.style.display = 'none';
-//             errorElement.classList.remove('show');
-//         }
-//         return true;
-//     }
-// }
+    // Get or create the error element
+    let errorElement = document.getElementById('runway-error');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.id = 'runway-error';
+        errorElement.style.color = '#e74c3c';
+        errorElement.style.fontWeight = 'bold';
+        errorElement.style.marginTop = '8px';
+        errorElement.style.display = 'none';
+        // Insert after the last runway input's parent
+        const mixEl = document.getElementById('mixed_runways');
+        mixEl.closest('.form-group, .field, div')?.after(errorElement)
+            || mixEl.parentNode.appendChild(errorElement);
+    }
+
+    if (total > MAX_RUNWAYS) {
+        errorElement.textContent = `Total runways is ${total} - cannot exceed ${MAX_RUNWAYS}. Please reduce your runway numbers.`;
+        errorElement.style.display = 'block';
+    } else {
+        errorElement.style.display = 'none';
+    }
+}
 
 /**
  * Start simulation - main form submission handler
@@ -49,7 +55,22 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 async function startSimulation(event) {
     event.preventDefault();
-    
+
+    // Validate runway total before proceeding
+    const dep = parseInt(document.getElementById('departure_runways').value) || 0;
+    const lnd = parseInt(document.getElementById('landing_runways').value) || 0;
+    const mix = parseInt(document.getElementById('mixed_runways').value) || 0;
+    const totalRunways = dep + lnd + mix;
+
+    if (totalRunways <= 0) {
+        alert('You need at least 1 runway to run the simulation.');
+        return;
+    }
+    if (totalRunways > MAX_RUNWAYS) {
+        alert(`Total runways cannot exceed ${MAX_RUNWAYS}. Currently: ${totalRunways}`);
+        return;
+    }
+
     // Show loading overlay
     const loadingOverlay = document.getElementById('loadingOverlay');
     loadingOverlay.classList.add('active');
@@ -60,11 +81,7 @@ async function startSimulation(event) {
         const data = Object.fromEntries(formData);
 
         // Backend expects "runways" (total), not "total_runways" from form state.
-        data.runways = String(
-            (parseInt(data.departure_runways) || 0) +
-            (parseInt(data.landing_runways) || 0) +
-            (parseInt(data.mixed_runways) || 0)
-        );
+        data.runways = String(totalRunways);
         
         // Add flag to save this config as a preset
         data.save_as_preset = true;

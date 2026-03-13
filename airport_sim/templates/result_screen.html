@@ -112,7 +112,10 @@
                         </div>
                     </div>
                     <div class="modal-footer" style="padding: 10px 20px;">
-                        <button class="btn btn-export" onclick="exportCurrentReport()">Export Report</button>
+                        <div class="tooltip-wrapper">
+                            <button class="btn btn-export" onclick="exportCurrentReport()" aria-describedby="exportTooltip">Export Report</button>
+                            <span id="exportTooltip" class="tooltip-text" role="tooltip">Export for More Details</span>
+                        </div>
                         <button class="btn btn-secondary" onclick="goToMenu()">Close</button>
                     </div>
                 </div>
