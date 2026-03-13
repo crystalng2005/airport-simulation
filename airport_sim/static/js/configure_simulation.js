@@ -62,6 +62,11 @@ async function startSimulation(event) {
     const mix = parseInt(document.getElementById('mixed_runways').value) || 0;
     const totalRunways = dep + lnd + mix;
 
+    if(dep < 0 || lnd < 0 || mix < 0) {
+        alert('Runway numbers cannot be negative.');
+        return;
+    }   
+
     if (totalRunways <= 0) {
         alert('You need at least 1 runway to run the simulation.');
         return;
