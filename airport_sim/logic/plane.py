@@ -104,6 +104,10 @@ class Plane:
     def genCallsign(self):
         return "PLN" + str(self.plane_num)
 
+    @classmethod
+    def reset_plane_num(cls):
+        cls.plane_num = 0
+
     # Generates the IATA code for the destination from the list of IATA airport codes
     def genOrigin(self):
         # Gets the absolute path of iata.txt
