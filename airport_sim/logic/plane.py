@@ -273,17 +273,17 @@ class Plane:
   
     def genEmergencyOnSpawn(self):
 
-        mechanical_val = random.randint(1,int(1/self.user_mechanical)) if self.user_mechanical != 0 else 2
-        fuel_val = random.randint(1,int(1/self.user_fuel)) if self.user_fuel != 0 else 2
-        medical_val = random.randint(1,int(1/self.user_health)) if self.user_health != 0 else 2
+        mechanical_val = random.randint(0,int(1/self.user_mechanical)) if self.user_mechanical != 0 else 2
+        fuel_val = random.randint(0,int(1/self.user_fuel)) if self.user_fuel != 0 else 2
+        medical_val = random.randint(0,int(1/self.user_health)) if self.user_health != 0 else 2
 
 
         # Goes through and checks if any emergencies have been generated
-        if mechanical_val == 1:
+        if mechanical_val == 1 or self.user_mechanical == 1:
             return EmergencyStatus.MECHANICAL
-        elif fuel_val == 1:
+        elif fuel_val == 1 or self.fuel_level == 1:
             return EmergencyStatus.FUEL
-        elif medical_val == 1:
+        elif medical_val == 1 or self.user_health == 1:
             return EmergencyStatus.HEALTH
         else:
             return EmergencyStatus.NONE
@@ -368,25 +368,22 @@ class Plane:
         medical_per_tick = self.user_health/MINUTES_PER_TICK
 
         # Ordered in terms of priorities
-        mechanical_val = random.randint(1,int(1/mechanical_per_tick))
-        medical_val = random.randint(1,int(1/medical_per_tick))
+        mechanical_val = random.randint(0,int(1/mechanical_per_tick)) if self.user_mechanical != 0 else 2 
+        medical_val = random.randint(0,int(1/medical_per_tick)) if self.user_health != 0 else 2
 
         # Sets the emergency status based on generated values
         if self.emergency_status == EmergencyStatus.NONE:
-            if mechanical_val == 1:
+            if mechanical_val == 1 or self.user_mechanical == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
                 self.queue_controller.planeEmergency(self)
-                #print("emergency")
-            elif medical_val == 1:
+            elif medical_val == 1 or self.user_health == 1:
                 self.emergency_status= EmergencyStatus.HEALTH
                 self.queue_controller.planeEmergency(self)
-                #print("emergency")
             # Checks the fuel level and flags emergency if needed
             else:
                 if self.fuel_level < 20:
                     self.emergency_status = EmergencyStatus.FUEL
                     self.queue_controller.planeEmergency(self)
-                    #print("emergency")
             
         return self.emergency_status
 

@@ -57,6 +57,7 @@ class QueueController:
                     else:
                         RD.reportData.arrival_delay_times.append(delay)
 
+                    RD.reportData.wait_times.append(delay)
                     RD.reportData.hold_times.append(hold_time)
                     RD.reportData.tot_wait_time += hold_time
                     RD.reportData.decQueueCurrent()
