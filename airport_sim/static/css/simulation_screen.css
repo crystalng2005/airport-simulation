@@ -122,7 +122,7 @@ display: block;
   background-color: rgb(229, 224, 224);
   position: relative;
 
-  height: 120px;
+  height: 200px;
   width: 120px;
 
   border-radius: 15px;  
@@ -135,9 +135,9 @@ display: block;
   background-color: rgb(57, 57, 57);
   position: relative;
 
-  top: -53%;        /* move upward */
-  left: 50%;         /* center horizontally */
-  transform: translateX(-50%);
+  top: -32%;        /* move upward */
+  left: 24%;         /* center horizontally */
+  /* transform: translateX(-50%); */
 
   border-radius: 15px;  
   box-sizing:border-box;  
