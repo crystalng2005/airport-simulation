@@ -62,13 +62,13 @@ class Runway:
             construction = random.randint(0,int(1/self.user_construction)) if self.user_safety != 0 else 2
 
             # Checks if any closures have been generated
-            if weather == 1:
+            if weather == 1 or self.user_weather == 1:
                 self.closeRunway()
-            elif maintenance == 1:
+            elif maintenance == 1 or self.user_maintenance == 1:
                 self.closeRunway()
-            elif safety == 1:
+            elif safety == 1 or self.user_safety == 1:
                 self.closeRunway()
-            elif construction == 1:
+            elif construction == 1 or self.user_construction:
                 self.closeRunway()
                 
         return self.closed
