@@ -415,7 +415,7 @@ def export_current_report() -> ResponseReturnValue:
         if RD.reportData is None:
             return jsonify({'success': False, 'error': 'No report available'}), 400
 
-        filepath = controller.visualisation_controller.results_controller.exportReport(RD.reportData)
+        filepath = controller.visualisation_controller.results_controller.export_report(RD.reportData)
         if filepath and os.path.exists(filepath):
             return send_file(filepath, as_attachment=True, download_name='simulation_report.txt')
 
