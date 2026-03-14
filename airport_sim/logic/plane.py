@@ -8,7 +8,6 @@ import math
 import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
 
-
 # CONSTANTS
 FUEL_USAGE_PER_TICK = 5
 
@@ -41,10 +40,11 @@ class Plane:
     # Stores the total number of plane objects generated
     plane_num = 0
     
-    def __init__(self, is_departure: bool, cancellation_time: int, probabilities: list[float]):
+    def __init__(self, is_departure: bool, queue_controller, cancellation_time: int, probabilities: list[float]):
         
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
         self.set_user_settings(probabilities)
+        self.queue_controller = queue_controller
         self.cancellation_time = cancellation_time
 
         # Management variables

@@ -122,8 +122,8 @@ class SimulationController:
     # Generates a plane and adds it to the plane list
     def generatePlane(self, is_departure: bool) -> bool:
         # Generates depending on departure or not
-        if is_departure: p = Plane(is_departure, self.cancellation_time, self.plane_emergency_prob)
-        else: p = Plane(is_departure, self.cancellation_time, self.plane_emergency_prob)
+        if is_departure: p = Plane(is_departure, self.departure_queue, self.cancellation_time, self.plane_emergency_prob)
+        else: p = Plane(is_departure, self.landing_queue, self.cancellation_time, self.plane_emergency_prob)
         p.generated_at = self.current_time
 
         # Adds to the plane by call sign and preset storage lists
