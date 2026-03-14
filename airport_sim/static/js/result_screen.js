@@ -25,151 +25,77 @@ async function getReport(){
   }
 }
 
-function showReport(report){
-  if (!report) return;
+// Show report modal - just display backend data
+function showReportModal(report) {
+    const modal = document.getElementById('reportModal');
+    const content = document.getElementById('reportContent');
 
-  // For Turki to change
-  const reportBox = document.querySelector('.report-container');
-  if (!reportBox) {
-    console.log('Final report:', report);
-    return;
-  }
+    // Backend already calculated everything
+    content.innerHTML = 
 
-  reportBox.innerHTML = `
-    <h3>Simulation Report</h3>
-    <p>Total planes: ${report.total_planes}</p>
-    <p>Diversions: ${report.diversions}</p>
-    <p>Cancellations: ${report.cancellations}</p>
-    <p>Efficiency: ${report.efficiency}</p>
-    <p>Avg wait: ${report.avg_wait_time}</p>
-    <p>Max hold: ${report.max_hold_time}</p>
-  `;
-}
-
-
-// Load all simulation results from backend
-// Backend returns ALL calculated data
-async function loadResults() {
-    const resultsContainer = document.getElementById('resultsContainer');
-
-    try {
-        // Get data from VisualisationController
-        const response = await fetch('/api/get-all-results');
-        const data = await response.json();
-        
-        loadingIndicator.style.display = 'none';
-
-        if (!data.success || !data.results || data.results.length === 0) {
-            noResultsMessage.style.display = 'block';
-        } else {
-            // document.getElementById('totalCount').textContent = allSimulations.length;
-            resultsContainer.style.display = 'block';
-            displayResults(data.results);
-        }
-    } catch (error) {
-        console.error('Error loading results:', error);
-        loadingIndicator.style.display = 'none';
-        noResultsMessage.style.display = 'block';
-    }
-}
-
-// Display results in table - just rendering
-function displayResults(result) {
-    const tbody = document.getElementById('resultsTableBody');
-    tbody.innerHTML = '';
-
-    const row = createResultRow(result);
-    tbody.appendChild(row);
-}
-
-// Create table row - just display data from backend
-function createResultRow(result) {
-    const row = document.createElement('tr');
-    // row.dataset.simId = result.id;
-
-    // Format date for display
-    // const date = new Date(result.completed_at);
-    // const formattedDate = date.toLocaleDateString('en-GB', {
-    //     year: 'numeric',
-    //     month: 'short',
-    //     day: 'numeric'
-    // });
-    // const formattedTime = date.toLocaleTimeString('en-GB', {
-    //     hour: '2-digit',
-    //     minute: '2-digit'
-    // });
-
-    const report = result.report;
-    const config = result.config;
-
-    row.innerHTML = `
-        <td>
-            <input type="checkbox" class="select-checkbox" 
-        </td>
-        <td>
-            <div>${formattedDate}</div>
-            <div style="font-size: 0.8rem; color: #64748b;">${formattedTime}</div>
-        </td>
-        <td class="number">${report.total_planes}</td>
-        <td class="${report.diversions > 0 ? 'highlight' : 'number'}">${report.diversions}</td>
-        <td class="${report.cancellations > 0 ? 'highlight' : 'number'}">${report.cancellations}</td>
-        <td class="number">${report.queue_max}</td>
-        <td>
-            <button class="btn btn-view" onclick="viewReport('${result.id}')">
-                View
-            </button>
-            <button class="btn btn-export" onclick="exportReport('${result.id}')">
-                Export
-            </button>
-        </td>
+        // `<h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${report.id} - Full Report</h3>`+
+        `
+        <div class="metric-cards">
+            <div class="metric-card">
+                <div class="metric-label">Total Planes</div>
+                <div class="metric-value">${report.total_planes}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Diversions</div>
+                <div class="metric-value" style="color: #ef4444;">${report.diversions}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Cancellations</div>
+                <div class="metric-value" style="color: #ef4444;">${report.cancellations}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Efficiency</div>
+                <div class="metric-value" style="color: #10b981;">${report.efficiency}%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Max Queue Size</div>
+                <div class="metric-value">${report.queue_max}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Max Holding Pattern</div>
+                <div class="metric-value">${report.holding_max}</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Total Fuel Used</div>
+                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>        
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Avg Wait Time</div>
+                <div class="metric-value">${report.avg_wait_time.toFixed(1)} min</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Avg Fuel/Plane</div>
+                <div class="metric-value">${report.avg_fuel_per_plane.toFixed(1)}</div>
+            </div>
+        </div>
     `;
 
-    return row;
+    showReportResults();
+    modal.style.display = 'flex';
 }
 
-// Toggle simulation selection
-function toggleSelection(simId) {
-    const checkbox = document.getElementById(`checkbox-${simId}`);
-    const row = document.querySelector(`tr[data-sim-id="${simId}"]`);
-    
-    if (checkbox.checked) {
-        if (selectedSimulations.length < 2) {
-            selectedSimulations.push(simId);
-            row.classList.add('selected');
-        } else {
-            checkbox.checked = false;
-            alert('You can only select 2 simulations for comparison');
-        }
-    } else {
-        selectedSimulations = selectedSimulations.filter(id => id !== simId);
-        row.classList.remove('selected');
+function showReportResults() {
+    const reportContent = document.getElementById('reportContent');
+    const plotsSection = document.getElementById('plotsSection');
+    const resultsBtn = document.getElementById('reportResultsBtn');
+    const plotsBtn = document.getElementById('reportPlotsBtn');
+
+    if (reportContent) reportContent.style.display = 'block';
+    if (plotsSection) plotsSection.style.display = 'none';
+    if (resultsBtn) {
+        resultsBtn.classList.remove('btn-secondary');
+        resultsBtn.classList.add('btn-primary');
     }
-
-    updateCompareButton();
+    if (plotsBtn) {
+        plotsBtn.classList.remove('btn-primary');
+        plotsBtn.classList.add('btn-secondary');
+    }
 }
-
-// Update compare button
-function updateCompareButton() {
-    const compareBtn = document.getElementById('compareBtn');
-    const count = selectedSimulations.length;
-    
-    compareBtn.textContent = `Compare Selected (${count}/2)`;
-    compareBtn.disabled = count !== 2;
-}
-
-// Clear selection
-function clearSelection() {
-    selectedSimulations.forEach(simId => {
-        const checkbox = document.getElementById(`checkbox-${simId}`);
-        const row = document.querySelector(`tr[data-sim-id="${simId}"]`);
-        if (checkbox) checkbox.checked = false;
-        if (row) row.classList.remove('selected');
-    });
-    
-    selectedSimulations = [];
-    updateCompareButton();
-}
-
 
 // Compare selected simulations
 // Backend does ALL calculations
@@ -354,78 +280,6 @@ async function viewReport(simId) {
     }
 }
 
-// Show report modal - just display backend data
-function showReportModal(report) {
-    const modal = document.getElementById('reportModal');
-    const content = document.getElementById('reportContent');
-
-    // Backend already calculated everything
-    content.innerHTML = 
-
-        // `<h3 style="color: #1e3a8a; margin-bottom: 20px;">Simulation #${report.id} - Full Report</h3>`+
-        `
-        <div class="metric-cards">
-            <div class="metric-card">
-                <div class="metric-label">Total Planes</div>
-                <div class="metric-value">${report.total_planes}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Diversions</div>
-                <div class="metric-value" style="color: #ef4444;">${report.diversions}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Cancellations</div>
-                <div class="metric-value" style="color: #ef4444;">${report.cancellations}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Efficiency</div>
-                <div class="metric-value" style="color: #10b981;">${report.efficiency}%</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Max Queue Size</div>
-                <div class="metric-value">${report.queue_max}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Max Holding Pattern</div>
-                <div class="metric-value">${report.holding_max}</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Total Fuel Used</div>
-                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>        
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Avg Wait Time</div>
-                <div class="metric-value">${report.avg_wait_time.toFixed(1)} min</div>
-            </div>
-            <div class="metric-card">
-                <div class="metric-label">Avg Fuel/Plane</div>
-                <div class="metric-value">${report.avg_fuel_per_plane.toFixed(1)}</div>
-            </div>
-        </div>
-    `;
-
-    showReportResults();
-    modal.style.display = 'flex';
-}
-
-function showReportResults() {
-    const reportContent = document.getElementById('reportContent');
-    const plotsSection = document.getElementById('plotsSection');
-    const resultsBtn = document.getElementById('reportResultsBtn');
-    const plotsBtn = document.getElementById('reportPlotsBtn');
-
-    if (reportContent) reportContent.style.display = 'block';
-    if (plotsSection) plotsSection.style.display = 'none';
-    if (resultsBtn) {
-        resultsBtn.classList.remove('btn-secondary');
-        resultsBtn.classList.add('btn-primary');
-    }
-    if (plotsBtn) {
-        plotsBtn.classList.remove('btn-primary');
-        plotsBtn.classList.add('btn-secondary');
-    }
-}
-
 function showReportPlots() {
     const reportContent = document.getElementById('reportContent');
     const plotsSection = document.getElementById('plotsSection');
@@ -502,117 +356,12 @@ async function loadPlots() {
     }
 }
 
-// Export report - backend handles file generation
-function exportReport(simId) {
-    window.location.href = `/api/export-report/${simId}`;
-}
-
-
 // Close modals
- 
 function closeComparison() {
     document.getElementById('comparisonModal').style.display = 'none';
-}
-
-function closeReport() {
-    document.getElementById('reportModal').style.display = 'none';
-    currentReportId = null;
-    showReportResults();
 }
 
 // Go to menu
 function goToMenu() {
     window.location.href = '/';
 }
-
-// Close modals when clicking outside
-window.onclick = function(event) {
-    const compModal = document.getElementById('comparisonModal');
-    const repModal = document.getElementById('reportModal');
-    
-    if (event.target === compModal) {
-        closeComparison();
-    }
-    if (event.target === repModal) {
-        closeReport();
-    }
-}
-
-
-
-/*
-document.addEventListener("DOMContentLoaded", () => {
-    const simId = getSimulationId();
-    loadSimulation(simId);
-});
-
-function getSimulationId() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("id");
-}
-
-async function loadSimulation(simId) {
-
-    const loading = document.getElementById("loadingIndicator");
-    const content = document.getElementById("resultContent");
-
-    try {
-
-        const response = await fetch(`/api/get-full-report/${simId}`);
-        const data = await response.json();
-
-        loading.style.display = "none";
-
-        if (!data.success) {
-            content.innerHTML = "<p>Failed to load simulation</p>";
-            content.style.display = "block";
-            return;
-        }
-
-        const report = data.report;
-
-        content.innerHTML = `
-        <h2>Simulation #${report.id}</h2>
-
-        <div class="metric-cards">
-
-            <div class="metric-card">
-                <div class="metric-label">Total Planes</div>
-                <div class="metric-value">${report.total_planes}</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Diversions</div>
-                <div class="metric-value">${report.diversions}</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Cancellations</div>
-                <div class="metric-value">${report.cancellations}</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Efficiency</div>
-                <div class="metric-value">${report.efficiency}%</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Max Queue</div>
-                <div class="metric-value">${report.queue_max}</div>
-            </div>
-
-            <div class="metric-card">
-                <div class="metric-label">Fuel Used</div>
-                <div class="metric-value">${report.tot_fuel_used.toFixed(1)}</div>
-            </div>
-
-        </div>
-        `;
-
-        content.style.display = "block";
-
-    } catch (error) {
-        console.error(error);
-    }
-}
-*/
