@@ -23,7 +23,7 @@ class ResultsController:
                 json.dump([], f)
 
     # Save current report file as result in results.json
-    def saveResult(self) -> bool:
+    def save_result(self) -> bool:
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -60,7 +60,7 @@ class ResultsController:
             return False
 
     # load a specific result, using its index as the ID
-    def loadResults(self, index: int):
+    def load_results(self, index: int):
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -76,20 +76,20 @@ class ResultsController:
             return None
 
     # Return a list of all indexes + saving timestamps of each result in list
-    def getResultSaveTimes(self) -> list[tuple[int, str]]:
+    def get_result_save_times(self) -> list[tuple[int, str]]:
         with open(self.results_file, 'r') as f:
             results = json.load(f)
 
         return [(i, r["saved_at"]) for i, r in enumerate(results)]
 
 
-    def getAllResults(self):
+    def get_all_results(self):
         with open(self.results_file, 'r') as f:
             results = json.load(f)
 
         output = []
         for i, r in enumerate(results):
-            report = self.loadResults(i)
+            report = self.load_results(i)
 
             output.append({
                 "id": i,
@@ -106,7 +106,7 @@ class ResultsController:
 
         return output
 
-    def getOneResult(self,id:int):
+    def get_one_result(self,id:int):
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -135,14 +135,14 @@ class ResultsController:
 
 
     # Given a specific report ID, exports it to the exports folder
-    def exportResultById(self, id: int):
-        report = self.loadResults(id)
+    def export_result_by_id(self, id: int):
+        report = self.load_results(id)
         if report is None:
             return None
-        return self.exportReport(report)
+        return self.export_report(report)
 
     # Given a specific report, exports it to the exports folder and returns the file path
-    def exportReport(self, PR: PerformanceReport):
+    def export_report(self, PR: PerformanceReport):
         export_dir = os.path.join(os.path.dirname(__file__), '..', 'exports')
 
         try:
@@ -154,33 +154,57 @@ class ResultsController:
             report = PR.outputReport_dict()
 
             content = (
+                '===========================================================\n'
                 'AIRPORT SIMULATION REPORT\n'
-                '=========================\n\n'
+                '===========================================================\n\n'
+
+                '-----------------------------------------------------------\n'
                 'Summary\n'
-                '-------\n'
+                '-----------------------------------------------------------\n'
                 f"Start time: {report.get('start_time', 'N/A')}\n"
                 f"End time: {report.get('completed_at', 'N/A')}\n"
                 f"Total duration: {report.get('duration', 'N/A')}\n\n"
+
+                '-----------------------------------------------------------\n'
                 'Overall outcome\n'
-                '---------------\n'
+                '-----------------------------------------------------------\n'
                 f"Total flights handled: {report.get('total_planes', 0)}\n"
                 f"Flights diverted: {report.get('diversions', 0)}\n"
                 f"Flights cancelled: {report.get('cancellations', 0)}\n"
                 f"Operational efficiency: {report.get('efficiency', 0)}%\n\n"
+
+                '-----------------------------------------------------------\n'
                 'Queue and holding overview\n'
-                '--------------------------\n'
+                '-----------------------------------------------------------\n'
                 f"Longest runway queue: {report.get('queue_max', 0)} flights\n"
                 f"Longest holding pattern queue: {report.get('holding_max', 0)} flights\n\n"
+
+                '-----------------------------------------------------------\n'
                 'Fuel and delays\n'
-                '---------------\n'
+                '-----------------------------------------------------------\n'
                 f"Total fuel used: {report.get('tot_fuel_used', 0):.1f} units\n"
                 f"Average fuel used per flight: {report.get('avg_fuel_per_plane', 0):.1f} units\n"
+
                 f"Average wait before runway access: {report.get('avg_wait_time', 0)} minutes\n"
                 f"Average holding time: {report.get('avg_hold_time', 0)} minutes\n"
                 f"Average take-off delay: {report.get('avg_takeoff_time', 0)} minutes\n"
                 f"Average arrival delay: {report.get('avg_arrival_time', 0)} minutes\n\n"
-                'Detail notes\n'
-                '------------\n'
+
+                '-----------------------------------------------------------\n'
+                'Additional metrics\n'
+                '-----------------------------------------------------------\n'
+                f"Maximum hold time: {report.get('max_hold_time', 0)} minutes\n"
+                f"Maximum take-off time: {report.get('max_takeoff_time', 0)} minutes\n"
+                f"Maximum arrival time: {report.get('max_arrival_time', 0)} minutes\n\n"
+
+                f"Standard deviation of wait times: {report.get('std_wait_time', 0)} minutes\n"
+                f"Standard deviation of hold times: {report.get('std_hold_time', 0)} minutes\n"
+                f"Standard deviation of take-off delays: {report.get('std_take_off_time', 0)} minutes\n"
+                f"Standard deviation of arrival delays: {report.get('std_arrival_time', 0)} minutes\n\n"
+
+                '-----------------------------------------------------------\n'
+                'Notes on data\n'
+                '-----------------------------------------------------------\n'
                 'Lower diversion and cancellation counts are better.\n'
                 'A higher efficiency percentage means more flights were completed successfully.\n'
                 'Use this report to compare runway setups and traffic flow settings.\n'

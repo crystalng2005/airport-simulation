@@ -1,9 +1,10 @@
+# Python cache files
 **/__pycache__/
+*.pyc
 
-# Airport sim generated presets
-airport_sim/data/preset[0-2].json
+# Airport sim generated files
+airport_sim/data/
+airport_sim/exports/
 
-# Below may be untracked? Maybe?
-# airport_sim/data/preset_meta.json
-# airport_sim/data/preset.json
-# airport_sim/data/results.json
+# Windows path variant
+airport_sim\exports\

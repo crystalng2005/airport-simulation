@@ -15,18 +15,18 @@ class VisualisationController:
         self.active_simulation = None
 
     def getAllSimulationResults(self):
-        return self.results_controller.getAllResults()
+        return self.results_controller.get_all_results()
 
     def getSimulationReport(self, sim_id):
-        report = self.results_controller.loadResults(sim_id)
+        report = self.results_controller.load_results(sim_id)
         if report != None:
             return {
                 "report": report.outputReport_dict()
             }
 
     def compareSimulations(self, sim_id_1, sim_id_2):
-        sim1 = self.results_controller.getOneResult(sim_id_1)
-        sim2 = self.results_controller.getOneResult(sim_id_2)
+        sim1 = self.results_controller.get_one_result(sim_id_1)
+        sim2 = self.results_controller.get_one_result(sim_id_2)
 
         if sim1 is None or sim2 is None:
             return None
@@ -67,18 +67,18 @@ class VisualisationController:
         }
 
     def exportSimulationReport(self, sim_id):
-        return self.results_controller.exportResultById(sim_id)
+        return self.results_controller.export_result_by_id(sim_id)
         
 
     def getAvailablePresets(self):
         try:
             
-            preset_times = self.preset_controller.getPresetSaveTimes()
+            preset_times = self.preset_controller.get_preset_save_times()
             
             output = []
             for (preset_id, saved_at) in preset_times:                
                 # Load each preset
-                if self.preset_controller.loadPreset(preset_id):
+                if self.preset_controller.load_preset(preset_id):
                     # Get first 5 planes
                     planes = []
                     for i, p in enumerate(self.preset_controller.plane_list):
@@ -114,7 +114,7 @@ class VisualisationController:
             return []
 
     def getPresetData(self, id):
-        self.preset_controller.loadPreset(id)
+        self.preset_controller.load_preset(id)
         planes = []
         temp = 0
         for p in self.preset_controller.plane_list:
@@ -159,6 +159,7 @@ class VisualisationController:
             maintenance_closure_prob= float(data.get('maintenance_closure_prob')),
             safety_closure_prob=float(data.get('safety_closure_prob')),
             construction_closure_prob=float(data.get('construction_closure_prob')),
+            runway_opening_prob=float(data.get('runway_opening_prob')),
             tick_minutes=5
         )
         return True
@@ -215,4 +216,4 @@ class VisualisationController:
         self.preset_controller.mixed_runways = sim.mixed_runways
         self.preset_controller.plane_list = sim.preset_controller.plane_list
         self.preset_controller.report = RD.reportData
-        return self.preset_controller.savePreset()
+        return self.preset_controller.save_preset()

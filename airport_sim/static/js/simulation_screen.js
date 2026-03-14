@@ -58,7 +58,6 @@ document.addEventListener("keydown", function(event) {
 });
 
 
-
 // Simulation is already started by configure_simulation.js calling /start
 // Just initialize the screen and begin the loop
 (async function init() {
@@ -77,8 +76,6 @@ document.addEventListener("keydown", function(event) {
 })();
 
 
-
-
 // startSimulation() is now called after the /start fetch completes (see above)
 
 
@@ -87,7 +84,6 @@ document.addEventListener("keydown", function(event) {
 // ________________________________________________________________________________________________________
 class Aircraft{
   constructor(c,o,d,i,f,e,t,a,cu){
-    // this.id = ID;
     this.callsign = c;
     this.origin = o;
     this.destination = d;
@@ -308,13 +304,17 @@ function movePlaneToRunway(planeID, runwayID){
   plane.style.margin = 0;
   plane.style.transform = 'none'; 
 
-  const shift = (runwayRect.width - planeRect.width)/4;
+  // 7. Calculate runway center positions values
+  const borderWidth = 2 * parseFloat(window.getComputedStyle(plane).borderTopWidth);
+
+  const horizontalShift = (runwayRect.width-planeRect.width-borderWidth)/2;
+  const verticalShift = (runwayRect.height-planeRect.height-borderWidth)/2;
 
   // 6. Animate into runway final position (0,0)
   plane.animate(
     [
-      { left: `${relativeLeft}px`, top: `${relativeTop + shift}px` },
-      { left: `${shift}px`, top: `${shift}px`}
+      { left: `${relativeLeft}px`, top: `${relativeTop}px` }
+      ,{ left: `${horizontalShift}px`, top: `${verticalShift}px`}
     ],
     {
       duration: planeRunwaySlideDuration * 1000,

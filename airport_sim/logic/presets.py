@@ -16,6 +16,7 @@ class PresetController:
         self.mixed_runways = 0
         self.runway_closure_prob = []
         self.plane_emergency_prob = []
+        self.runway_opening_prob = 1
 
         self.report = None  # Initialised before saving, goto line 75
 
@@ -28,10 +29,10 @@ class PresetController:
             os.path.join(self.data_dir, f'preset{i}.json') for i in range(3)
         ]
 
-        self.init_meta()
+        self._init_meta()
 
     # --- Meta file functions ---  (Meta file keeps track of preset ID's and when they were saved)
-    def init_meta(self):
+    def _init_meta(self):
         if not os.path.exists(self.meta_file):
             meta = {
                 "presets": [
@@ -43,19 +44,19 @@ class PresetController:
             with open(self.meta_file, 'w') as f:
                 json.dump(meta, f, indent=4)
 
-    def load_meta(self):
+    def _load_meta(self):
         try:
             with open(self.meta_file, 'r') as f:
                 return json.load(f)
         except (IOError, json.JSONDecodeError):
             return {"presets": []}
 
-    def save_meta(self, meta):
+    def _save_meta(self, meta):
         with open(self.meta_file, 'w') as f:
             json.dump(meta, f, indent=4)
 
-    def getPresetSaveTimes(self) -> list[tuple[int, str]]:
-        meta = self.load_meta().get("presets", [])
+    def get_preset_save_times(self) -> list[tuple[int, str]]:
+        meta = self._load_meta().get("presets", [])
 
         return [
             (p["id"], p["last_saved"])
@@ -65,11 +66,11 @@ class PresetController:
 
     # --- Preset functions ---
 
-    def savePreset(self):
+    def save_preset(self):
         try:
             print('savePreset called')
             
-            meta_data = self.load_meta()
+            meta_data = self._load_meta()
             presets = meta_data.get("presets", [])
 
             unused = [p for p in presets if p.get("last_saved") is None]
@@ -109,6 +110,7 @@ class PresetController:
                     "mixed_runways": self.mixed_runways,
                     "plane_emergency_prob" : self.plane_emergency_prob,
                     "runway_closure_prob" : self.runway_closure_prob,
+                    "runway_opening_prob" : self.runway_opening_prob,
                 },
                 "planes": [self._serialize_plane(plane) for plane in self.plane_list],
                 "report": report_dict
@@ -129,7 +131,7 @@ class PresetController:
                 if p["id"] == preset_id:
                     p["last_saved"] = now
 
-            self.save_meta(meta_data)
+            self._save_meta(meta_data)
             print('Preset saved successfully!')
             return True
 
@@ -139,7 +141,7 @@ class PresetController:
             traceback.print_exc()
             return False
 
-    def loadPreset(self, preset_id: int) -> bool:
+    def load_preset(self, preset_id: int) -> bool:
         if not (0 <= preset_id < len(self.preset_files)):
             return False
 
@@ -153,6 +155,7 @@ class PresetController:
             self.mixed_runways = vars_data["mixed_runways"]
             self.plane_emergency_prob = vars_data["plane_emergency_prob"]
             self.runway_closure_prob = vars_data["runway_closure_prob"]
+            self.runway_opening_prob = vars_data["runway_opening_prob"]
 
             # Loads planes by initiating new objects and importing their data from the preset
             self.plane_list = []
@@ -180,6 +183,7 @@ class PresetController:
         self.mixed_runways = 0
         self.plane_emergency_prob = []
         self.runway_closure_prob = []
+        self.runway_opening_prob = 1
         self.plane_list.clear()
         self.report = None
         return True

@@ -32,6 +32,7 @@ class SimulationController:
         maintenance_closure_prob: float,
         safety_closure_prob: float,
         construction_closure_prob: float,
+        runway_opening_prob: float,
         tick_minutes: int = 5
     ):
         # Values defining the simulation
@@ -42,12 +43,13 @@ class SimulationController:
         self.departure_runways = departure_runways
         self.landing_runways = landing_runways
         self.mixed_runways = mixed_runways
-        self.all_runways = []
+        self.all_runways:list[Runway] = []
 
         # Probabilities for plane emergencies and runway closures
         self.plane_emergency_prob = [mechanical_emergency_prob, health_emergency_prob, fuel_emergency_prob]
         self.runway_closure_prob = [weather_closure_prob, maintenance_closure_prob, safety_closure_prob, construction_closure_prob]
-        
+        self.runway_opening_prob = runway_opening_prob
+
         # Times for the simulation
         self.cancellation_time = cancellation_time
         self.current_time = datetime(2000, 1, 1, 0, 0)
@@ -67,6 +69,8 @@ class SimulationController:
         self.generateRunway()
         self.generateQueue()
 
+        Plane.reset_plane_num()
+
         # Initialises the reportData global variable
         RD.init(total_runways, mixed_runways, departure_runways, landing_runways, landings_per_hour, self.current_time)
 
@@ -82,7 +86,7 @@ class SimulationController:
         preset_controller = PresetController()
 
         # Exits if preset can't be loaded
-        if not preset_controller.loadPreset(preset):
+        if not preset_controller.load_preset(preset):
             return False
 
         # Load the preset values
@@ -90,6 +94,7 @@ class SimulationController:
         self.departure_runways = preset_controller.departure_runways
         self.landing_runways = preset_controller.landing_runways
         self.mixed_runways = preset_controller.mixed_runways
+        self.runway_opening_prob = preset_controller.runway_opening_prob
         #self.runway_closure_prob = preset_controller.runway_closure_prob
 
         # Generate runways and queues based on loaded data
@@ -164,21 +169,21 @@ class SimulationController:
 
         # Departure runways
         for i in range(self.departure_runways):
-            runway = Runway(True, False, runway_num, True, True, self.runway_closure_prob)
+            runway = Runway(True, False, runway_num, True, True, self.runway_closure_prob, self.runway_opening_prob)
             self.departure_list.append(runway)
             self.all_runways.append(runway)
             runway_num += 1
 
         # Landing runways
         for i in range(self.landing_runways):
-            runway = Runway(False, False, runway_num, True, True, self.runway_closure_prob)
+            runway = Runway(False, False, runway_num, True, True, self.runway_closure_prob, self.runway_opening_prob)
             self.landing_list.append(runway)
             self.all_runways.append(runway)
             runway_num += 1
         
         # Mixed mode runways
         for i in range(self.mixed_runways):
-            temp = Runway(True, True, runway_num, True, True, self.runway_closure_prob)
+            temp = Runway(True, True, runway_num, True, True, self.runway_closure_prob, self.runway_opening_prob)
             self.landing_list.append(temp)
             self.departure_list.append(temp)
             self.all_runways.append(temp)
@@ -190,7 +195,7 @@ class SimulationController:
     def get_runway_statuses(self):
         statuses = []
         for runway in self.all_runways:
-            statuses.append(not (runway.checkClosed()))
+            statuses.append(not (runway.check_closed()))
 
         return statuses
     
@@ -227,10 +232,10 @@ class SimulationController:
         self.preset_controller.landing_runways = self.landing_runways
         self.preset_controller.mixed_runways = self.mixed_runways
         self.preset_controller.report = RD.reportData
-        self.preset_controller.savePreset()
+        self.preset_controller.save_preset()
         # Save result to results history
         self.results_controller = ResultsController()
-        self.results_controller.saveResult()
+        self.results_controller.save_result()
         return False
 
     def get_tick_time(self):
@@ -247,7 +252,7 @@ class SimulationController:
 
         currentFrameActions.current_frame_actions = []
         for runway in self.all_runways:
-            runway.maxPlanes = 0
+            runway.max_planes = 0
 
         if self.current_time >= self.end_time:
             return self.end_simulation()
@@ -262,16 +267,16 @@ class SimulationController:
 
         # Gives runways the chance to close/open
         for runway in self.all_runways:
-            runway.updateStatus()
+            runway.update_status()
             #if runway.checkStatus():
             #    print("closed!!")
 
         # Process existing queue first — assign waiting planes to available runways
-        self.landing_queue.checkCancelTime()
-        self.departure_queue.checkCancelTime()
+        self.landing_queue.check_cancel_time()
+        self.departure_queue.check_cancel_time()
 
-        self.landing_queue.checkRunways()
-        self.departure_queue.checkRunways()
+        self.landing_queue.check_runways()
+        self.departure_queue.check_runways()
 
 
 

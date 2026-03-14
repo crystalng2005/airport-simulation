@@ -7,9 +7,8 @@ import datetime
 
 
 # PerformanceReport Class
-
 class PerformanceReport:
-    def __init__(self, runway_total, runways_mixed, runways_departure, runways_landing, landings_per_hour, start_time):
+    def __init__(self, runway_total: int, runways_mixed: int, runways_departure: int, runways_landing: int, landings_per_hour: int, start_time: datetime):
         # Simulation preset data
         self.runway_total = runway_total
         self.runways_mixed = runways_mixed
@@ -39,17 +38,27 @@ class PerformanceReport:
         self.holding_current = 0
 
 
-
-
-    # Records the time the simulation has finished
-    # Call when ending the simulation
     def setFinishTime(self, finishTime : datetime):
+        """
+        Records the time the simulation has finished
+        Call when ending the simulation
+        """
         self.finish_time = finishTime
         self.duration = self.finish_time - self.start_time
         
 
-    # Generates the report based on collected data
+    # 
     def generateReport(self):
+        """
+        Generates the report based on collected data about the simulation.
+        Calculates the maximum, mean, and standard deviation for the following metrics:
+        - Wait time
+        - Hold time
+        - Take-off time
+        - Arrival time
+
+        Also calculates the average amount of fuel used (rounded to 2d.p.)
+        """
         self.efficiency = self.getEfficiency()
         
         # Maximum of each value stored in the lists
@@ -73,11 +82,16 @@ class PerformanceReport:
         # Calculated the average fuel used per plane, checks if total planes are 0
         self.fuel_avg = 0
         if self.total_planes > 0:
-            self.fuel_avg = self.tot_fuel_used / self.total_planes
+            self.fuel_avg = round(self.tot_fuel_used / self.total_planes)
 
 
-    # Returns the duration in seconds as a formatted string
-    def string_duration(self):
+
+    def string_duration(self) -> str:
+        """
+        Returns the duration of the simulation (defined in seconds) as a formatted string.
+        Used for returning the duration in the appropriate format for the results. 
+        
+        """
         if hasattr(self.duration, 'total_seconds'):
             inSeconds = int(self.duration.total_seconds())
         else:
@@ -87,8 +101,43 @@ class PerformanceReport:
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
     
 
-    # Outputs the values for the reports as a dictionary
-    def outputReport_dict(self):
+    def outputReport_dict(self) -> dict:
+        """
+        Outputs the values stored in the report as a dictionary in the following format:
+
+        "start_time" : datetime,
+        "completed_at" : datetime,
+        "duration" : str,
+
+        "total_planes": int,
+        "diversions": int,
+        "cancellations": int,
+
+        "tot_fuel_used": int,
+        "avg_fuel_per_plane" : float,
+
+        "holding_max": int,
+        "queue_max": int,
+        
+        "tot_wait_time": int,
+        "avg_wait_time": float, 
+        "std_wait_time" : float,
+
+        "max_hold_time" : int,
+        "avg_hold_time" : float,
+        "std_hold_time" : float,
+
+        "max_takeoff_time" : int,
+        "avg_takeoff_time" : float,
+        "std_take_off_time" : float,
+
+        "max_arrival_time" : int,
+        "avg_arrival_time" : float,
+        "std_arrival_time" : float,
+
+        "efficiency": float
+
+        """
         return {
             "start_time" : self.start_time,
             "completed_at" : self.finish_time,
@@ -99,7 +148,7 @@ class PerformanceReport:
             "cancellations": self.cancellations,
 
             "tot_fuel_used": self.tot_fuel_used,
-            "avg_fuel_per_plane" : self.fuel_avg,
+            "avg_fuel_per_plane" : round(self.fuel_avg),
 
             "holding_max": self.holding_max,
             "queue_max": self.queue_max,
@@ -124,8 +173,11 @@ class PerformanceReport:
         }
 
 
-    # Generates the report and returns as a formatted string
     def outputReport_string(self) -> str:
+        """
+        Generates the report and returns the values generated as a formatted string
+
+        """
         self.generateReport()
 
         return (f"Number of diversions: {self.diversions}\n"
@@ -154,8 +206,10 @@ class PerformanceReport:
                 f"Standard deviation of arrival times: {self.std_arrival}\n\n")
 
 
-    # Resets the values stored in the report
     def reset(self) -> bool:
+        """
+        Resets the values stored in the report
+        """
         self.diversions = 0
         self.cancellations = 0
         self.total_planes = 0
@@ -174,39 +228,58 @@ class PerformanceReport:
         self.holding_current = 0
 
 
-    # Calculates the efficiency
-    def getEfficiency(self):
+    def getEfficiency(self) -> float:
+        """
+        Calculates the efficiency using the formula efficiency = (total planes - diversions - cancellations)/total planes * 100
+        
+        """
         if self.total_planes > 0:
             return (round((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100))
         return 0
 
 
-    # Increments the number of planes currently in the runway queue
-    # Checks if the maximum number needs to be updated
     def incQueueCurrent(self):
+        """
+        Increments the number of planes currently in the runway queue.
+        Then, checks if the maximum number needs to be updated.
+        """
         self.queue_current +=1 
         if self.queue_current > self.queue_max:
             self.queue_max = self.queue_current 
 
-    # Decrements the number of planes currently in the runway queue
+    
     def decQueueCurrent(self):
+        """
+        Decrements the number of planes currently in the runway queue
+
+        """
         if self.queue_current > 0:
             self.queue_current -= 1
 
-    # Increments the number of planes currently in the holding queue
-    # Checks if the maximum number needs to be updated
+
     def incHoldingCurrent(self):
+        """
+        Increments the number of planes currently in the holding queue
+        Checks if the maximum number needs to be updated
+        """
         self.holding_current += 1
         if self.holding_current > self.holding_max:
             self.holding_max = self.holding_current
 
-    # Decrements the number of planes currently in the holding queue
+
+    
     def decHoldingCurrent(self):
+        """
+        Decrements the number of planes currently in the holding queue
+        """
         if self.holding_current > 0:
             self.holding_current -= 1
 
+
     def generate_plots_base64(self):
-        """Generate distribution plots for the report and return them as base64-encoded PNGs."""
+        """
+        Generates distribution plots for the report and return them as base64-encoded PNGs.
+        """
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
@@ -293,7 +366,10 @@ class PerformanceReport:
 
     @staticmethod
     def generate_comparison_plots_base64(rep1, rep2, label1="Sim 1", label2="Sim 2"):
-        """Generate side-by-side bar chart comparisons of two reports as base64 PNGs."""
+        """
+        Generates side-by-side bar chart comparisons of two reports as base64 PNGs.
+        """
+
         import matplotlib
         matplotlib.use('Agg')
         import matplotlib.pyplot as plt
