@@ -10,13 +10,11 @@ This document describes all HTTP endpoints exposed by the Flask application (`ap
 |--------|----------|-------------|
 | `GET` | `/` | Render main menu page |
 | `POST` | `/start` | Start a new simulation |
-| `POST` | `/tick` | Advance simulation by one tick |
 | `GET` | `/simulation-screen` | Render simulation screen page |
 | `GET` | `/configure-simulation` | Render configuration page |
 | `GET` | `/presets` | Render presets page |
 | `GET` | `/results` | Render results page |
 | `GET` | `/result-screen` | Render result screen page |
-| `GET` | `/api/runway-count` | Get number of runways |
 | `GET` | `/api/number-of-runways` | Get number of runways |
 | `GET` | `/api/simulation-finished` | Check if simulation has finished |
 | `GET` | `/api/get-preset-data/<preset_id>` | Get full data for a preset |
@@ -184,28 +182,13 @@ Start a new simulation with the given configuration.
 
 **Response (Error) — 500:**
 ```json
-{ "success": false, "errors": ["Description of error"] }
-```
-
----
-
-#### `POST /tick`
-Advance the simulation by one time step. Requires an active simulation.
-
-**Response (Success) — 200:**
-```json
-{ "success": true, "message": "Tick processed" }
-```
-
-**Response (Error) — 400:**
-```json
-{ "success": false, "errors": ["No active simulation"] }
+{ "success": false, "error": "Description of error" }
 ```
 
 ---
 
 #### `POST /api/next-frame`
-Advance the simulation by one frame (alias for `/tick`, used by the simulation screen).
+Advance the simulation by one frame.
 
 **Response (Success) — 200:**
 ```json
@@ -214,7 +197,7 @@ Advance the simulation by one frame (alias for `/tick`, used by the simulation s
 
 **Response (Error) — 400:**
 ```json
-{ "success": false, "errors": ["No active simulation"] }
+{ "success": false, "error": "No active simulation" }
 ```
 
 ---
@@ -284,25 +267,15 @@ Get current data for a specific aircraft by its callsign.
 
 **Response (Not Found) — 404:**
 ```json
-{ "success": false, "errors": ["Aircraft not found"] }
+{ "success": false, "error": "Aircraft not found" }
 ```
 
 ---
 
 ### Runways
 
-#### `GET /api/runway-count`
-Get the total number of runways in the current simulation.
-
-**Response (Success) — 200:**
-```json
-{ "success": true, "count": 4 }
-```
-
----
-
 #### `GET /api/number-of-runways`
-Alias for `/api/runway-count`.
+Get the total number of runways in the current simulation.
 
 **Response (Success) — 200:**
 ```json

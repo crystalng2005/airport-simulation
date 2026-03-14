@@ -96,12 +96,9 @@ function createResultRow(result) {
             <button class="btn btn-view" onclick="viewReport('${result.id}')">
                 View
             </button>
-            <span class="tooltip-wrapper">
-                <button class="btn btn-export" onclick="exportReport('${result.id}')">
-                    Export
-                </button>
-                <span class="tooltip-text" role="tooltip">Export for More Details</span>
-            </span>
+            <button class="btn btn-export" onclick="exportReport('${result.id}')">
+                Export
+            </button>
         </td>
     `;
 
