@@ -1,8 +1,4 @@
 # QueueController Class
-from datetime import datetime, timedelta, time
-from typing import List
-from queue import Queue
-
 from logic.models import Runway
 from logic.plane import Plane, EmergencyStatus
 
@@ -15,19 +11,45 @@ MINUTES_PER_TICK = 5
 
 
 class QueueController:
-    def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim):
+    def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim) -> None:
+        """
+        Initialises the QueueController.
+
+        The controller manages a queue of planes waiting to either take off
+        or land and assigns them to available runways.
+
+        Args:
+            plane_queue: A list of Plane objects representing the holding queue.
+            runway_list: A list of Runway objects that planes can be assigned to.
+            is_departure: True if the queue is for departures, False if it is for arrivals.
+            sim: Reference to the SimulationController used to access simulation time.
+        """
         self.plane_queue = plane_queue # A list, treated as a queue
         self.runway_list = runway_list
         self.is_departure = is_departure # true = takeoff, false = landing 
         self.sim = sim
         self.current_frame_actions = []
-        self.evenTurn = False
+        self.even_turn = False
 
 
-    # Runway algorithm - linearly search through the runway list, when one is available, direct the first plane to that runway
-    def checkRunways(self): 
-        if self.evenTurn: self.evenTurn = False
-        else: self.evenTurn = True
+    def check_runways(self) -> None:
+        """
+        Checks the runway list and assigns planes from the queue to available runways.
+
+        Each runway is checked to determine if it can accept another plane. If a runway
+        has available capacity and the queue is not empty, the next plane in the queue
+        is directed to that runway.
+
+        For mixed-mode runways, landing and departure access alternates every tick
+        using the even_turn flag to prevent starvation of either queue.
+
+        When a plane leaves the queue:
+        - It is assigned to a runway.
+        - Delay and holding time statistics are calculated.
+        - The relevant metrics in reportData are updated.
+        """ 
+        if self.even_turn: self.even_turn = False
+        else: self.even_turn = True
 
         checked = 0
         while checked < len(self.runway_list):
@@ -35,16 +57,16 @@ class QueueController:
             for runway in self.runway_list:
                 #if not runway.is_operational:
                 #    print("closed11!!")
-                if runway.maxPlanes < 5 and len(self.plane_queue) != 0 and runway.is_operational: # NOTE: added check for runway closure
+                if runway.max_planes < 5 and self.plane_queue and runway.is_operational: # NOTE: added check for runway closure
                     # Alternates each tick who can use mixed mode (allowing departure to use it too)
-                    if self.evenTurn == True and self.is_departure == False and runway.mixed_mode == True:
+                    if self.even_turn == True and self.is_departure == False and runway.mixed_mode == True:
                         checked += 1
                         continue
 
                     # Directs the plane to the runway
-                    runway.maxPlanes += 1
+                    runway.max_planes += 1
                     removed = self.plane_queue.pop(0)
-                    removed.goToRunway(runway.runway_number)
+                    removed.go_to_runway(runway.runway_number)
                     currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                     # Assigns the holding queue exit time to the plane object
                     removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
@@ -65,10 +87,22 @@ class QueueController:
                     checked += 1
 
 
-    def enqueue(self, p: Plane):
-        # Adds plane to queue
+    def enqueue(self, p: Plane) -> None:
+        """
+        Adds a plane to the queue.
+
+        If the plane has an emergency status it will be inserted into the queue
+        according to its emergency priority. Otherwise the plane is appended
+        to the end of the queue.
+
+        The time at which the plane enters the holding queue is recorded and
+        the queue size statistics are updated.
+
+        Args:
+            p: The Plane object to add to the queue.
+        """
         if(p.emergency_status != EmergencyStatus.NONE): 
-            self.planeEmergency(p)
+            self.plane_emergency(p)
         else:
             self.plane_queue.append(p)
 
@@ -78,9 +112,22 @@ class QueueController:
 
 
 
-    # (For landing only) Checks if emergency_time_left <= 0, then cancel
-    # Then checks if the plane is over the user specified cancellation time, then cancel
-    def checkCancelTime(self):
+    def check_cancel_time(self) -> None:
+        """
+        Checks whether planes should be removed from the queue due to
+        emergencies or cancellation limits.
+
+        For landing queues:
+        - If a plane has an emergency and its emergency_time_left reaches zero,
+          the plane is diverted and removed from the queue.
+
+        For departure queues:
+        - If a plane exceeds its cancellation_time it is cancelled and removed
+          from the queue.
+
+        All relevant diversion and cancellation statistics are updated in
+        reportData.
+        """
         if len(self.plane_queue) == 0:
             return
 
@@ -104,8 +151,20 @@ class QueueController:
 
 
 
-    # Given a plane with an EmergencyStatus, it sets the emergency_time_left, and changes its place in the queue accordingly
-    def planeEmergency(self, p: Plane):
+    def plane_emergency(self, p: Plane) -> None:
+        """
+        Handles the insertion of a plane with an emergency into the queue.
+
+        The plane's emergency_time_left is set depending on the type of
+        emergency (fuel, health, or mechanical). The plane is then placed
+        in the queue according to its emergency priority so that planes
+        with more urgent emergencies are positioned closer to the front.
+
+        The emergency event is also recorded in the current frame actions.
+
+        Args:
+            p: The Plane object experiencing an emergency.
+        """
         currentFrameActions.current_frame_actions.append([p.callsign, "emergency"])
         if p in self.plane_queue:
             self.plane_queue.remove(p)

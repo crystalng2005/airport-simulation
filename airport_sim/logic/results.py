@@ -23,7 +23,7 @@ class ResultsController:
                 json.dump([], f)
 
     # Save current report file as result in results.json
-    def saveResult(self) -> bool:
+    def save_result(self) -> bool:
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -60,7 +60,7 @@ class ResultsController:
             return False
 
     # load a specific result, using its index as the ID
-    def loadResults(self, index: int):
+    def load_results(self, index: int):
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -76,20 +76,20 @@ class ResultsController:
             return None
 
     # Return a list of all indexes + saving timestamps of each result in list
-    def getResultSaveTimes(self) -> list[tuple[int, str]]:
+    def get_result_save_times(self) -> list[tuple[int, str]]:
         with open(self.results_file, 'r') as f:
             results = json.load(f)
 
         return [(i, r["saved_at"]) for i, r in enumerate(results)]
 
 
-    def getAllResults(self):
+    def get_all_results(self):
         with open(self.results_file, 'r') as f:
             results = json.load(f)
 
         output = []
         for i, r in enumerate(results):
-            report = self.loadResults(i)
+            report = self.load_results(i)
 
             output.append({
                 "id": i,
@@ -106,7 +106,7 @@ class ResultsController:
 
         return output
 
-    def getOneResult(self,id:int):
+    def get_one_result(self,id:int):
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -135,14 +135,14 @@ class ResultsController:
 
 
     # Given a specific report ID, exports it to the exports folder
-    def exportResultById(self, id: int):
-        report = self.loadResults(id)
+    def export_result_by_id(self, id: int):
+        report = self.load_results(id)
         if report is None:
             return None
-        return self.exportReport(report)
+        return self.export_report(report)
 
     # Given a specific report, exports it to the exports folder and returns the file path
-    def exportReport(self, PR: PerformanceReport):
+    def export_report(self, PR: PerformanceReport):
         export_dir = os.path.join(os.path.dirname(__file__), '..', 'exports')
 
         try:

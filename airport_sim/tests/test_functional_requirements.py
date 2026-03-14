@@ -124,7 +124,7 @@ class TestFR3_ArrivalAndLanding:
         emergency.emergency_time_left = 10
         
         self.sim.landing_queue.enqueue(normal)
-        self.sim.landing_queue.planeEmergency(emergency)
+        self.sim.landing_queue.plane_emergency(emergency)
         
         e_idx = self.sim.landing_queue.plane_queue.index(emergency)
         n_idx = self.sim.landing_queue.plane_queue.index(normal)
@@ -252,7 +252,7 @@ class TestUSP1_ConfigurableRunwayScenarios:
         self.preset_controller.mixed_runways = 1
         self.preset_controller.report = RD.reportData
         
-        result = self.preset_controller.savePreset()
+        result = self.preset_controller.save_preset()
         assert result == True
     
     def test_usp1_preset_can_load(self):
@@ -265,7 +265,7 @@ class TestUSP1_ConfigurableRunwayScenarios:
         pc1.report = RD.reportData
         
         # Find which slot will be used (first unused or oldest)
-        meta = pc1.load_meta()
+        meta = pc1._load_meta()
         unused = [p for p in meta['presets'] if p.get('last_saved') is None]
         if unused:
             slot_id = unused[0]['id']
@@ -276,12 +276,12 @@ class TestUSP1_ConfigurableRunwayScenarios:
             slot_id = presets_with_time[0]['id']
         
         # Save to that slot
-        saved = pc1.savePreset()
+        saved = pc1.save_preset()
         assert saved == True
         
         # Load from that specific slot
         pc2 = PresetController()
-        loaded = pc2.loadPreset(slot_id)
+        loaded = pc2.load_preset(slot_id)
         
         assert loaded == True
         assert pc2.departure_runways == 3, f"Expected 3, got {pc2.departure_runways}"
@@ -290,7 +290,7 @@ class TestUSP1_ConfigurableRunwayScenarios:
     
     def test_usp1_stores_last_3_presets(self):
         """USP-1: Stores 3 preset slots"""
-        meta = self.preset_controller.load_meta()
+        meta = self.preset_controller._load_meta()
         assert len(meta.get("presets", [])) == 3
     
     def test_usp1_preset_saves_runway_config(self):
@@ -302,15 +302,15 @@ class TestUSP1_ConfigurableRunwayScenarios:
         pc1.report = RD.reportData
         
         # Determine slot
-        meta = pc1.load_meta()
+        meta = pc1._load_meta()
         unused = [p for p in meta['presets'] if not p.get('last_saved')]
         slot_id = unused[0]['id'] if unused else 0
         
-        pc1.savePreset()
+        pc1.save_preset()
         
         # Load from correct slot
         pc2 = PresetController()
-        pc2.loadPreset(slot_id)
+        pc2.load_preset(slot_id)
         
         assert pc2.departure_runways == 2
         assert pc2.landing_runways == 3

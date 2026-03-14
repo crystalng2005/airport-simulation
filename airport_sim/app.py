@@ -252,8 +252,8 @@ def comparison_plots():
     sim_id_1 = int(data.get('sim_id_1'))
     sim_id_2 = int(data.get('sim_id_2'))
     try:
-        r1 = controller.visualisation_controller.results_controller.getOneResult(sim_id_1)
-        r2 = controller.visualisation_controller.results_controller.getOneResult(sim_id_2)
+        r1 = controller.visualisation_controller.results_controller.get_one_result(sim_id_1)
+        r2 = controller.visualisation_controller.results_controller.get_one_result(sim_id_2)
         if r1 is None or r2 is None:
             return jsonify({'success': False, 'error': 'One or both simulation IDs not found'}), 404
         plots = PerformanceReport.generate_comparison_plots_base64(
@@ -273,7 +273,7 @@ def export_current_report():
         if RD.reportData is None:
             return jsonify({'success': False, 'error': 'No report available'}), 400
         
-        filepath = controller.visualisation_controller.results_controller.exportReport(RD.reportData)
+        filepath = controller.visualisation_controller.results_controller.export_report(RD.reportData)
         if filepath and os.path.exists(filepath):
             return send_file(filepath, as_attachment=True, download_name='simulation_report.txt')
         return jsonify({'success': False, 'error': 'Failed to generate report'}), 500
@@ -400,7 +400,7 @@ def get_report_plots():
 def get_saved_report_plots(sim_id):
     """Generate and return base64 plot images for a specific saved simulation report."""
     try:
-        report = controller.visualisation_controller.results_controller.loadResults(sim_id)
+        report = controller.visualisation_controller.results_controller.load_results(sim_id)
         if report is None:
             return jsonify({'success': False, 'error': 'Simulation report not found'}), 404
         report.generateReport()

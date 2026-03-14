@@ -20,11 +20,11 @@ class Runway:
         self.set_user_settings(probabilities)
         self.opening_probability = opening
 
-        # Maximum number of planes that have passed through this runway (?)
-        #self.maxPlanes = 0 # (?)
+        # Keep track of no. of planes on runway per tick
+        self.max_planes = 0 
 
 
-    def openRunway(self):
+    def open_runway(self):
         """
         Opens the runway by setting closed to false and is operational to true
         """
@@ -32,14 +32,14 @@ class Runway:
         self.is_operational = True
 
 
-    def closeRunway(self):
+    def close_runway(self):
         """
         Closes the runway by setting closed to true and is operational to false
         """
         self.closed = True
         self.is_operational = False
 
-    def checkClosed(self) -> bool:
+    def check_closed(self) -> bool:
         """
         Returns true if a runway is closed, false otherwise
         """
@@ -57,7 +57,7 @@ class Runway:
         self.user_construction = probabilities[3]
 
     
-    def updateStatus(self) -> bool:
+    def update_status(self) -> bool:
         """
         Checks if the runway is closed.
         If closed, offers the random chance for runway to open based on user input probability.
@@ -75,7 +75,7 @@ class Runway:
         if self.closed:
             opening = random.randint(0,int(1/self.opening_probability)) if self.opening_probability !=0 else 2
             if opening == 1:
-                self.openRunway()
+                self.open_runway()
             return self.closed
         else:
             weather = random.randint(0,int(1/self.user_weather)) if self.user_weather != 0 else 2
@@ -85,13 +85,13 @@ class Runway:
 
             # Checks if any closures have been generated
             if weather == 1 or self.user_weather == 1:
-                self.closeRunway()
+                self.close_runway()
             elif maintenance == 1 or self.user_maintenance == 1:
-                self.closeRunway()
+                self.close_runway()
             elif safety == 1 or self.user_safety == 1:
-                self.closeRunway()
+                self.close_runway()
             elif construction == 1 or self.user_construction == 1:
-                self.closeRunway()
+                self.close_runway()
                 
         return self.closed
 

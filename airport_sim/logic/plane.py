@@ -41,11 +41,12 @@ class Plane:
     # Stores the total number of plane objects generated
     plane_num = 0
     
-    def __init__(self, is_departure: bool, cancellation_time: int, probabilities: list[float]):
+    def __init__(self, is_departure: bool, queue_controller, cancellation_time: int, probabilities: list[float]):
         
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
         self.set_user_settings(probabilities)
         self.cancellation_time = cancellation_time
+        self.queue_controller = queue_controller
 
         # Management variables
         self.emergency_time_left = 0 # Initially 0, will be decreased in decrease fuel when emergency arises
@@ -61,15 +62,15 @@ class Plane:
         self.needsToBeRemoved = False
 
         # Basic information relating to the plane
-        self.callsign = self.genCallsign()
-        self.origin = self.genOrigin()
-        self.destination = self.genDestination()
+        self.callsign = self.gen_callsign()
+        self.origin = self.gen_origin()
+        self.destination = self.gen_destination()
         self.current_location = self.origin
         self.is_departure = is_departure
-        self.fuel_level = self.genFuel()
-        self.emergency_status = self.genEmergencyOnSpawn()
-        self.target_time = self.genTargetTime()
-        self.actual_time = self.genActualTime()
+        self.fuel_level = self.gen_fuel()
+        self.emergency_status = self.gen_emergency_on_spawn()
+        self.target_time = self.gen_target_time()
+        self.actual_time = self.gen_actual_time()
 
         # Increments total number of planes
         Plane.plane_num += 1
@@ -106,7 +107,7 @@ class Plane:
 
     # ------- PLANE GENERATION FUNCTIONS ------- #
 
-    def genCallsign(self) -> str:
+    def gen_callsign(self) -> str:
         """
         Generates the call sign of the plane (PLN followed by the total number of planes in the simulation).
         """
@@ -121,7 +122,7 @@ class Plane:
         cls.plane_num = 0
 
     
-    def genOrigin(self) -> str:
+    def gen_origin(self) -> str:
         """
         Generates the IATA code for the destination from the list of IATA airport codes
         
@@ -162,7 +163,7 @@ class Plane:
 
 
     # Generates the destination airport IATA code
-    def genDestination(self) -> str:
+    def gen_destination(self) -> str:
         """
         Generates the destination codes for the airplanes using the same IATA.txt
         file that is used for genOrigin() and in the same way, but keeps looping
@@ -205,7 +206,7 @@ class Plane:
         return code 
 
 
-    def genFuel(self) -> float:
+    def gen_fuel(self) -> float:
         """
         Generates fuel based on the uniform distribution between 20 and 60 minutes
 
@@ -217,7 +218,7 @@ class Plane:
 
 
 
-    def genTargetTime(self) -> datetime:
+    def gen_target_time(self) -> datetime:
         """
         Generates the target arrival/departure time for the aircraft
 
@@ -241,7 +242,7 @@ class Plane:
         return datetime.time(int(randHours), int(randMinutes), int(secs))
 
 
-    def genActualTime(self) -> datetime:
+    def gen_actual_time(self) -> datetime:
         """
         Uses the target time to generate the actual time using the normal distribution
 
@@ -281,7 +282,7 @@ class Plane:
         self.user_fuel = probabilities[2]
 
 
-    def genEmergencyOnSpawn(self) -> EmergencyStatus:
+    def gen_emergency_on_spawn(self) -> EmergencyStatus:
         """
         Called to generate the emergencies based on the probability of something occuring over the whole journey
 
@@ -348,7 +349,7 @@ class Plane:
 
 
     # Directs a plane to the given runway
-    def goToRunway(self, runway: int) -> bool:
+    def go_to_runway(self, runway: int) -> bool:
         """
         Assigns the plane runway value based on the available runways, only if the plane 
         is still in the simulation and not on a runway already.
@@ -426,15 +427,15 @@ class Plane:
         if self.emergency_status == EmergencyStatus.NONE:
             if mechanical_val == 1 or self.user_mechanical == 1:
                 self.emergency_status= EmergencyStatus.MECHANICAL
-                self.queue_controller.planeEmergency(self)
+                self.queue_controller.plane_emergency(self)
             elif medical_val == 1 or self.user_health == 1:
                 self.emergency_status= EmergencyStatus.HEALTH
-                self.queue_controller.planeEmergency(self)
+                self.queue_controller.plane_emergency(self)
             # Checks the fuel level and flags emergency if needed
             else:
                 if self.fuel_level < 20:
                     self.emergency_status = EmergencyStatus.FUEL
-                    self.queue_controller.planeEmergency(self)
+                    self.queue_controller.plane_emergency(self)
             
         return self.emergency_status
 
