@@ -4,38 +4,41 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import datetime
+from dataclasses import dataclass, field
+
 
 
 # PerformanceReport Class
+@dataclass
 class PerformanceReport:
-    def __init__(self, runway_total: int, runways_mixed: int, runways_departure: int, runways_landing: int, landings_per_hour: int, start_time: datetime):
-        # Simulation preset data
-        self.runway_total = runway_total
-        self.runways_mixed = runways_mixed
-        self.runways_departure = runways_departure
-        self.runways_landing = runways_landing
-        self.landings_per_hour = landings_per_hour
-        self.start_time = start_time
+    runway_total: int 
+    runways_mixed: int 
+    runways_departure: int 
+    runways_landing: int 
+    landings_per_hour: int 
+    start_time: datetime
 
-        # Data from running the simulation
-        self.diversions = 0
-        self.cancellations = 0
-        self.total_planes = 0
-        self.tot_wait_time = 0
-        self.tot_fuel_used = 0
+    diversions = 0
+    cancellations = 0
+    total_planes = 0
+    tot_wait_time = 0
+    tot_fuel_used = 0
 
-        # Time monitored per plane, each counted in seconds
-        self.wait_times = []
-        self.hold_times = []
-        self.take_off_delays = []
-        self.arrival_delay_times = []
+    # Time monitored per plane, each counted in seconds
+    wait_times: list[float] = field(default_factory=list)
+    hold_times: list[float] = field(default_factory=list)
+    take_off_delays: list[float] = field(default_factory=list)
+    arrival_delay_times: list[float] = field(default_factory=list)
 
-        # Queue size data
-        self.queue_max = 0
-        self.queue_current = 0
+    finish_time: datetime = None
 
-        self.holding_max = 0
-        self.holding_current = 0
+    # Queue size data
+    queue_max = 0
+    queue_current = 0
+
+    holding_max = 0
+    holding_current = 0
+
 
 
     def set_finish_time(self, finishTime : datetime):
