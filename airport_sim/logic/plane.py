@@ -8,7 +8,6 @@ import math
 import logic.globals.reportData as RD
 from logic.currentFrameActions import currentFrameActions
 
-
 # CONSTANTS
 FUEL_USAGE_PER_TICK = 5
 
@@ -45,6 +44,7 @@ class Plane:
         
         # User settings for emergency probabilities (must be set before genEmergencyOnSpawn())
         self.set_user_settings(probabilities)
+        self.queue_controller = queue_controller
         self.cancellation_time = cancellation_time
         self.queue_controller = queue_controller
 
