@@ -9,6 +9,7 @@
 </head>
 <body>
     <div class="container">
+        <!-- Page Header -->
         <header class="header">
             <h1>Configure New Simulation</h1>
             <p class="subtitle">Set up your airport simulation parameters</p>
@@ -18,6 +19,7 @@
             <div class="config-form">
                 <form id="configForm" onsubmit="startSimulation(event)">
                     
+                    <!-- Runway Configuration -->
                     <div class="form-section">
                         <h3>Runway Configuration</h3>
 
@@ -45,6 +47,7 @@
 
                     </div>
 
+                    <!-- Traffic Flow -->
                     <div class="form-section">
                         <h3>Traffic Flow</h3>
                         
@@ -61,6 +64,7 @@
                         </div>
                     </div>
 
+                    <!-- Plane Emergency Probabilities -->
                     <div class="form-section">
                         <h3>Plane Emergency Probabilities</h3>
 
@@ -97,6 +101,7 @@
                         </div>
                     </div>
 
+                    <!-- Runway Closure Probabilities -->
                     <div class="form-section">
                         <h3>Runway Closure Probabilities</h3>
 
@@ -135,6 +140,7 @@
                         </div>
                     </div>
 
+                    <!-- Simulation Parameters -->
                     <div class="form-section">
                         <h3>Simulation Parameters</h3>
                         
@@ -151,6 +157,7 @@
                         </div>
                     </div>
 
+                    <!-- Form Actions -->
                     <div class="button-group">
                         <button type="submit" class="btn primary-btn">
                             <span class="btn-text">Start Simulation</span>
@@ -164,6 +171,7 @@
         </main>
     </div>
 
+    <!-- Loading Overlay (shown while simulation initialises) -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-content">
             <div class="spinner"></div>

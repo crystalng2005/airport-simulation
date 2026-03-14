@@ -1,13 +1,9 @@
-
-
 // Load presets when page loads
 document.addEventListener('DOMContentLoaded', function() {
     loadPresets();
 });
 
-/**
- * Main function to load and display presets
- */
+/** Fetch presets from the API and display them, or show a fallback message. */
 async function loadPresets() {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const presetsContainer = document.getElementById('presetsContainer');
@@ -36,7 +32,8 @@ async function loadPresets() {
 }
 
 /**
- * Display preset cards in the grid
+ * Sort presets by date and render the three most recent as cards.
+ * @param {Object[]} presets - Array of preset objects from the API.
  */
 function displayPresets(presets) {
     const presetsContainer = document.getElementById('presetsContainer');
@@ -55,7 +52,10 @@ function displayPresets(presets) {
 }
 
 /**
- * Create a preset card element
+ * Build a DOM element for a single preset card.
+ * @param {Object} preset - Preset data including vars and report.
+ * @param {number} index - Position index (0 = most recent).
+ * @returns {HTMLDivElement} The constructed card element.
  */
 function createPresetCard(preset, index) {
     const card = document.createElement('div');
@@ -157,7 +157,8 @@ function createPresetCard(preset, index) {
 }
 
 /**
- * Load preset into configuration form
+ * Fetch a preset by ID, store it in sessionStorage, and redirect to the config form.
+ * @param {number} presetId - The preset ID to load.
  */
 async function loadPreset(presetId) {
     try {
@@ -205,9 +206,7 @@ async function loadPreset(presetId) {
     }
 }
 
-/**
- * Navigate back to main menu
- */
+/** Navigate back to main menu. */
 function goToMenu() {
     window.location.href = '/';
 }

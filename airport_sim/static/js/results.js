@@ -1,17 +1,15 @@
-
-
+/** Currently selected simulation IDs for comparison (max 2). */
 let selectedSimulations = [];
+/** All simulation results loaded from the backend. */
 let allSimulations = [];
+/** The simulation ID whose report is currently open. */
 let currentReportId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     loadResults();
 });
 
-/**
- * Load all simulation results from backend
- * Backend returns ALL calculated data
- */
+/* Fetch all simulation results from the backend and display them. */
 async function loadResults() {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const resultsContainer = document.getElementById('resultsContainer');
@@ -40,7 +38,8 @@ async function loadResults() {
 }
 
 /**
- * Display results in table - just rendering
+ * Render result rows into the results table.
+ * @param {Object[]} results - Simulation result objects from the backend.
  */
 function displayResults(results) {
     const tbody = document.getElementById('resultsTableBody');
@@ -54,7 +53,9 @@ function displayResults(results) {
 }
 
 /**
- * Create table row - just display data from backend
+ * Create a table row element for a single simulation result.
+ * @param {Object} result - A simulation result containing report and config data.
+ * @returns {HTMLTableRowElement} The constructed row.
  */
 function createResultRow(result) {
     const row = document.createElement('tr');
@@ -109,7 +110,8 @@ function createResultRow(result) {
 }
 
 /**
- * Toggle simulation selection
+ * Toggle a simulation's selection state for comparison (max 2).
+ * @param {string} simId - The simulation ID to toggle.
  */
 function toggleSelection(simId) {
     const checkbox = document.getElementById(`checkbox-${simId}`);
@@ -131,9 +133,7 @@ function toggleSelection(simId) {
     updateCompareButton();
 }
 
-/**
- * Update compare button
- */
+/** Update the compare button label and disabled state based on selection count. */
 function updateCompareButton() {
     const compareBtn = document.getElementById('compareBtn');
     const count = selectedSimulations.length;
@@ -142,9 +142,7 @@ function updateCompareButton() {
     compareBtn.disabled = count !== 2;
 }
 
-/**
- * Clear selection
- */
+/** Deselect all simulations and reset the compare button. */
 function clearSelection() {
     selectedSimulations.forEach(simId => {
         const checkbox = document.getElementById(`checkbox-${simId}`);
@@ -157,10 +155,7 @@ function clearSelection() {
     updateCompareButton();
 }
 
-/**
- * Compare selected simulations
- * Backend does ALL calculations
- */
+/** POST the two selected simulation IDs to the backend and display the comparison modal. */
 async function compareSelected() {
     if (selectedSimulations.length !== 2) {
         alert('Please select exactly 2 simulations to compare');
@@ -197,7 +192,8 @@ async function compareSelected() {
 }
 
 /**
- * Show comparison modal - just display backend data
+ * Populate and display the comparison modal with backend-calculated metrics.
+ * @param {Object} comparison - Comparison data containing both simulations and metrics.
  */
 function showComparisonModal(comparison) {
     const modal = document.getElementById('comparisonModal');
@@ -325,6 +321,7 @@ function showComparisonModal(comparison) {
     modal.style.display = 'flex';
 }
 
+/** Switch the comparison modal to the results tab. */
 function showComparisonResults() {
     const content = document.getElementById('comparisonContent');
     const plotsSection = document.getElementById('comparisonPlotsSection');
@@ -343,6 +340,7 @@ function showComparisonResults() {
     }
 }
 
+/** Switch the comparison modal to the plots tab. */
 function showComparisonPlots() {
     const content = document.getElementById('comparisonContent');
     const plotsSection = document.getElementById('comparisonPlotsSection');
@@ -362,7 +360,8 @@ function showComparisonPlots() {
 }
 
 /**
- * View full report - backend provides all data
+ * Fetch the full report for a simulation and display it in the report modal.
+ * @param {string} simId - The simulation ID to view.
  */
 async function viewReport(simId) {
     currentReportId = simId;
@@ -393,7 +392,9 @@ async function viewReport(simId) {
 }
 
 /**
- * Show report modal - just display backend data
+ * Populate and display the report modal with simulation metrics.
+ * @param {Object} report - Report data from the backend.
+ * @param {string|null} [simId=null] - Optional simulation ID for the heading.
  */
 function showReportModal(report, simId = null) {
     const modal = document.getElementById('reportModal');
@@ -448,6 +449,7 @@ function showReportModal(report, simId = null) {
     modal.style.display = 'flex';
 }
 
+/** Switch the report modal to the results tab. */
 function showReportResults() {
     const content = document.getElementById('reportContent');
     const plotsSection = document.getElementById('reportPlotsSection');
@@ -466,6 +468,7 @@ function showReportResults() {
     }
 }
 
+/** Switch the report modal to the plots tab. */
 function showReportPlots() {
     const content = document.getElementById('reportContent');
     const plotsSection = document.getElementById('reportPlotsSection');
@@ -484,6 +487,10 @@ function showReportPlots() {
     }
 }
 
+/**
+ * Fetch and display saved plot images for a simulation report.
+ * @param {string} simId - The simulation ID to load plots for.
+ */
 async function loadSavedReportPlots(simId) {
     try {
         const response = await fetch(`/api/report-plots/${simId}`);
@@ -534,9 +541,7 @@ async function loadSavedReportPlots(simId) {
     }
 }
 
-/**
- * Export current report
- */
+/** Export the currently viewed report. */
 function exportCurrentReport() {
     if (currentReportId) {
         exportReport(currentReportId);
@@ -544,7 +549,8 @@ function exportCurrentReport() {
 }
 
 /**
- * Export report - backend handles file generation
+ * Trigger a report export download via the backend.
+ * @param {string} simId - The simulation ID to export.
  */
 function exportReport(simId) {
     window.location.href = `/api/export-report/${simId}`;
@@ -553,9 +559,7 @@ function exportReport(simId) {
     }, 500);
 }
 
-/**
- * Close modals
- */
+/** Close the comparison modal and clear its plots. */
 function closeComparison() {
     document.getElementById('comparisonModal').style.display = 'none';
     // Clear plots when closing
@@ -567,7 +571,9 @@ function closeComparison() {
 }
 
 /**
- * Load and display comparison charts
+ * Fetch and display side-by-side comparison plot images.
+ * @param {string} simId1 - First simulation ID.
+ * @param {string} simId2 - Second simulation ID.
  */
 async function loadComparisonPlots(simId1, simId2) {
     try {
@@ -622,6 +628,7 @@ async function loadComparisonPlots(simId1, simId2) {
     }
 }
 
+/** Close the report modal and clear its plots. */
 function closeReport() {
     document.getElementById('reportModal').style.display = 'none';
     currentReportId = null;
@@ -630,9 +637,7 @@ function closeReport() {
     showReportResults();
 }
 
-/**
- * Go to menu
- */
+/** Navigate back to main menu. */
 function goToMenu() {
     window.location.href = '/';
 }
