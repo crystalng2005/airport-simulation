@@ -20,8 +20,8 @@ class Runway:
         self.set_user_settings(probabilities)
         self.opening_probability = opening
 
-        # Maximum number of planes that have passed through this runway (?)
-        #self.maxPlanes = 0 # (?)
+        # Maximum number of planes that have passed through this runway 
+        self.maxPlanes = 0 
 
 
     def openRunway(self):
