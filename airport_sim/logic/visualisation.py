@@ -21,7 +21,7 @@ class VisualisationController:
         report = self.results_controller.load_results(sim_id)
         if report != None:
             return {
-                "report": report.outputReport_dict()
+                "report": report.output_report_dict()
             }
 
     def compareSimulations(self, sim_id_1, sim_id_2):
@@ -89,7 +89,7 @@ class VisualisationController:
                     report_dict = {}
                     if self.preset_controller.report:
                         try:
-                            report_dict = self.preset_controller.report.outputReport_dict()
+                            report_dict = self.preset_controller.report.output_report_dict()
                         except Exception as e:
                             print(f"Report outputReport_dict() failed: {e}")
                             report_dict = self.preset_controller.report.__dict__
@@ -124,7 +124,7 @@ class VisualisationController:
         report_dict = {}
         if self.preset_controller.report:
             try:
-                report_dict = self.preset_controller.report.outputReport_dict()
+                report_dict = self.preset_controller.report.output_report_dict()
             except Exception:
                 report_dict = self.preset_controller.report.__dict__
         elif RD.reportData:
@@ -203,8 +203,8 @@ class VisualisationController:
             return None
         if RD.reportData is None:
             return None
-        RD.reportData.generateReport()
-        return RD.reportData.outputReport_dict()
+        RD.reportData.generate_report()
+        return RD.reportData.output_report_dict()
 
     def saveSimulationAsPreset(self):
         if not self.active_simulation or not self.active_simulation.simulation_finished:

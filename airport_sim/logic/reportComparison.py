@@ -6,7 +6,7 @@ from report import PerformanceReport
 from logic.presets import PresetController
 
     
-def compareReports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
+def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     """
     Generates a dictionary storing the results of the comparison of two PerformanceReport
     objects.

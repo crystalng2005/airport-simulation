@@ -70,7 +70,7 @@ class QueueController:
                     currentFrameActions.current_frame_actions.append([removed.callsign, runway.runway_number])
                     # Assigns the holding queue exit time to the plane object
                     removed.left_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
-                    delay = round(removed.left_hold - removed.tickActualTime) 
+                    delay = round(removed.left_hold - removed.tick_actual_time) 
                     hold_time = round(removed.left_hold - removed.entered_hold)
                 
                     # Adds the delay time and wait time to the report and decrements current queue size
@@ -82,7 +82,7 @@ class QueueController:
                     RD.reportData.wait_times.append(delay)
                     RD.reportData.hold_times.append(hold_time)
                     RD.reportData.tot_wait_time += hold_time
-                    RD.reportData.decQueueCurrent()
+                    RD.reportData.dec_queue_current()
                 else:
                     checked += 1
 
@@ -108,7 +108,7 @@ class QueueController:
 
         # Assigns holding queue entry time to plane object and increments current queue size
         p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
-        RD.reportData.incQueueCurrent()
+        RD.reportData.inc_queue_current()
 
 
 
