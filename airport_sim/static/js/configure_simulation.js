@@ -1,3 +1,4 @@
+/** Maximum total runways allowed across all types. */
 const MAX_RUNWAYS = 10;
 
 // Initialise on page load
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Check total runways and show/hide an error message.
+ * Check total runways and show/hide an inline error message.
  */
 function enforceRunwayLimit() {
     const dep = parseInt(document.getElementById('departure_runways').value) || 0;
@@ -50,8 +51,9 @@ function enforceRunwayLimit() {
 }
 
 /**
- * Start simulation - main form submission handler
- * @param {Event} event - Form submit event
+ * Validate form inputs and POST configuration to /start.
+ * Redirects to the simulation screen on success.
+ * @param {Event} event - Form submit event.
  */
 async function startSimulation(event) {
     event.preventDefault();
@@ -134,16 +136,15 @@ async function startSimulation(event) {
     }
 }
 
-/**
- * Navigate back to main menu
- */
+/** Navigate back to main menu. */
 function goBack() {
     console.log('Returning to main menu...');
     window.location.href = '/';
 }
 
 /**
- * Load preset data from sessionStorage and populate form
+ * Load a preset configuration from sessionStorage and populate the form.
+ * Clears the stored preset after loading.
  */
 function loadPresetIntoForm() {
     const presetConfigStr = sessionStorage.getItem('presetConfig');
@@ -200,7 +201,7 @@ function loadPresetIntoForm() {
     }
 }
 
-// Keyboard shortcuts
+// Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to go back
 document.addEventListener('keydown', function(e) {
     // Ctrl/Cmd + Enter to submit
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

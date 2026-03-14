@@ -5,7 +5,7 @@ from datetime import datetime
 import random
 
 class Runway:
-    def __init__(self, is_departure: bool, mixed_mode: bool, runway_number: int, is_available: bool, is_operational: bool, probabilities, opening: float):
+    def __init__(self, is_departure: bool, mixed_mode: bool, runway_number: int, is_available: bool, is_operational: bool, probabilities: list[float], opening: float):
         # Values for defining the runway
         self.is_departure = is_departure
         self.mixed_mode = mixed_mode
@@ -20,40 +20,62 @@ class Runway:
         self.set_user_settings(probabilities)
         self.opening_probability = opening
 
-        # Maximum number of planes that have passed through this runway (?)
-        self.maxPlanes = 0 # (?)
+        # Keep track of no. of planes on runway per tick
+        self.max_planes = 0 
 
 
-    # Functions to open and close runways, can be called outside the class if necessary
-    def openRunway(self):
+    def open_runway(self):
+        """
+        Opens the runway by setting closed to false and is operational to true
+        """
         self.closed = False
         self.is_operational = True
 
-    def closeRunway(self):
-        #print("closed!")
+
+    def close_runway(self):
+        """
+        Closes the runway by setting closed to true and is operational to false
+        """
         self.closed = True
         self.is_operational = False
 
-    # Returns the status of the runway
-    def checkClosed(self):
+    def check_closed(self) -> bool:
+        """
+        Returns true if a runway is closed, false otherwise
+        """
         return self.closed
     
 
     def set_user_settings(self, probabilities):
+        """
+        Uses the probabilities input by the user to set the probabilities of runway closure from the list.
+        Called on object generation.
+        """
         self.user_weather = probabilities[0]
         self.user_safety = probabilities[1]
         self.user_maintenance = probabilities[2]
         self.user_construction = probabilities[3]
 
-    # Checks if the runway is closed
-    # If closed, offers the random chance for runway to open
-    # If open, offers the chance to close it
-    def updateStatus(self):
+    
+    def update_status(self) -> bool:
+        """
+        Checks if the runway is closed.
+        If closed, offers the random chance for runway to open based on user input probability.
+        If open, offers the chance to close it.
+
+        Uses the user probability to generate a value, if this is 1, then the runway closes or opens
+        depending on the point in the if statement.s
+
+        Note that the default values entered in the user input boxes are based on reasonable estimates
+        for the probabilities of an event occuring (e.g. weather related events being the most common,
+        planned construction the least common).
+
+        """
         # Chance of opening closed runway randomly
         if self.closed:
             opening = random.randint(0,int(1/self.opening_probability)) if self.opening_probability !=0 else 2
             if opening == 1:
-                self.openRunway()
+                self.open_runway()
             return self.closed
         else:
             weather = random.randint(0,int(1/self.user_weather)) if self.user_weather != 0 else 2
@@ -63,40 +85,15 @@ class Runway:
 
             # Checks if any closures have been generated
             if weather == 1 or self.user_weather == 1:
-                self.closeRunway()
+                self.close_runway()
             elif maintenance == 1 or self.user_maintenance == 1:
-                self.closeRunway()
+                self.close_runway()
             elif safety == 1 or self.user_safety == 1:
-                self.closeRunway()
+                self.close_runway()
             elif construction == 1 or self.user_construction == 1:
-                self.closeRunway()
+                self.close_runway()
                 
         return self.closed
 
 
         
-"""
-# Placeholder values
-        weather = 0
-        maintenance = 0
-        safety = 0
-        construction = 0
-        # If no user values have been defined, use presets
-        if not self.user_settings:
-            if self.closed:
-                val = random.randint(0,100)
-                if val <= 10:
-                    self.openRunway()
-                return self.closed
-            else:
-                # Weather is the most likely, construction least likely
-                weather = random.randint(0,1000)
-                maintenance = random.randint(0,7000)
-                safety = random.randint(0,15000)
-                construction = random.randint(0,30000)
-
-
-        # If user values have been set, uses these here
-        else:
-
-"""

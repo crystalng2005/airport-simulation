@@ -393,7 +393,7 @@ def get_report_plots() -> ResponseReturnValue:
 def get_saved_report_plots(sim_id: int) -> ResponseReturnValue:
     """Generate and return base64 plot images for a specific saved simulation report."""
     try:
-        report = controller.visualisation_controller.results_controller.loadResults(sim_id)
+        report = controller.visualisation_controller.results_controller.load_results(sim_id)
         if report is None:
             return jsonify({'success': False, 'error': 'Simulation report not found'}), 404
 

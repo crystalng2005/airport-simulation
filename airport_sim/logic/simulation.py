@@ -43,7 +43,7 @@ class SimulationController:
         self.departure_runways = departure_runways
         self.landing_runways = landing_runways
         self.mixed_runways = mixed_runways
-        self.all_runways = []
+        self.all_runways:list[Runway] = []
 
         # Probabilities for plane emergencies and runway closures
         self.plane_emergency_prob = [mechanical_emergency_prob, health_emergency_prob, fuel_emergency_prob]
@@ -86,7 +86,7 @@ class SimulationController:
         preset_controller = PresetController()
 
         # Exits if preset can't be loaded
-        if not preset_controller.loadPreset(preset):
+        if not preset_controller.load_preset(preset):
             return False
 
         # Load the preset values
@@ -195,7 +195,7 @@ class SimulationController:
     def get_runway_statuses(self):
         statuses = []
         for runway in self.all_runways:
-            statuses.append(not (runway.checkClosed()))
+            statuses.append(not (runway.check_closed()))
 
         return statuses
     
@@ -232,10 +232,10 @@ class SimulationController:
         self.preset_controller.landing_runways = self.landing_runways
         self.preset_controller.mixed_runways = self.mixed_runways
         self.preset_controller.report = RD.reportData
-        self.preset_controller.savePreset()
+        self.preset_controller.save_preset()
         # Save result to results history
         self.results_controller = ResultsController()
-        self.results_controller.saveResult()
+        self.results_controller.save_result()
         return False
 
     def get_tick_time(self):
@@ -252,7 +252,7 @@ class SimulationController:
 
         currentFrameActions.current_frame_actions = []
         for runway in self.all_runways:
-            runway.maxPlanes = 0
+            runway.max_planes = 0
 
         if self.current_time >= self.end_time:
             return self.end_simulation()
@@ -267,16 +267,16 @@ class SimulationController:
 
         # Gives runways the chance to close/open
         for runway in self.all_runways:
-            runway.updateStatus()
+            runway.update_status()
             #if runway.checkStatus():
             #    print("closed!!")
 
         # Process existing queue first — assign waiting planes to available runways
-        self.landing_queue.checkCancelTime()
-        self.departure_queue.checkCancelTime()
+        self.landing_queue.check_cancel_time()
+        self.departure_queue.check_cancel_time()
 
-        self.landing_queue.checkRunways()
-        self.departure_queue.checkRunways()
+        self.landing_queue.check_runways()
+        self.departure_queue.check_runways()
 
 
 
