@@ -5,7 +5,6 @@ from pathlib import Path
 from report import PerformanceReport
 from logic.presets import PresetController
 
-    
 def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     """
     Generates a dictionary storing the results of the comparison of two PerformanceReport
@@ -116,7 +115,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
 
     comparison.update(avg_fuel)
 
-
     # Total planes
     total_planes = {
         "absolute_change" : rep2.total_planes - rep1.total_planes
@@ -138,7 +136,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     total_planes.update({"is_improvement" : improvement})
 
     comparison.update(total_planes)
-
 
     # Max hold
     holding_max = {
@@ -162,8 +159,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
 
     comparison.update(holding_max)
 
-
-
     # Queue max
     queue_max = {
         "absolute_change" : rep2.queue_max - rep1.queue_max
@@ -185,7 +180,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     queue_max.update({"is_improvement" : improvement})
 
     comparison.update(queue_max)
-
 
     ## Wait time
     # Maximum wait time
@@ -232,8 +226,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
 
     comparison.update(mean_wait)
 
-
-
     ## Hold time
     # Maximum
     max_hold = {
@@ -257,7 +249,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
 
     comparison.update(max_hold)
 
-
     # Average
     mean_hold = {
         "absolute_change" : rep2.mean_hold - rep1.mean_hold
@@ -279,7 +270,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     mean_hold.update({"is_improvement" : improvement})
 
     comparison.update(mean_hold)
-
 
     ## Takeoff time
     # Maximum
@@ -304,7 +294,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
 
     comparison.update(max_take_off)
 
-
     # Average
     mean_take_off = {
         "absolute_change" : rep2.mean_take_off - rep1.mean_take_off
@@ -326,8 +315,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     mean_take_off.update({"is_improvement" : improvement})
 
     comparison.update(mean_take_off)
-
-
 
     ## Arrival time
     # Maximum
@@ -352,7 +339,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
 
     comparison.update(max_arrival)
 
-
     # Average
     mean_arrival = {
         "absolute_change" : rep2.mean_arrival - rep1.mean_arrival
@@ -374,7 +360,6 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     mean_arrival.update({"is_improvement" : improvement})
 
     comparison.update(mean_arrival)
-
 
     # efficiency
     efficiency = {
@@ -401,4 +386,3 @@ def compare_reports(rep1 : PerformanceReport, rep2 : PerformanceReport) -> dict:
     comparison.update(efficiency)
 
     return comparison
-

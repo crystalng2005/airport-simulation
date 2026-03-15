@@ -7,8 +7,7 @@ from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
 class PresetController:
-
-    def __init__(self):
+    def __init__(self) -> None:
         self.plane_list = []
 
         self.departure_runways = 0
@@ -32,7 +31,13 @@ class PresetController:
         self._init_meta()
 
     # --- Meta file functions ---  (Meta file keeps track of preset ID's and when they were saved)
-    def _init_meta(self):
+    def _init_meta(self) -> None:
+        """
+        Ensures the preset metadata file exists.
+        If the metadata file does not exist, it creates one containing
+        three preset slots, each with an ID and a timestamp indicating
+        when the preset was last saved.
+        """
         if not os.path.exists(self.meta_file):
             meta = {
                 "presets": [
@@ -44,18 +49,39 @@ class PresetController:
             with open(self.meta_file, 'w') as f:
                 json.dump(meta, f, indent=4)
 
-    def _load_meta(self):
+    def _load_meta(self) -> dict:
+        """
+        Loads the preset metadata file.
+        Returns:
+            A dictionary containing metadata for all preset slots.
+            If the file cannot be read or parsed, an empty metadata
+            structure is returned.
+        """
         try:
             with open(self.meta_file, 'r') as f:
                 return json.load(f)
         except (IOError, json.JSONDecodeError):
             return {"presets": []}
 
-    def _save_meta(self, meta):
+    def _save_meta(self, meta: dict) -> None:
+        """
+        Saves metadata about presets to the metadata file.
+        Args:
+            meta: A dictionary containing preset metadata including
+                preset IDs and last saved timestamps.
+        """
         with open(self.meta_file, 'w') as f:
             json.dump(meta, f, indent=4)
 
     def get_preset_save_times(self) -> list[tuple[int, str]]:
+        """
+        Retrieves the save timestamps of all presets.
+        Returns:
+            A list of tuples containing:
+                (preset_id, last_saved_timestamp)
+
+            Only presets that have been saved at least once are included.
+        """
         meta = self._load_meta().get("presets", [])
 
         return [
@@ -66,7 +92,15 @@ class PresetController:
 
     # --- Preset functions ---
 
-    def save_preset(self):
+    def save_preset(self) -> bool:
+        """
+        Saves the current simulation state as a preset.
+        Presets are stored in one of three preset slots. If all slots are
+        occupied, the oldest preset is overwritten.
+
+        Returns:
+            True if the preset was saved successfully, otherwise False.
+        """
         try:
             print('savePreset called')
             
@@ -142,6 +176,15 @@ class PresetController:
             return False
 
     def load_preset(self, preset_id: int) -> bool:
+        """
+        Loads a preset from a file.
+
+        Args:
+            preset_id: The ID of the preset slot to load.
+
+        Returns:
+            True if the preset was loaded successfully, otherwise False.
+        """
         if not (0 <= preset_id < len(self.preset_files)):
             return False
 
@@ -175,9 +218,17 @@ class PresetController:
             return True
         except (IOError, KeyError, IndexError, TypeError):
             return False
-    # Resets file to save new preset info
-    # To be called when new simulation runs
+
+
     def reset(self) -> bool:
+        """
+        Resets the controller state in preparation for a new simulation.
+        All parameters are cleared, and the
+        report reference is removed.
+
+        Returns:
+            True once the reset operation completes.
+        """
         self.departure_runways = 0
         self.landing_runways = 0
         self.mixed_runways = 0
@@ -189,8 +240,16 @@ class PresetController:
         return True
 
     @staticmethod
-    def _serialize_plane(plane):
-        """Convert a Plane object to a JSON-serializable dict."""
+    def _serialize_plane(plane: Plane) -> dict:
+        """
+        Converts a Plane object into a JSON-serialisable dictionary.
+
+        Args:
+            plane: The Plane object to serialise.
+
+        Returns:
+            A dictionary representation of the plane suitable for JSON storage.
+        """
         skip = {'queue_controller'}
         d = {}
         for k, v in plane.__dict__.items():

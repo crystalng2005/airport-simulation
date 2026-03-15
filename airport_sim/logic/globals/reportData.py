@@ -9,5 +9,3 @@ def init(runway_total: int, runways_mixed: int, runways_departure: int, runways_
     """
     global reportData
     reportData = R.PerformanceReport(runway_total, runways_mixed, runways_departure, runways_landing, landings_per_hour, start_time)
-
-

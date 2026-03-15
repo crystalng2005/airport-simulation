@@ -69,7 +69,6 @@ class VisualisationController:
     def exportSimulationReport(self, sim_id):
         return self.results_controller.export_result_by_id(sim_id)
         
-
     def getAvailablePresets(self):
         try:
             
@@ -140,7 +139,6 @@ class VisualisationController:
             "planes": planes,
             "report": report_dict
         }
-
 
     def startSimulation(self, data: dict):
         self.active_simulation = SimulationController(

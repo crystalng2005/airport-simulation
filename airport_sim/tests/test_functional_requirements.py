@@ -18,7 +18,7 @@ class TestFR1_CoreSimulation:
     
     def setup_method(self):
         RD.init(5, 1, 2, 2, 10, datetime(2000, 1, 1))
-        self.sim = SimulationController(10, 10, 5, 2, 2, 1, 30, 100)
+        self.sim = SimulationController(10, 10, 5, 2, 2, 1, 30, 100, 0, 0, 0, 0, 0, 0, 0, 0.1)
     
     def test_fr1_1_aircraft_generation_inbound(self):
         """FR-1.1: System generates inbound aircraft"""
@@ -34,27 +34,27 @@ class TestFR1_CoreSimulation:
     
     def test_fr1_2_aircraft_has_callsign(self):
         """FR-1.2: Aircraft has callsign (String)"""
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         assert hasattr(plane, 'callsign'), "Aircraft missing callsign"
         assert isinstance(plane.callsign, str), "callsign not a string"
     
     def test_fr1_2_aircraft_has_fuel_level(self):
         """FR-1.2: Aircraft tracks fuel level (Float)"""
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         assert hasattr(plane, 'fuel_level'), "Aircraft missing fuel_level"
         assert isinstance(plane.fuel_level, (int, float)), "fuel_level not numeric"
     
     def test_fr1_2_aircraft_has_emergency_status(self):
         """FR-1.2: Aircraft tracks emergency status (Enum)"""
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         assert hasattr(plane, 'emergency_status'), "Aircraft missing emergency_status"
         assert isinstance(plane.emergency_status, EmergencyStatus), "emergency_status not Enum"
     
     def test_fr1_2_aircraft_data_updates(self):
         """FR-1.2: Aircraft data updates as simulation progresses"""
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         initial_fuel = plane.fuel_level
-        plane.decrease_fuel()  # Correct method name
+        plane.decrease_fuel()
         assert plane.fuel_level < initial_fuel, "Fuel not decreasing"
 
 
@@ -63,13 +63,13 @@ class TestFR2_DepartureAndTakeOff:
     
     def setup_method(self):
         RD.init(3, 0, 1, 2, 10, datetime(2000, 1, 1))
-        self.sim = SimulationController(10, 10, 3, 1, 2, 0, 30, 100)
+        self.sim = SimulationController(10, 10, 3, 1, 2, 0, 30, 100, 0, 0, 0, 0, 0, 0, 0, 0.1)
     
     def test_fr2_1_takeoff_queue_fifo_order(self):
         """FR-2.1: Take-off queue operates in FIFO order"""
-        plane1 = Plane(True, self.sim.departure_queue, 30)
-        plane2 = Plane(True, self.sim.departure_queue, 30)
-        plane3 = Plane(True, self.sim.departure_queue, 30)
+        plane1 = Plane(True, self.sim.departure_queue, 30, [0, 0, 0])
+        plane2 = Plane(True, self.sim.departure_queue, 30, [0, 0, 0])
+        plane3 = Plane(True, self.sim.departure_queue, 30, [0, 0, 0])
         
         self.sim.departure_queue.enqueue(plane1)
         self.sim.departure_queue.enqueue(plane2)
@@ -80,13 +80,13 @@ class TestFR2_DepartureAndTakeOff:
     def test_fr2_1_outbound_aircraft_joins_queue(self):
         """FR-2.1: Outbound aircraft joins take-off queue"""
         initial_size = len(self.sim.departure_queue.plane_queue)
-        plane = Plane(True, self.sim.departure_queue, 30)
+        plane = Plane(True, self.sim.departure_queue, 30, [0, 0, 0])
         self.sim.departure_queue.enqueue(plane)
         assert len(self.sim.departure_queue.plane_queue) == initial_size + 1
     
     def test_fr2_2_cancellation_when_wait_exceeds_max(self):
         """FR-2.2: Aircraft cancelled when wait exceeds max"""
-        plane = Plane(True, self.sim.departure_queue, 30)
+        plane = Plane(True, self.sim.departure_queue, 30, [0, 0, 0])
         plane.cancelled = False
         plane.cancel()
         assert plane.cancelled == True
@@ -103,23 +103,23 @@ class TestFR3_ArrivalAndLanding:
     
     def setup_method(self):
         RD.init(3, 0, 1, 2, 10, datetime(2000, 1, 1))
-        self.sim = SimulationController(10, 10, 3, 1, 2, 0, 30, 100)
+        self.sim = SimulationController(10, 10, 3, 1, 2, 0, 30, 100, 0, 0, 0, 0, 0, 0, 0, 0.1)
     
     def test_fr3_1_holding_pattern_when_no_runway(self):
         """FR-3.1: Aircraft in holding pattern when no runway"""
         for runway in self.sim.landing_list:
             runway.is_available = False
         
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         self.sim.landing_queue.enqueue(plane)
         assert plane in self.sim.landing_queue.plane_queue
     
     def test_fr3_1_emergency_aircraft_prioritized(self):
         """FR-3.1: Emergency aircraft prioritized"""
-        normal = Plane(False, self.sim.landing_queue, 30)
+        normal = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         normal.emergency_status = EmergencyStatus.NONE
         
-        emergency = Plane(False, self.sim.landing_queue, 30)
+        emergency = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         emergency.emergency_status = EmergencyStatus.FUEL
         emergency.emergency_time_left = 10
         
@@ -132,8 +132,8 @@ class TestFR3_ArrivalAndLanding:
     
     def test_fr3_1_non_emergency_fifo(self):
         """FR-3.1: Non-emergency aircraft in FIFO"""
-        p1 = Plane(False, self.sim.landing_queue, 30)
-        p2 = Plane(False, self.sim.landing_queue, 30)
+        p1 = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
+        p2 = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         
         p1.emergency_status = EmergencyStatus.NONE
         p2.emergency_status = EmergencyStatus.NONE
@@ -145,14 +145,14 @@ class TestFR3_ArrivalAndLanding:
     
     def test_fr3_2_fuel_decreases_in_holding(self):
         """FR-3.2: Fuel decreases in holding pattern"""
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         initial = plane.fuel_level
         plane.decrease_fuel()  # Correct method name
         assert plane.fuel_level < initial
     
     def test_fr3_2_diversion_at_fuel_threshold(self):
         """FR-3.2: Aircraft diverted when fuel < 10 min"""
-        plane = Plane(False, self.sim.landing_queue, 30)
+        plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         plane.fuel_level = 5
         assert plane.fuel_level < 10
     
@@ -168,37 +168,37 @@ class TestFR4_RunwayConfiguration:
     
     def test_fr4_1_landing_only_runway(self):
         """FR-4.1: Landing-only runway mode"""
-        runway = Runway(False, False, 1, True, True)
+        runway = Runway(False, False, 1, True, True, [0, 0, 0, 0], 0.1)
         assert runway.is_departure == False
         assert runway.mixed_mode == False
     
     def test_fr4_1_takeoff_only_runway(self):
         """FR-4.1: Take-off-only runway mode"""
-        runway = Runway(True, False, 2, True, True)
+        runway = Runway(True, False, 2, True, True, [0, 0, 0, 0], 0.1)
         assert runway.is_departure == True
         assert runway.mixed_mode == False
     
     def test_fr4_1_mixed_mode_runway(self):
         """FR-4.1: Mixed mode runway"""
-        runway = Runway(True, True, 3, True, True)
+        runway = Runway(True, True, 3, True, True, [0, 0, 0, 0], 0.1)
         assert runway.mixed_mode == True
     
     def test_fr4_1_runway_occupation_exclusive(self):
         """FR-4.1: Only one aircraft per runway"""
-        runway = Runway(False, False, 1, True, True)
+        runway = Runway(False, False, 1, True, True, [0, 0, 0, 0], 0.1)
         runway.is_available = False
         assert runway.is_available == False
     
     def test_fr4_2_multiple_runways_supported(self):
         """FR-4.2: Supports 1-10 runways"""
-        sim = SimulationController(10, 10, 7, 3, 2, 2, 30, 100)
+        sim = SimulationController(10, 10, 7, 3, 2, 2, 30, 100, 0, 0, 0, 0, 0, 0, 0, 0.1)
         assert len(sim.all_runways) == 7
     
     def test_fr4_2_runways_independently_configured(self):
         """FR-4.2: Independent runway configuration"""
-        r1 = Runway(True, False, 1, True, True)
-        r2 = Runway(False, False, 2, True, True)
-        r3 = Runway(True, True, 3, True, True)
+        r1 = Runway(True, False, 1, True, True, [0, 0, 0, 0], 0.1)
+        r2 = Runway(False, False, 2, True, True, [0, 0, 0, 0], 0.1)
+        r3 = Runway(True, True, 3, True, True, [0, 0, 0, 0], 0.1)
         
         assert r1.is_departure and not r1.mixed_mode
         assert not r2.is_departure and not r2.mixed_mode
@@ -210,13 +210,13 @@ class TestFR5_ScenarioModelling:
     
     def test_fr5_1_runway_operational_status_toggle(self):
         """FR-5.1: Toggle runway operational status"""
-        runway = Runway(False, False, 1, True, True)
+        runway = Runway(False, False, 1, True, True, [0, 0, 0, 0], 0.1)
         runway.is_operational = False
         assert runway.is_operational == False
     
     def test_fr5_1_non_operational_runway_unavailable(self):
         """FR-5.1: Non-operational runway unavailable"""
-        runway = Runway(False, False, 1, True, False)
+        runway = Runway(False, False, 1, True, False, [0, 0, 0, 0], 0.1)
         assert runway.is_operational == False
     
     def test_fr5_2_diversions_tracked(self):
@@ -232,8 +232,8 @@ class TestFR5_ScenarioModelling:
     def test_fr5_2_emergency_priority_fuel(self):
         """FR-5.2: Fuel emergency prioritized"""
         RD.init(3, 0, 1, 2, 10, datetime(2000, 1, 1))
-        sim = SimulationController(10, 10, 3, 1, 2, 0, 30, 100)
-        plane = Plane(False, sim.landing_queue, 30)
+        sim = SimulationController(10, 10, 3, 1, 2, 0, 30, 100, 0, 0, 0, 0, 0, 0, 0, 0.1)
+        plane = Plane(False, sim.landing_queue, 30, [0, 0, 0])
         plane.emergency_status = EmergencyStatus.FUEL
         assert plane.emergency_status == EmergencyStatus.FUEL
 
@@ -301,10 +301,15 @@ class TestUSP1_ConfigurableRunwayScenarios:
         pc1.mixed_runways = 1
         pc1.report = RD.reportData
         
-        # Determine slot
+        # Determine slot using the same strategy as save_preset()
         meta = pc1._load_meta()
-        unused = [p for p in meta['presets'] if not p.get('last_saved')]
-        slot_id = unused[0]['id'] if unused else 0
+        unused = [p for p in meta['presets'] if p.get('last_saved') is None]
+        if unused:
+            slot_id = unused[0]['id']
+        else:
+            presets_with_time = [p for p in meta['presets'] if p.get('last_saved')]
+            presets_with_time.sort(key=lambda p: p['last_saved'])
+            slot_id = presets_with_time[0]['id']
         
         pc1.save_preset()
         

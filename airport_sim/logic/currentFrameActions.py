@@ -1,7 +1,10 @@
+from dataclasses import dataclass, field
 
 
-class currentFrameActions:
-    current_frame_actions = []
+# Class to store which frame actions have taken place last tick
+# Stores a list in the form [[plane, "action"]]
+@dataclass
+class CurrentFrameActions:
+    current_frame_actions: list[list[str]] = field(default_factory=list)
 
-    def __init__(self):
-        self.current_frame_actions = []
+currentFrameActions = CurrentFrameActions()

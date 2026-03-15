@@ -7,7 +7,7 @@ A discrete event simulation system for modeling aircraft arrivals, departures, a
 The Airport Simulation is a **prototype software solution** that models airport operations under various configurations. It allows airport operators to:
 
 - Model aircraft arrivals and departures
-- Analyse runway utilization and capacity
+- Analyse runway utilisation and capacity
 - Project impact of runway closures
 - Evaluate mixed-mode vs dedicated runway strategies
 - Understand fuel constraints and diversions
@@ -17,7 +17,7 @@ The Airport Simulation is a **prototype software solution** that models airport 
 
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Installation
 
@@ -33,23 +33,20 @@ python app.py
 ```
 ---
 
-## 📚 Documentation
+## Documentation
 
 This project includes comprehensive professional documentation:
 
 | Document | Audience | Purpose |
 |----------|----------|---------|
-| **[INDEX.md](../docs/INDEX.md)** | Everyone | Navigation guide for all docs |
-| **[USER_GUIDE.md](../docs/USER_GUIDE.md)** | End Users | How to use the application |
-| **[ARCHITECTURE.md](../docs/ARCHITECTURE.md)** | Developers | System design overview |
-| **[SYSTEM_DESIGN.md](../docs/SYSTEM_DESIGN.md)** | Developers | Implementation details |
-| **[TESTING.md](../docs/TESTING.md)** | QA/Testers | Test strategy & results |
-| **[DEVELOPMENT.md](../docs/DEVELOPMENT.md)** | Developers | Development setup |
-| **[API_SPECIFICATION.md](../docs/API_SPECIFICATION.md)** | Developers | REST API reference |
+| **[ARCHITECTURE.md](doumentations/ARCHITECTURE.md)** | Developers | System structure and component responsibilities |
+| **[SYSTEM_DESIGN.md](doumentations/SYSTEM_DESIGN.md)** | Developers | Requirement mapping, timing model, and algorithms |
+| **[DEVELOPMENT.md](doumentations/DEVELOPMENT.md)** | Developers | Setup, dependencies, and testing workflow |
+| **[API_SPECIFICATION.md](doumentations/API_SPECIFICATION.md)** | Developers | Flask route and payload reference |
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -82,7 +79,7 @@ This project includes comprehensive professional documentation:
 ```
 ---
 
-## ✨ Key Features
+## Key Features
 
 ### Core Functionality ✓
 - [x] Aircraft arrival & departure modeling
@@ -103,7 +100,7 @@ This project includes comprehensive professional documentation:
 
 ---
 
-## 📋 Project Structure
+## Project Structure
 
 ```
 airport_sim/
@@ -121,12 +118,12 @@ airport_sim/
 ├── tests/                  # Test suite (47 tests)
 ├── data/                   # Data files & presets
 ├── exports/                # Generated results
-└── docs/                   # Documentation (8 files)
+└── doumentations/          # Documentation (4 files)
 ```
 
 ---
 
-## 🔧 Technology Stack
+## Technology Stack
 
 - **Backend**: Python 3.7+, Flask 2.3+
 - **Frontend**: HTML5, CSS3, JavaScript
@@ -135,7 +132,7 @@ airport_sim/
 
 ---
 
-## 📖 Understanding the Simulation
+## Understanding the Simulation
 
 ### Aircraft Lifecycle
 
@@ -167,10 +164,10 @@ Departs from system                Departs from system
 A: Aircraft arrival/departure times use normal distribution (random). Use same random seed to reproduce results.
 
 **Q: What do the metrics mean?**  
-A: See [USER_GUIDE.md](../docs/USER_GUIDE.md) §5.1 for detailed interpretation.
+A: See [SYSTEM_DESIGN.md](doumentations/SYSTEM_DESIGN.md) for how metrics are produced and interpreted in the simulation flow.
 
 **Q: Can I export results?**  
-A: Yes. Export to JSON (machine-readable) or text (human-readable). See §5.2 of USER_GUIDE.
+A: Yes. Export to JSON (machine-readable) or text (human-readable). The export handlers are documented in [API_SPECIFICATION.md](doumentations/API_SPECIFICATION.md).
 
 ---
 

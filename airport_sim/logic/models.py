@@ -23,14 +23,12 @@ class Runway:
         # Keep track of no. of planes on runway per tick
         self.max_planes = 0 
 
-
     def open_runway(self):
         """
         Opens the runway by setting closed to false and is operational to true
         """
         self.closed = False
         self.is_operational = True
-
 
     def close_runway(self):
         """
@@ -45,7 +43,6 @@ class Runway:
         """
         return self.closed
     
-
     def set_user_settings(self, probabilities):
         """
         Uses the probabilities input by the user to set the probabilities of runway closure from the list.
@@ -55,7 +52,6 @@ class Runway:
         self.user_safety = probabilities[1]
         self.user_maintenance = probabilities[2]
         self.user_construction = probabilities[3]
-
     
     def update_status(self) -> bool:
         """
@@ -94,6 +90,3 @@ class Runway:
                 self.close_runway()
                 
         return self.closed
-
-
-        

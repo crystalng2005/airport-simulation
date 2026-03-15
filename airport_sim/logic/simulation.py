@@ -12,8 +12,6 @@ from logic.currentFrameActions import currentFrameActions
 
 import logic.globals.reportData as RD
 
-
-
 class SimulationController:
     def __init__(
         self,
@@ -110,14 +108,10 @@ class SimulationController:
         self.preset_mode = True
 
         return True
-        
-
-
 
     # Gets the current time of the simulation
     def getSimulationTime(self) -> datetime:
         return self.current_time
-
 
     # Generates a plane and adds it to the plane list
     def generatePlane(self, is_departure: bool) -> bool:
@@ -142,11 +136,9 @@ class SimulationController:
         # Increases total number of planes
         RD.reportData.total_planes += 1
 
-
     # Gets the aircraft object based on the given callsign
     def getAircraftByCallSign(self, plane_call_sign: str):
         return self.planes_by_call_sign.get(plane_call_sign, None)
-
 
     # Generates the departure and landing queues
     def generateQueue(self) -> bool: #departure and landing queue
@@ -154,11 +146,9 @@ class SimulationController:
         self.landing_queue = QueueController([], self.landing_list, False, self)
         return True
 
-
     # Gets the current frame actions
     def getCurrentFrameActions(self):
         return currentFrameActions.current_frame_actions
-
 
     # Generates the runways based on the simulation defintions
     def generateRunway(self) -> bool:
@@ -190,7 +180,6 @@ class SimulationController:
             runway_num += 1
         return True
     
-
     # Returns a list of the status of each runway from all_runways
     def get_runway_statuses(self):
         statuses = []
@@ -198,7 +187,6 @@ class SimulationController:
             statuses.append(not (runway.check_closed()))
 
         return statuses
-    
 
     # Returns a list of all the runway modes from all_runways
     # Mixed mode: 0, Departure: -1, Arrival: 1
@@ -214,11 +202,9 @@ class SimulationController:
                     modes.append(1)
         return modes
     
-
     # Returns the number of runways
     def get_runway_num(self):
         return self.total_runways
-    
 
     # Ends the simulation and generates the report file
     def end_simulation(self):
@@ -268,8 +254,6 @@ class SimulationController:
         # Gives runways the chance to close/open
         for runway in self.all_runways:
             runway.update_status()
-            #if runway.checkStatus():
-            #    print("closed!!")
 
         # Process existing queue first — assign waiting planes to available runways
         self.landing_queue.check_cancel_time()
@@ -277,8 +261,6 @@ class SimulationController:
 
         self.landing_queue.check_runways()
         self.departure_queue.check_runways()
-
-
 
         # Extracts the planes from the preset planes instead of generating
         if self.preset_mode:
