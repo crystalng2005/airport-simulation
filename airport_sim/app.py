@@ -382,7 +382,7 @@ def get_report_plots() -> ResponseReturnValue:
         return jsonify({'success': False, 'error': 'No report available'}), 400
 
     try:
-        RD.reportData.generateReport()
+        RD.reportData.generate_report()
         plots = RD.reportData.generate_plots_base64()
         return jsonify({'success': True, 'plots': plots})
     except (TypeError, ValueError, KeyError, AttributeError, OSError) as e:
@@ -397,7 +397,7 @@ def get_saved_report_plots(sim_id: int) -> ResponseReturnValue:
         if report is None:
             return jsonify({'success': False, 'error': 'Simulation report not found'}), 404
 
-        report.generateReport()
+        report.generate_report()
         plots = report.generate_plots_base64()
         return jsonify({'success': True, 'plots': plots})
     except (TypeError, ValueError, KeyError, AttributeError, OSError) as e:

@@ -76,7 +76,7 @@ class SimulationController:
 
 
     # Generates the initial simulation if presets are preset, otherwise load it in
-    def generateSimulation(self, preset: int) -> bool: # TODO: Consider if a preset exists according to Fede
+    def generateSimulation(self, preset: int) -> bool: 
         # If no presets are to be loaded, generate
         if preset is None:
             self.generateRunway()
@@ -104,7 +104,7 @@ class SimulationController:
         # Loads the planes from the preset
         self.preset_planes = preset_controller.plane_list.copy()
 
-        # Loads the report NOTE::: are we sure we want to do this?
+
         RD.reportData = preset_controller.report
 
         self.preset_mode = True
@@ -225,8 +225,8 @@ class SimulationController:
         if self.simulation_finished:
             return False
         self.simulation_finished = True
-        RD.reportData.setFinishTime(self.current_time)
-        RD.reportData.generateReport()
+        RD.reportData.set_finish_time(self.current_time)
+        RD.reportData.generate_report()
         # Save preset with actual data
         self.preset_controller.departure_runways = self.departure_runways
         self.preset_controller.landing_runways = self.landing_runways

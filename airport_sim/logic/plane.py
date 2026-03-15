@@ -59,7 +59,7 @@ class Plane:
         self.left_hold = None
         self.generated_at = None
         self.left_simulation = False
-        self.needsToBeRemoved = False
+        self.needs_to_be_removed = False
 
         # Basic information relating to the plane
         self.callsign = self.gen_callsign()
@@ -136,7 +136,7 @@ class Plane:
         iata_path = os.path.join(os.path.dirname(__file__), '..', 'iata.txt')
         # Gets a random line from the file
         line = linecache.getline(iata_path, random.randint(3, 535))
-        wordCount = 0
+        word_count = 0
         # Gets the code, airport and country from the entry
         code = ""
         airport = ""
@@ -144,14 +144,14 @@ class Plane:
         # Checks which part of the entry is currently being read based on '|' location
         for l in line:
             if l != "|":
-                if wordCount == 0:
+                if word_count == 0:
                     code += l
-                elif wordCount == 1:
+                elif word_count == 1:
                     airport += l
-                elif wordCount == 2:
+                elif word_count == 2:
                     country += l
             else:
-                wordCount += 1
+                word_count += 1
         
         # Remove whitespace
         code = code.strip()
@@ -179,21 +179,21 @@ class Plane:
         # Lets it run once (first), then loops until the code generated is different from the origin code
         while first or (code == self.origin):
             line = linecache.getline(iata_path, random.randint(3,535))
-            wordCount = 0
+            word_count = 0
             code = ""
             airport = ""
             country = ""
             # Checks which part of the entry is currently being read based on '|' location
             for l in line:
                 if l != "|":
-                    if wordCount == 0:
+                    if word_count == 0:
                         code += l
-                    elif wordCount == 1:
+                    elif word_count == 1:
                         airport += l
-                    elif wordCount == 2:
+                    elif word_count == 2:
                         country += l
                 else:
-                    wordCount += 1
+                    word_count += 1
 
             first = False 
 
@@ -229,17 +229,17 @@ class Plane:
         but returns the datetime format.
         """
         # Generates the seconds randomly, then divides into hours/minutes etc.
-        randSeconds = random.randint(0,82800)
-        randHours = randSeconds // 3600
-        remaining = randSeconds % 3600
-        randMinutes = remaining // 60
+        rand_seconds = random.randint(0,82800)
+        rand_hours = rand_seconds // 3600
+        remaining = rand_seconds % 3600
+        rand_minutes = remaining // 60
         secs = remaining % 60
 
         # Gets the target time in ticks
-        self.tickTargetTime = round(math.ceil(randMinutes/5))
+        self.tick_target_time = round(math.ceil(rand_minutes/5))
 
         # Returns in datetime format, converted to int
-        return datetime.time(int(randHours), int(randMinutes), int(secs))
+        return datetime.time(int(rand_hours), int(rand_minutes), int(secs))
 
 
     def gen_actual_time(self) -> datetime:
@@ -252,21 +252,21 @@ class Plane:
         stores the tick time and returns the datetime version.
         """
         # Breaks down the target time back into seconds
-        actualSeconds = self.target_time.hour * 3600 + self.target_time.minute * 60 + self.target_time.second 
+        actual_seconds = self.target_time.hour * 3600 + self.target_time.minute * 60 + self.target_time.second 
 
         # Applies normal distribution (with standard deviation of 5 minutes (300s))
-        time = random.normal(actualSeconds, 5*60) 
+        time = random.normal(actual_seconds, 5*60) 
         # Applies the normal distribution on the tick time
-        self.tickActualTime = round(random.normal(self.tickTargetTime, 5/MINUTES_PER_TICK))
+        self.tick_actual_time = round(random.normal(self.tick_target_time, 5/MINUTES_PER_TICK))
 
         # Converts the new time back into datetime and returns
-        timeSeconds = int(time)
-        timeSeconds = max(0, min(timeSeconds, 86399))
-        timeHours = timeSeconds // 3600
-        remaining = timeSeconds % 3600
-        timeMinutes = remaining // 60
+        time_seconds = int(time)
+        time_seconds = max(0, min(time_seconds, 86399))
+        time_hours = time_seconds // 3600
+        remaining = time_seconds % 3600
+        time_minutes = remaining // 60
         secs = remaining % 60
-        return datetime.time(int(timeHours),int(timeMinutes), int(secs))
+        return datetime.time(int(time_hours),int(time_minutes), int(secs))
     
 
     def set_user_settings(self, probabilities: list[float]):
@@ -334,8 +334,8 @@ class Plane:
         cancellation time rather than fuel consumption. If there is an emergency, then this instead decreases the
         emergency time left before the plane is diverted.
         """
-        if self.needsToBeRemoved:
-            self.needsToBeRemoved = False
+        if self.needs_to_be_removed:
+            self.needs_to_be_removed = False
             self.exit_simulation()
         # Checks if the plane is cancelled (don't need to decrease if it is)
         if not self.left_simulation:
@@ -358,7 +358,7 @@ class Plane:
             if self.current_runway != runway:
                 self.current_runway = runway 
                 # Its now on a runway and will need to depart
-                self.needsToBeRemoved = True
+                self.needs_to_be_removed = True
                 return True 
             else:
                 return False

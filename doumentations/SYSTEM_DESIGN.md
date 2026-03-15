@@ -79,7 +79,7 @@ Generated → Queued for Takeoff → On Runway → Takeoff → Gone
 ## 3. Timing & Scheduling Model
 
 ### Time Unit
-- **Base Unit**: 1 time step = 1 minute of airport operations
+- **Base Unit**: 1 time step (tick) = 5 minutes of airport operations
 - **Simulation Speed**: User can accelerate via visualisation controller
 
 ### Arrival Generation (Normal Distribution)
@@ -105,10 +105,10 @@ Example:
 ### Processing Times
 | Operation | Duration | Notes |
 |-----------|----------|-------|
-| Landing approach to touchdown | 1 time unit | Instant runway occupation |
-| Takeoff acceleration to airborne | 1 time unit | Instant runway vacancy |
+| Landing approach to touchdown | 1 tick (5 minutes) | Single tick runway occupation |
+| Takeoff acceleration to airborne | 1 tick (5 minutes) | Runway becomes available after the tick |
 | Descent in holding pattern | Instant | Per spec, ignored in timeline |
-| Fuel consumption | 1 unit/min | Constant linear rate |
+| Fuel consumption | 5 units per tick | Equivalent to 1 unit/min |
 
 ---
 
@@ -155,7 +155,7 @@ Each time step:
   IF runway available AND holding_pattern not empty:
     aircraft = holding_pattern.dequeue()
     aircraft.land()
-    runway.occupy(aircraft, duration=1)
+    runway.occupy(aircraft, duration=1 tick)
 ```
 
 #### Dedicated Takeoff Runway
@@ -164,7 +164,7 @@ Each time step:
   IF runway available AND takeoff_queue not empty:
     aircraft = takeoff_queue.dequeue()
     aircraft.takeoff()
-    runway.occupy(aircraft, duration=1)
+    runway.occupy(aircraft, duration=1 tick)
 ```
 
 #### Mixed Mode Runway
@@ -205,8 +205,8 @@ Closure simulation:
 
 | Parameter | Value | Notes |
 |-----------|-------|-------|
-| Initial fuel | Uniform(20, 60) min | Converted to litres at 1 unit/min |
-| Consumption rate | 1 unit/min | For all aircraft |
+| Initial fuel | Uniform(20, 60) min | Stored as minutes of endurance |
+| Consumption rate | 5 units per tick | Equivalent to 1 unit/min |
 | Minimum safe level | 10 min remaining | Must land/divert before this |
 | No landing slot time | 30 min (configurable) | Diversion trigger |
 
@@ -219,8 +219,8 @@ fuel_consumed = 0
 
 # Each time step
 if in_system:
-    current_fuel -= 1  # consume 1 minute of fuel
-    fuel_consumed += 1
+    current_fuel -= 5  # consume one 5-minute tick of fuel
+    fuel_consumed += 5
     
     if current_fuel <= 10 and in_holding_pattern:
         divert()  # Emergency drop-down landing elsewhere
@@ -331,51 +331,21 @@ User Message:
 
 ## 10. Configuration Management
 
-### Preset Structure
-```json
-{
-  "name": "Busy Airport",
-  "runways": [
-    {
-      "number": 1,
-      "mode": "LANDING",
-      "status": "AVAILABLE"
-    },
-    {
-      "number": 2,
-      "mode": "TAKEOFF",
-      "status": "AVAILABLE"
-    }
-  ],
-  "inbound_flow": 30,
-  "outbound_flow": 30,
-  "max_wait_departure": 30,
-  "simulation_duration": 480
-}
-```
-
 ### User Configuration Override Points
-- Runway operational status (active/inspection/snow/failed)
+- Probability of Runway operational status (active/inspection/snow/failed)
 - Runway operating mode (landing/takeoff/mixed)
 - Maximum wait times before cancellation
 - Simulation run duration
 
 ---
 
-## 11. Performance Optimization
+## 11. Performance Optimisation
 
-### Current Optimization Strategies
+### Current Optimisation Strategies
 
 1. **Event-Based Processing**: Only process events when they occur
 2. **Incremental Metric Updates**: Update per aircraft, not whole system
 3. **Queue Indexing**: O(1) access for queue operations
 4. **Lazy Calculations**: Compute stats only when requested
-
-### Potential Future Optimisations
-
-- Cache frequently accessed metrics
-- Parallel processing of independent queues
-- Database indexing for historical queries
-- Simulation result compression
 
 ---

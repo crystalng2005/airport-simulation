@@ -2,7 +2,7 @@
 
 ## 1. System Overview
 
-The Airport Simulation system is a discrete event simulation application designed to model aircraft arrivals and departures at a single airport. It provides airport operators with the analytical tools to evaluate runway configuration types and hence obtain the optimal configuration.
+The Airport Simulation system is a discrete event simulation application designed to model aircraft arrivals and departures. It provides airport operators with the analytical tools to evaluate runway configuration types and hence obtain the optimal configuration.
 
 ### Purpose
 - Model aircraft arrivals, departures, and holding patterns
@@ -300,15 +300,6 @@ Return state to UI
 - **Lazy Load Presets**: Load only when needed
 - **Result Caching**: Cache computed statistics
 - **Incremental Metrics**: Update metrics per-frame rather than recalculating
-
----
-
-## 10. Version Control Strategy
-
-- **Main Branch**: Stable, tested code
-- **Development Branch**: Active feature development
-- **Feature Branches**: Individual features/components
-- **Git Workflow**: Feature → Dev → Main (with PR reviews)
 
 ---
 
