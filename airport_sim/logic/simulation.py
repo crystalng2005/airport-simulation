@@ -40,6 +40,7 @@ class SimulationController:
         maintenance_closure_prob: float,
         safety_closure_prob: float,
         construction_closure_prob: float,
+        runway_opening_prob: float,
         tick_minutes: int = 5
     ):
         """
@@ -71,6 +72,8 @@ class SimulationController:
             safety_closure_prob,
             construction_closure_prob
         ]
+
+        self.runway_opening_prob = runway_opening_prob
 
         """Simulation time tracking."""
         self.cancellation_time = cancellation_time
@@ -117,7 +120,7 @@ class SimulationController:
 
         preset_controller = PresetController()
 
-        if not preset_controller.loadPreset(preset):
+        if not preset_controller.load_preset(preset):
             return False
 
         self.departure_runways = preset_controller.departure_runways
@@ -211,19 +214,19 @@ class SimulationController:
         runway_num = 1
 
         for _ in range(self.departure_runways):
-            runway = Runway(True, False, runway_num, True, True, self.runway_closure_prob)
+            runway = Runway(True, False, runway_num, True, True, self.runway_closure_prob, self.runway_opening_prob)
             self.departure_list.append(runway)
             self.all_runways.append(runway)
             runway_num += 1
 
         for _ in range(self.landing_runways):
-            runway = Runway(False, False, runway_num, True, True, self.runway_closure_prob)
+            runway = Runway(False, False, runway_num, True, True, self.runway_closure_prob, self.runway_opening_prob)
             self.landing_list.append(runway)
             self.all_runways.append(runway)
             runway_num += 1
 
         for _ in range(self.mixed_runways):
-            temp = Runway(True, True, runway_num, True, True, self.runway_closure_prob)
+            temp = Runway(True, True, runway_num, True, True, self.runway_closure_prob, self.runway_opening_prob)
             self.landing_list.append(temp)
             self.departure_list.append(temp)
             self.all_runways.append(temp)
@@ -238,7 +241,7 @@ class SimulationController:
 
         statuses = []
         for runway in self.all_runways:
-            statuses.append(not runway.checkClosed())
+            statuses.append(not runway.check_closed())
 
         return statuses
 
@@ -277,17 +280,17 @@ class SimulationController:
             return False
 
         self.simulation_finished = True
-        RD.reportData.setFinishTime(self.current_time)
-        RD.reportData.generateReport()
+        RD.reportData.set_finish_time(self.current_time)
+        RD.reportData.generate_report()
 
         self.preset_controller.departure_runways = self.departure_runways
         self.preset_controller.landing_runways = self.landing_runways
         self.preset_controller.mixed_runways = self.mixed_runways
         self.preset_controller.report = RD.reportData
-        self.preset_controller.savePreset()
+        self.preset_controller.save_preset()
 
         self.results_controller = ResultsController()
-        self.results_controller.saveResult()
+        self.results_controller.save_result()
 
         return False
 
@@ -313,7 +316,7 @@ class SimulationController:
         currentFrameActions.current_frame_actions = []
 
         for runway in self.all_runways:
-            runway.maxPlanes = 0
+            runway.max_planes = 0
 
         if self.current_time >= self.end_time:
             return self.end_simulation()
@@ -326,13 +329,13 @@ class SimulationController:
                 plane.update_emergency()
 
         for runway in self.all_runways:
-            runway.updateStatus()
+            runway.update_status()
 
-        self.landing_queue.checkCancelTime()
-        self.departure_queue.checkCancelTime()
+        self.landing_queue.check_cancel_time()
+        self.departure_queue.check_cancel_time()
 
-        self.landing_queue.checkRunways()
-        self.departure_queue.checkRunways()
+        self.landing_queue.check_runways()
+        self.departure_queue.check_runways()
 
         if self.preset_mode:
 

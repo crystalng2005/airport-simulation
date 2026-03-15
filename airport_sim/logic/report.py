@@ -87,6 +87,8 @@ class PerformanceReport:
         Used for returning the duration in the appropriate format for the results. 
         
         """
+        if not hasattr(self, 'duration'):
+            return "N/A"
         if hasattr(self.duration, 'total_seconds'):
             in_seconds = int(self.duration.total_seconds())
         else:
