@@ -4,9 +4,7 @@ from datetime import datetime, timezone
 from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
-
 class ResultsController:
-
     def __init__(self):
         self.result = None
         self.max_results = 50
@@ -130,9 +128,6 @@ class ResultsController:
             }       
         except (IOError, IndexError, KeyError):
             return None
-
-        
-
 
     # Given a specific report ID, exports it to the exports folder
     def export_result_by_id(self, id: int):

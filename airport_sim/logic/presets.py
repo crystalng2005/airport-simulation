@@ -7,7 +7,6 @@ from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
 class PresetController:
-
     def __init__(self):
         self.plane_list = []
 

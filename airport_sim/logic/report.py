@@ -6,8 +6,6 @@ from pathlib import Path
 import datetime
 from dataclasses import dataclass, field
 
-
-
 # PerformanceReport Class
 @dataclass
 class PerformanceReport:
@@ -39,8 +37,6 @@ class PerformanceReport:
     holding_max = 0
     holding_current = 0
 
-
-
     def set_finish_time(self, finishTime : datetime):
         """
         Records the time the simulation has finished
@@ -49,8 +45,6 @@ class PerformanceReport:
         self.finish_time = finishTime
         self.duration = self.finish_time - self.start_time
         
-
-    # 
     def generate_report(self):
         """
         Generates the report based on collected data about the simulation.
@@ -87,8 +81,6 @@ class PerformanceReport:
         if self.total_planes > 0:
             self.fuel_avg = round(self.tot_fuel_used / self.total_planes)
 
-
-
     def string_duration(self) -> str:
         """
         Returns the duration of the simulation (defined in seconds) as a formatted string.
@@ -102,7 +94,6 @@ class PerformanceReport:
         hours, remainder = divmod(in_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
-    
 
     def output_report_dict(self) -> dict:
         """
@@ -175,7 +166,6 @@ class PerformanceReport:
             "efficiency": self.efficiency           
         }
 
-
     def output_report_string(self) -> str:
         """
         Generates the report and returns the values generated as a formatted string
@@ -208,7 +198,6 @@ class PerformanceReport:
                 f"Average arrival time: {self.mean_arrival}\n"
                 f"Standard deviation of arrival times: {self.std_arrival}\n\n")
 
-
     def reset(self) -> bool:
         """
         Resets the values stored in the report
@@ -230,7 +219,6 @@ class PerformanceReport:
         self.holding_max = 0
         self.holding_current = 0
 
-
     def get_efficiency(self) -> float:
         """
         Calculates the efficiency using the formula efficiency = (total planes - diversions - cancellations)/total planes * 100
@@ -239,7 +227,6 @@ class PerformanceReport:
         if self.total_planes > 0:
             return (round((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100))
         return 0
-
 
     def inc_queue_current(self):
         """
@@ -250,7 +237,6 @@ class PerformanceReport:
         if self.queue_current > self.queue_max:
             self.queue_max = self.queue_current 
 
-    
     def dec_queue_current(self):
         """
         Decrements the number of planes currently in the runway queue
@@ -258,7 +244,6 @@ class PerformanceReport:
         """
         if self.queue_current > 0:
             self.queue_current -= 1
-
 
     def inc_holding_current(self):
         """
@@ -269,15 +254,12 @@ class PerformanceReport:
         if self.holding_current > self.holding_max:
             self.holding_max = self.holding_current
 
-
-    
     def dec_holding_current(self):
         """
         Decrements the number of planes currently in the holding queue
         """
         if self.holding_current > 0:
             self.holding_current -= 1
-
 
     def generate_plots_base64(self):
         """
@@ -446,4 +428,3 @@ class PerformanceReport:
         )
 
         return plots
-

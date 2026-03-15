@@ -1,5 +1,3 @@
-
-
 class currentFrameActions:
     current_frame_actions = []
 
