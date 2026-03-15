@@ -1,7 +1,7 @@
 /** Maximum total runways allowed across all types. */
 const MAX_RUNWAYS = 10;
 
-/** Initialize on page load. */
+/** Initialise on page load. */
 document.addEventListener('DOMContentLoaded', function() {
     // Add validation listeners
     const runwayInputs = document.querySelectorAll(
@@ -108,7 +108,7 @@ async function startSimulation(event) {
         console.log('Start response:', result);
         
         if (result.success) {
-            console.log('Simulation initialized successfully!');
+            console.log('Simulation initialised successfully!');
             console.log('Redirecting to simulation screen...');
             
             setTimeout(() => {
