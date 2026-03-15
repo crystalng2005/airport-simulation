@@ -141,6 +141,8 @@ def get_current_frame_actions() -> ResponseReturnValue:
     actions = controller.visualisation_controller.getCurrentFrameActions()
     return _success(200, actions=actions)
 
+# simulation_screen.js is not using this function anymore 
+# Remove the function if not needed
 @app.route('/api/current-time', methods=['GET'])
 def get_current_time() -> ResponseReturnValue:
     """Return the current simulation clock time."""
