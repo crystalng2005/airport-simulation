@@ -13,8 +13,6 @@ FUEL_USAGE_PER_TICK = 5
 
 MINUTES_PER_TICK = 5
 
-
-
 # Emergency status enum, used with the plane class
 class EmergencyStatus(Enum):
     NONE = 0
@@ -113,14 +111,12 @@ class Plane:
         """
         return "PLN" + str(self.plane_num)
 
-
     @classmethod
     def reset_plane_num(cls):
         """
         Class method, resets the number of planes in the simulation between runs, call on simulation start.
         """
         cls.plane_num = 0
-
     
     def gen_origin(self) -> str:
         """
@@ -160,7 +156,6 @@ class Plane:
 
         # Returns the IATA code, but can change to airport/country
         return code
-
 
     # Generates the destination airport IATA code
     def gen_destination(self) -> str:
@@ -205,7 +200,6 @@ class Plane:
         # Returns the IATA code
         return code 
 
-
     def gen_fuel(self) -> float:
         """
         Generates fuel based on the uniform distribution between 20 and 60 minutes
@@ -215,8 +209,6 @@ class Plane:
         """
         fuel = round(random.uniform(20,60))
         return fuel
-
-
 
     def gen_target_time(self) -> datetime:
         """
@@ -240,7 +232,6 @@ class Plane:
 
         # Returns in datetime format, converted to int
         return datetime.time(int(rand_hours), int(rand_minutes), int(secs))
-
 
     def gen_actual_time(self) -> datetime:
         """
@@ -267,7 +258,6 @@ class Plane:
         time_minutes = remaining // 60
         secs = remaining % 60
         return datetime.time(int(time_hours),int(time_minutes), int(secs))
-    
 
     def set_user_settings(self, probabilities: list[float]):
         """
@@ -280,7 +270,6 @@ class Plane:
         self.user_mechanical = probabilities[0]
         self.user_health = probabilities[1]
         self.user_fuel = probabilities[2]
-
 
     def gen_emergency_on_spawn(self) -> EmergencyStatus:
         """
@@ -318,13 +307,9 @@ class Plane:
             return EmergencyStatus.HEALTH
         else:
             return EmergencyStatus.NONE
-        
-    
-
 
 
     # ------- PLANE CONTROL FUNCTIONS ------- #
-
 
     # Decreases the fuel by the amount stored in FUEL_USAGE_PER_TICK constant with each call
     def decrease_fuel(self) -> bool:
@@ -346,8 +331,6 @@ class Plane:
             return True 
         return False
 
-
-
     # Directs a plane to the given runway
     def go_to_runway(self, runway: int) -> bool:
         """
@@ -362,8 +345,6 @@ class Plane:
                 return True 
             else:
                 return False
-
-
     
     def cancel(self):
         """
@@ -371,8 +352,6 @@ class Plane:
         """
         self.cancelled = True
         self.exit_simulation()
-
-
     
     def divert(self):
         """
@@ -381,8 +360,6 @@ class Plane:
         self.diverted = True
         self.exit_simulation()
 
-
-    
     def exit_simulation(self):
         """
         Called when a plane is supposed to leave the simulation.
@@ -391,13 +368,11 @@ class Plane:
         self.left_simulation = True
         currentFrameActions.current_frame_actions.append([self.callsign, "kill"])
 
-
     def has_emergency(self) -> EmergencyStatus:
         """
         Returns the current emergency status
         """
         return self.emergency_status
-
 
     # Called every tick to give every plane a chance of generating an emergency
     def update_emergency(self) -> EmergencyStatus:
@@ -438,8 +413,3 @@ class Plane:
                     self.queue_controller.plane_emergency(self)
             
         return self.emergency_status
-
-
-    
-
-

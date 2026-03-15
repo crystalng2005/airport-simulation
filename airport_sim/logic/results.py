@@ -4,10 +4,8 @@ from datetime import datetime, timezone
 from logic.report import PerformanceReport
 import logic.globals.reportData as RD
 
-
 class ResultsController:
-
-    def __init__(self):
+    def __init__(self) -> None:
         self.result = None
         self.max_results = 50
 
@@ -22,8 +20,16 @@ class ResultsController:
             with open(self.results_file, 'w') as f:
                 json.dump([], f)
 
-    # Save current report file as result in results.json
     def save_result(self) -> bool:
+        """
+        Saves the current simulation report to the results file.
+        The report stored in the global reportData object is converted
+        into a JSON-serialisable format and appended to the results list.
+        Only the most recent `max_results` reports are retained.
+
+        Returns:
+            True if the result was successfully saved, otherwise False.
+        """
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -59,8 +65,19 @@ class ResultsController:
         except IOError:
             return False
 
-    # load a specific result, using its index as the ID
-    def load_results(self, index: int):
+    def load_results(self, index: int) -> PerformanceReport | None:
+        """
+        Loads a specific simulation result by its index.
+        The stored report data is converted back into a PerformanceReport
+        object and stored in the controller.
+
+        Args:
+            index: The index of the result in the results list.
+
+        Returns:
+            The reconstructed PerformanceReport object if successful,
+            otherwise None.
+        """
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -75,15 +92,27 @@ class ResultsController:
         except (IOError, IndexError, KeyError):
             return None
 
-    # Return a list of all indexes + saving timestamps of each result in list
     def get_result_save_times(self) -> list[tuple[int, str]]:
+        """
+        Retrieves the save timestamps for all stored results.
+
+        Returns:
+            A list of tuples containing:
+                (result_index, saved_timestamp)
+        """
         with open(self.results_file, 'r') as f:
             results = json.load(f)
 
         return [(i, r["saved_at"]) for i, r in enumerate(results)]
 
 
-    def get_all_results(self):
+    def get_all_results(self) -> list[dict]:
+        """
+        Retrieves all stored results and formats them for display.
+
+        Returns:
+            A list of dictionaries representing all saved results.
+        """
         with open(self.results_file, 'r') as f:
             results = json.load(f)
 
@@ -106,7 +135,19 @@ class ResultsController:
 
         return output
 
-    def get_one_result(self,id:int):
+    def get_one_result(self, id: int) -> dict | None:
+        """
+        Retrieves a single result by its ID.
+        The stored report data is reconstructed into a PerformanceReport
+        object and returned as a formatted dictionary.
+
+        Args:
+            id: The ID (index) of the result.
+
+        Returns:
+            A dictionary containing result details if found,
+            otherwise None.
+        """
         try:
             with open(self.results_file, 'r') as f:
                 results = json.load(f)
@@ -131,18 +172,37 @@ class ResultsController:
         except (IOError, IndexError, KeyError):
             return None
 
-        
+    def export_result_by_id(self, id: int) -> str | None:
+        """
+        Exports a stored result to a text report file.
+        The result is first loaded using its ID and then exported
+        using the export_report method.
 
+        Args:
+            id: The ID of the result to export.
 
-    # Given a specific report ID, exports it to the exports folder
-    def export_result_by_id(self, id: int):
+        Returns:
+            The file path of the exported report if successful,
+            otherwise None.
+        """
         report = self.load_results(id)
         if report is None:
             return None
         return self.export_report(report)
 
-    # Given a specific report, exports it to the exports folder and returns the file path
-    def export_report(self, PR: PerformanceReport):
+    def export_report(self, PR: PerformanceReport) -> str | None:
+        """
+        Exports a PerformanceReport to a formatted text file.
+        The report is written to the exports directory with a
+        timestamped filename.
+
+        Args:
+            PR: The PerformanceReport object to export.
+
+        Returns:
+            The file path of the exported report if successful,
+            otherwise None.
+        """
         export_dir = os.path.join(os.path.dirname(__file__), '..', 'exports')
 
         try:
@@ -218,5 +278,13 @@ class ResultsController:
             return None
 
     def reset(self) -> bool:
+        """
+        Resets the controller state.
+        Clears the currently stored result reference so the controller
+        is ready for a new simulation.
+
+        Returns:
+            True once the reset operation completes.
+        """
         self.result = None
         return True

@@ -6,8 +6,6 @@ from pathlib import Path
 import datetime
 from dataclasses import dataclass, field
 
-
-
 # PerformanceReport Class
 @dataclass
 class PerformanceReport:
@@ -39,8 +37,6 @@ class PerformanceReport:
     holding_max = 0
     holding_current = 0
 
-
-
     def set_finish_time(self, finishTime : datetime):
         """
         Records the time the simulation has finished
@@ -49,8 +45,6 @@ class PerformanceReport:
         self.finish_time = finishTime
         self.duration = self.finish_time - self.start_time
         
-
-    # 
     def generate_report(self):
         """
         Generates the report based on collected data about the simulation.
@@ -87,14 +81,14 @@ class PerformanceReport:
         if self.total_planes > 0:
             self.fuel_avg = round(self.tot_fuel_used / self.total_planes)
 
-
-
     def string_duration(self) -> str:
         """
         Returns the duration of the simulation (defined in seconds) as a formatted string.
         Used for returning the duration in the appropriate format for the results. 
         
         """
+        if not hasattr(self, 'duration'):
+            return "N/A"
         if hasattr(self.duration, 'total_seconds'):
             in_seconds = int(self.duration.total_seconds())
         else:
@@ -102,7 +96,6 @@ class PerformanceReport:
         hours, remainder = divmod(in_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
-    
 
     def output_report_dict(self) -> dict:
         """
@@ -141,40 +134,45 @@ class PerformanceReport:
         "efficiency": float
 
         """
+        total_planes = getattr(self, 'total_planes', 0)
+        tot_fuel_used = getattr(self, 'tot_fuel_used', 0)
+        fuel_avg = getattr(self, 'fuel_avg', 0)
+        if fuel_avg == 0 and total_planes > 0:
+            fuel_avg = round(tot_fuel_used / total_planes)
+
         return {
-            "start_time" : self.start_time,
-            "completed_at" : self.finish_time,
+            "start_time" : getattr(self, 'start_time', None),
+            "completed_at" : getattr(self, 'finish_time', None),
             "duration" : self.string_duration(),
 
-            "total_planes": self.total_planes,
-            "diversions": self.diversions,
-            "cancellations": self.cancellations,
+            "total_planes": total_planes,
+            "diversions": getattr(self, 'diversions', 0),
+            "cancellations": getattr(self, 'cancellations', 0),
 
-            "tot_fuel_used": self.tot_fuel_used,
-            "avg_fuel_per_plane" : round(self.fuel_avg),
+            "tot_fuel_used": tot_fuel_used,
+            "avg_fuel_per_plane" : round(fuel_avg),
 
-            "holding_max": self.holding_max,
-            "queue_max": self.queue_max,
+            "holding_max": getattr(self, 'holding_max', 0),
+            "queue_max": getattr(self, 'queue_max', 0),
             
-            "tot_wait_time": self.tot_wait_time,
-            "avg_wait_time": self.mean_wait, 
-            "std_wait_time" : self.std_wait,
+            "tot_wait_time": getattr(self, 'tot_wait_time', 0),
+            "avg_wait_time": getattr(self, 'mean_wait', 0), 
+            "std_wait_time" : getattr(self, 'std_wait', 0),
 
-            "max_hold_time" : self.max_hold,
-            "avg_hold_time" : self.mean_hold,
-            "std_hold_time" : self.std_hold,
+            "max_hold_time" : getattr(self, 'max_hold', 0),
+            "avg_hold_time" : getattr(self, 'mean_hold', 0),
+            "std_hold_time" : getattr(self, 'std_hold', 0),
 
-            "max_takeoff_time" : self.max_take_off,
-            "avg_takeoff_time" : self.mean_take_off,
-            "std_take_off_time" : self.std_take_off,
+            "max_takeoff_time" : getattr(self, 'max_take_off', 0),
+            "avg_takeoff_time" : getattr(self, 'mean_take_off', 0),
+            "std_take_off_time" : getattr(self, 'std_take_off', 0),
 
-            "max_arrival_time" : self.max_arrival,
-            "avg_arrival_time" : self.mean_arrival,
-            "std_arrival_time" : self.std_arrival,
+            "max_arrival_time" : getattr(self, 'max_arrival', 0),
+            "avg_arrival_time" : getattr(self, 'mean_arrival', 0),
+            "std_arrival_time" : getattr(self, 'std_arrival', 0),
 
-            "efficiency": self.efficiency           
+            "efficiency": getattr(self, 'efficiency', 0)
         }
-
 
     def output_report_string(self) -> str:
         """
@@ -208,7 +206,6 @@ class PerformanceReport:
                 f"Average arrival time: {self.mean_arrival}\n"
                 f"Standard deviation of arrival times: {self.std_arrival}\n\n")
 
-
     def reset(self) -> bool:
         """
         Resets the values stored in the report
@@ -230,7 +227,6 @@ class PerformanceReport:
         self.holding_max = 0
         self.holding_current = 0
 
-
     def get_efficiency(self) -> float:
         """
         Calculates the efficiency using the formula efficiency = (total planes - diversions - cancellations)/total planes * 100
@@ -239,7 +235,6 @@ class PerformanceReport:
         if self.total_planes > 0:
             return (round((self.total_planes - self.diversions - self.cancellations)/self.total_planes * 100))
         return 0
-
 
     def inc_queue_current(self):
         """
@@ -250,7 +245,6 @@ class PerformanceReport:
         if self.queue_current > self.queue_max:
             self.queue_max = self.queue_current 
 
-    
     def dec_queue_current(self):
         """
         Decrements the number of planes currently in the runway queue
@@ -258,7 +252,6 @@ class PerformanceReport:
         """
         if self.queue_current > 0:
             self.queue_current -= 1
-
 
     def inc_holding_current(self):
         """
@@ -269,15 +262,12 @@ class PerformanceReport:
         if self.holding_current > self.holding_max:
             self.holding_max = self.holding_current
 
-
-    
     def dec_holding_current(self):
         """
         Decrements the number of planes currently in the holding queue
         """
         if self.holding_current > 0:
             self.holding_current -= 1
-
 
     def generate_plots_base64(self):
         """
@@ -446,4 +436,3 @@ class PerformanceReport:
         )
 
         return plots
-

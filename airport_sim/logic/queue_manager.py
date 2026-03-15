@@ -4,11 +4,8 @@ from logic.plane import Plane, EmergencyStatus
 
 from logic.currentFrameActions import currentFrameActions
 import logic.globals.reportData as RD
-#from logic.simulation import SimulationController
-
 
 MINUTES_PER_TICK = 5
-
 
 class QueueController:
     def __init__(self, plane_queue: list[Plane], runway_list: list[Runway], is_departure: bool, sim) -> None:
@@ -30,7 +27,6 @@ class QueueController:
         self.sim = sim
         self.current_frame_actions = []
         self.even_turn = False
-
 
     def check_runways(self) -> None:
         """
@@ -86,7 +82,6 @@ class QueueController:
                 else:
                     checked += 1
 
-
     def enqueue(self, p: Plane) -> None:
         """
         Adds a plane to the queue.
@@ -109,8 +104,6 @@ class QueueController:
         # Assigns holding queue entry time to plane object and increments current queue size
         p.entered_hold = self.sim.get_tick_time() * MINUTES_PER_TICK 
         RD.reportData.inc_queue_current()
-
-
 
     def check_cancel_time(self) -> None:
         """
@@ -149,8 +142,6 @@ class QueueController:
             else:
                 i += 1
 
-
-
     def plane_emergency(self, p: Plane) -> None:
         """
         Handles the insertion of a plane with an emergency into the queue.
@@ -187,5 +178,3 @@ class QueueController:
                 break
         if not inserted:
             self.plane_queue.append(p)
-
-

@@ -84,7 +84,7 @@ function createPresetCard(preset, index) {
 
     card.innerHTML = `
         <div class="preset-header">
-            <div class="preset-title">Preset ${preset.id + 1}</div>
+            <div class="preset-title">Preset ${index + 1}</div>
             <div class="preset-badge">${presetLabel}</div>
         </div>
 
