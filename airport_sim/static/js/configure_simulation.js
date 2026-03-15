@@ -1,7 +1,7 @@
 /** Maximum total runways allowed across all types. */
 const MAX_RUNWAYS = 10;
 
-// Initialise on page load
+/** Initialize on page load. */
 document.addEventListener('DOMContentLoaded', function() {
     // Add validation listeners
     const runwayInputs = document.querySelectorAll(
@@ -201,7 +201,7 @@ function loadPresetIntoForm() {
     }
 }
 
-// Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to go back
+/** Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to go back. */
 document.addEventListener('keydown', function(e) {
     // Ctrl/Cmd + Enter to submit
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {

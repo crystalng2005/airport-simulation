@@ -1,13 +1,17 @@
 let selectedSimulations = [];
 let currentReportId = null;
 
+/** Load report data and plots when the page is ready. */
 document.addEventListener('DOMContentLoaded', async function() {
     const report = await getReport();
     showReportModal(report);
     await loadPlots();
-    showReportResults();
 });
 
+/**
+ * Obtain the report statistics from the backend.
+ * @returns {Promise<Object|null>} Report data, or null on failure.
+ */
 async function getReport(){
   try {
     const response = await fetch('/api/report');
@@ -25,7 +29,11 @@ async function getReport(){
   }
 }
 
-// Show report modal - just display backend data
+/**
+ * Show the report modal using backend-provided data.
+ * @param {Object} report - Report metrics object.
+ * @returns {void}
+ */
 function showReportModal(report) {
     const modal = document.getElementById('reportModal');
     const content = document.getElementById('reportContent');
@@ -79,6 +87,10 @@ function showReportModal(report) {
     modal.style.display = 'flex';
 }
 
+/**
+ * Display report statistics and activate the results tab.
+ * @returns {void}
+ */
 function showReportResults() {
     const reportContent = document.getElementById('reportContent');
     const plotsSection = document.getElementById('plotsSection');
@@ -97,8 +109,10 @@ function showReportResults() {
     }
 }
 
-// Compare selected simulations
-// Backend does ALL calculations
+/**
+ * Compare two selected simulations using backend-calculated metrics.
+ * @returns {Promise<void>}
+ */
 async function compareSelected() {
     if (selectedSimulations.length !== 2) {
         alert('Please select exactly 2 simulations to compare');
@@ -133,7 +147,11 @@ async function compareSelected() {
     }
 }
 
-// Show comparison modal - just display backend data
+/**
+ * Show the comparison modal with backend-provided comparison data.
+ * @param {Object} comparison - Comparison payload from backend.
+ * @returns {void}
+ */
 function showComparisonModal(comparison) {
     const modal = document.getElementById('comparisonModal');
     const content = document.getElementById('comparisonContent');
@@ -259,7 +277,11 @@ function showComparisonModal(comparison) {
     modal.style.display = 'flex';
 }
 
-// View full report - backend provides all data
+/**
+ * View the full report for a selected simulation.
+ * @param {number|string} simId - Selected simulation ID.
+ * @returns {Promise<void>}
+ */
 async function viewReport(simId) {
     currentReportId = simId;
     
@@ -280,6 +302,10 @@ async function viewReport(simId) {
     }
 }
 
+/**
+ * Display report plots and activate the plots tab.
+ * @returns {void}
+ */
 function showReportPlots() {
     const reportContent = document.getElementById('reportContent');
     const plotsSection = document.getElementById('plotsSection');
@@ -298,12 +324,15 @@ function showReportPlots() {
     }
 }
 
-// Export current report
+/** Export the current report from the backend. */
 function exportCurrentReport() {
     window.location.href = '/api/export-current-report';
 }
 
-// Load and display performance plots
+/**
+ * Load and display performance plots from the backend.
+ * @returns {Promise<void>}
+ */
 async function loadPlots() {
     try {
         const response = await fetch('/api/report-plots');
@@ -356,12 +385,12 @@ async function loadPlots() {
     }
 }
 
-// Close modals
+/** Close the comparison modal. */
 function closeComparison() {
     document.getElementById('comparisonModal').style.display = 'none';
 }
 
-// Go to menu
+/** Navigate back to the main menu. */
 function goToMenu() {
     window.location.href = '/';
 }

@@ -54,7 +54,7 @@ class TestFR1_CoreSimulation:
         """FR-1.2: Aircraft data updates as simulation progresses"""
         plane = Plane(False, self.sim.landing_queue, 30, [0, 0, 0])
         initial_fuel = plane.fuel_level
-        plane.decrease_fuel()  # Correct method name
+        plane.decrease_fuel()
         assert plane.fuel_level < initial_fuel, "Fuel not decreasing"
 
 
