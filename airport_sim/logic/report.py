@@ -4,41 +4,44 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 import datetime
+from dataclasses import dataclass, field
+
 
 
 # PerformanceReport Class
+@dataclass
 class PerformanceReport:
-    def __init__(self, runway_total: int, runways_mixed: int, runways_departure: int, runways_landing: int, landings_per_hour: int, start_time: datetime):
-        # Simulation preset data
-        self.runway_total = runway_total
-        self.runways_mixed = runways_mixed
-        self.runways_departure = runways_departure
-        self.runways_landing = runways_landing
-        self.landings_per_hour = landings_per_hour
-        self.start_time = start_time
+    runway_total: int 
+    runways_mixed: int 
+    runways_departure: int 
+    runways_landing: int 
+    landings_per_hour: int 
+    start_time: datetime
 
-        # Data from running the simulation
-        self.diversions = 0
-        self.cancellations = 0
-        self.total_planes = 0
-        self.tot_wait_time = 0
-        self.tot_fuel_used = 0
+    diversions = 0
+    cancellations = 0
+    total_planes = 0
+    tot_wait_time = 0
+    tot_fuel_used = 0
 
-        # Time monitored per plane, each counted in seconds
-        self.wait_times = []
-        self.hold_times = []
-        self.take_off_delays = []
-        self.arrival_delay_times = []
+    # Time monitored per plane, each counted in seconds
+    wait_times: list[float] = field(default_factory=list)
+    hold_times: list[float] = field(default_factory=list)
+    take_off_delays: list[float] = field(default_factory=list)
+    arrival_delay_times: list[float] = field(default_factory=list)
 
-        # Queue size data
-        self.queue_max = 0
-        self.queue_current = 0
+    finish_time: datetime = None
 
-        self.holding_max = 0
-        self.holding_current = 0
+    # Queue size data
+    queue_max = 0
+    queue_current = 0
+
+    holding_max = 0
+    holding_current = 0
 
 
-    def setFinishTime(self, finishTime : datetime):
+
+    def set_finish_time(self, finishTime : datetime):
         """
         Records the time the simulation has finished
         Call when ending the simulation
@@ -48,7 +51,7 @@ class PerformanceReport:
         
 
     # 
-    def generateReport(self):
+    def generate_report(self):
         """
         Generates the report based on collected data about the simulation.
         Calculates the maximum, mean, and standard deviation for the following metrics:
@@ -59,7 +62,7 @@ class PerformanceReport:
 
         Also calculates the average amount of fuel used (rounded to 2d.p.)
         """
-        self.efficiency = self.getEfficiency()
+        self.efficiency = self.get_efficiency()
         
         # Maximum of each value stored in the lists
         self.max_wait = max(self.wait_times) if self.wait_times else 0
@@ -93,15 +96,15 @@ class PerformanceReport:
         
         """
         if hasattr(self.duration, 'total_seconds'):
-            inSeconds = int(self.duration.total_seconds())
+            in_seconds = int(self.duration.total_seconds())
         else:
-            inSeconds = int(self.duration)
-        hours, remainder = divmod(inSeconds, 3600)
+            in_seconds = int(self.duration)
+        hours, remainder = divmod(in_seconds, 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{hours} hours, {minutes} minutes, {seconds} seconds"
     
 
-    def outputReport_dict(self) -> dict:
+    def output_report_dict(self) -> dict:
         """
         Outputs the values stored in the report as a dictionary in the following format:
 
@@ -173,12 +176,12 @@ class PerformanceReport:
         }
 
 
-    def outputReport_string(self) -> str:
+    def output_report_string(self) -> str:
         """
         Generates the report and returns the values generated as a formatted string
 
         """
-        self.generateReport()
+        self.generate_report()
 
         return (f"Number of diversions: {self.diversions}\n"
                 f"Number of cancellations: {self.cancellations}\n"
@@ -228,7 +231,7 @@ class PerformanceReport:
         self.holding_current = 0
 
 
-    def getEfficiency(self) -> float:
+    def get_efficiency(self) -> float:
         """
         Calculates the efficiency using the formula efficiency = (total planes - diversions - cancellations)/total planes * 100
         
@@ -238,7 +241,7 @@ class PerformanceReport:
         return 0
 
 
-    def incQueueCurrent(self):
+    def inc_queue_current(self):
         """
         Increments the number of planes currently in the runway queue.
         Then, checks if the maximum number needs to be updated.
@@ -248,7 +251,7 @@ class PerformanceReport:
             self.queue_max = self.queue_current 
 
     
-    def decQueueCurrent(self):
+    def dec_queue_current(self):
         """
         Decrements the number of planes currently in the runway queue
 
@@ -257,7 +260,7 @@ class PerformanceReport:
             self.queue_current -= 1
 
 
-    def incHoldingCurrent(self):
+    def inc_holding_current(self):
         """
         Increments the number of planes currently in the holding queue
         Checks if the maximum number needs to be updated
@@ -268,7 +271,7 @@ class PerformanceReport:
 
 
     
-    def decHoldingCurrent(self):
+    def dec_holding_current(self):
         """
         Decrements the number of planes currently in the holding queue
         """

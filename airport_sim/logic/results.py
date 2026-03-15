@@ -101,7 +101,7 @@ class ResultsController:
                     "landing_runways": report.runways_landing, 
                     "mixed_runways": report.runways_mixed 
                 },
-                "report": report.outputReport_dict()
+                "report": report.output_report_dict()
             })
 
         return output
@@ -126,7 +126,7 @@ class ResultsController:
                     "landing_runways": report.runways_landing, 
                     "mixed_runways": report.runways_mixed 
                 },
-                "report": report.outputReport_dict()
+                "report": report.output_report_dict()
             }       
         except (IOError, IndexError, KeyError):
             return None
@@ -151,7 +151,7 @@ class ResultsController:
             now = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
             export_file = os.path.join(export_dir, f'simulation-report-{now}.txt')
 
-            report = PR.outputReport_dict()
+            report = PR.output_report_dict()
 
             content = (
                 '===========================================================\n'
