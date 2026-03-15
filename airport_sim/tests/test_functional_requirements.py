@@ -301,10 +301,15 @@ class TestUSP1_ConfigurableRunwayScenarios:
         pc1.mixed_runways = 1
         pc1.report = RD.reportData
         
-        # Determine slot
+        # Determine slot using the same strategy as save_preset()
         meta = pc1._load_meta()
-        unused = [p for p in meta['presets'] if not p.get('last_saved')]
-        slot_id = unused[0]['id'] if unused else 0
+        unused = [p for p in meta['presets'] if p.get('last_saved') is None]
+        if unused:
+            slot_id = unused[0]['id']
+        else:
+            presets_with_time = [p for p in meta['presets'] if p.get('last_saved')]
+            presets_with_time.sort(key=lambda p: p['last_saved'])
+            slot_id = presets_with_time[0]['id']
         
         pc1.save_preset()
         
