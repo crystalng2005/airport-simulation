@@ -89,14 +89,13 @@ The system follows a **Layered Architecture** pattern with separation of concern
 #### PresetController
 **Purpose**: Manage simulation configurations
 - Load/save preset configurations
-- Validate input parameters
 - Provide configuration templates
 
 #### VisualisationController
 **Purpose**: Manage active simulation and data presentation
 - Initialise and step through simulations
 - Collect simulation state snapshots
-- Format data for visualization
+- Format data for visualisation
 
 #### PerformanceReport
 **Purpose**: Generate analytical reports
@@ -125,40 +124,28 @@ The system follows a **Layered Architecture** pattern with separation of concern
 3. **Queue Management**
    - Maintain holding pattern queue (FIFO + priority for emergencies)
    - Maintain takeoff queue (FIFO)
-   - Enforce vertical separation in holding pattern (1000ft minimum)
 
 #### Queue Manager
 **Responsibilities:**
 - Queue data structure operations (enqueue, dequeue, peek)
 - Aircraft priority sorting (emergency status)
-- Queue visualization data
+- Queue visualisation data
 
 #### Aircraft Models (`logic/plane.py`, `logic/models.py`)
 **Data Attributes:**
-- Identification: `callsign`, `operator`, `origin`, `destination`
-- Timing: `scheduled_time`, `actual_time`, `flight_duration`
-- Flight Status: `altitude`, `ground_speed`, `fuel_level`
+- Identification: `callsign`, `origin`, `destination`
+- Timing: `target_time`, `actual_time`
+- Flight Status: `fuel_level`, `current_location`, runway assignment
 - Emergency Status: `NONE`, `FUEL`, `MECHANICAL`, `HEALTH`
 
 **Behavior:**
-- Fuel consumption rate (constant): ~1 unit per time step
-- Descent in holding pattern: instantaneous
-- Altitude constraints: 1000ft separation minimum
+- Fuel consumption rate (constant): 5 units per tick (tick = 5 minutes)
+- Arrival/departure actual times generated from a normal distribution around target time
 
 #### Current Frame Actions
-**Purpose**: Execute simulation logic for each time step
-- Process new arrivals/departures entering system
-- Move aircraft through queues
-- Update fuel levels
-- Detect emergency conditions
-- Execute takeoffs/landings
-
-**Key Methods:**
-- `processArrivals()`: Handle new aircraft entering airspace
-- `processDepartures()`: Handle new aircraft from ground
-- `processHoldingPattern()`: Manage landing queue
-- `processTakeoffQueue()`: Manage takeoff queue
-- `updateFuelLevels()`: Decrement fuel for all aircraft
+**Purpose**: Store actions produced during the current simulation tick for UI display.
+- Maintains a shared list of action entries in the form `[callsign, action]`.
+- Entries are populated by simulation and queue logic during updates.
 
 ---
 
@@ -185,39 +172,35 @@ The system follows a **Layered Architecture** pattern with separation of concern
 
 ## 4. Data Flow Diagrams
 
-### 4.1 Simulation Initialization Flow
+### 4.1 Simulation Initialisation Flow
 ```
 User Input (Web Form)
     ↓
-PresetController.validateAndLoad()
-    ↓
-Simulation.__init__()
-    ├─ Initialize Runways
-    ├─ Initialize Queues
-    └─ Initialize Aircraft Generator
-    ↓
-VisualisationController.startSimulation()
+app.py (/start)
+  ↓
+VisualisationController.startSimulation(data)
+  ↓
+SimulationController.__init__()
+    ├─ Initialise Runways
+    ├─ Initialise Queues
+  └─ Initialise report data (reportData)
     ↓
 Return confirmation to UI
 ```
 
 ### 4.2 Simulation Step (Each Time Unit)
 ```
-MainController.tick()
+POST /api/next-frame
     ↓
-Simulation.step()
-    ├─ CurrentFrameActions.process()
-    │  ├─ generateNewArrivals()
-    │  ├─ generateNewDepartures()
-    │  ├─ processHoldingPattern()
-    │  ├─ processTakeoffQueue()
-    │  ├─ processTakeoff()
-    │  └─ processLanding()
-    ├─ updateFuelLevels()
-    ├─ checkEmergencyConditions()
-    └─ collectMetrics()
+VisualisationController.tick()
     ↓
-VisualisationController.getSnapshot()
+SimulationController.update()
+  ├─ Generate new arrivals/departures based on configured flow
+  ├─ Enqueue and prioritise emergency aircraft
+  ├─ Update runway status (open/close)
+  ├─ Assign queued aircraft to available runways
+  ├─ Update report metrics and current frame actions
+  └─ Advance simulation clock by tick size
     ↓
 Return state to UI
 ```
@@ -240,7 +223,7 @@ Return state to UI
 ### 5.3 Queue Management Design
 - **Priority Queue for Arrivals**: Emergency aircraft goes to runway first
 - **FIFO for Departures**: Fair, predictable behavior
-- **Vertical Separation Model**: Abstracted from real ATC
+- **Mixed-Runway Fairness**: Mixed-mode runway access alternates by tick between arrival and departure processing to reduce starvation
 
 ### 5.4 Fuel Consumption Model
 - **Constant Rate**: Abstracted per spec assumptions
@@ -281,7 +264,7 @@ Return state to UI
 
 ## 8. Security Considerations
 
-- **Input Validation**: All user inputs validated before processing
+- **Input Validation**: Payload parsing and type conversion are validated; invalid JSON/types return error responses
 - **Error Handling**: Generic error messages to users, detailed logs internally
 - **Session Management**: Flask sessions used appropriately
 - **File Permissions**: Results directory access controlled
@@ -291,10 +274,9 @@ Return state to UI
 ## 9. Performance Characteristics
 
 ### Expected Behavior
-- **Simulation Speed**: ~1000 total aircraft per 10-second simulation
+- **Simulation Tick**: 1 tick = 5 simulated minutes
 - **Memory Usage**: Scales with queue size, typically <100MB
 - **Response Time**: <500ms per tick for normal operations
-- **Scalability Limit**: ~50 concurrent users with current architecture
 
 ### Optimisation Strategies
 - **Lazy Load Presets**: Load only when needed
@@ -315,7 +297,7 @@ app.py (MainController)
   
 Simulation
   ├→ Queue Manager
-  ├→ RunwayManager
+  ├→ Runway model (`models.py`)
   ├→ CurrentFrameActions
   └→ Plane + Models
 ```

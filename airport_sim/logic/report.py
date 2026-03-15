@@ -134,38 +134,44 @@ class PerformanceReport:
         "efficiency": float
 
         """
+        total_planes = getattr(self, 'total_planes', 0)
+        tot_fuel_used = getattr(self, 'tot_fuel_used', 0)
+        fuel_avg = getattr(self, 'fuel_avg', 0)
+        if fuel_avg == 0 and total_planes > 0:
+            fuel_avg = round(tot_fuel_used / total_planes)
+
         return {
-            "start_time" : self.start_time,
-            "completed_at" : self.finish_time,
+            "start_time" : getattr(self, 'start_time', None),
+            "completed_at" : getattr(self, 'finish_time', None),
             "duration" : self.string_duration(),
 
-            "total_planes": self.total_planes,
-            "diversions": self.diversions,
-            "cancellations": self.cancellations,
+            "total_planes": total_planes,
+            "diversions": getattr(self, 'diversions', 0),
+            "cancellations": getattr(self, 'cancellations', 0),
 
-            "tot_fuel_used": self.tot_fuel_used,
-            "avg_fuel_per_plane" : round(self.fuel_avg),
+            "tot_fuel_used": tot_fuel_used,
+            "avg_fuel_per_plane" : round(fuel_avg),
 
-            "holding_max": self.holding_max,
-            "queue_max": self.queue_max,
+            "holding_max": getattr(self, 'holding_max', 0),
+            "queue_max": getattr(self, 'queue_max', 0),
             
-            "tot_wait_time": self.tot_wait_time,
-            "avg_wait_time": self.mean_wait, 
-            "std_wait_time" : self.std_wait,
+            "tot_wait_time": getattr(self, 'tot_wait_time', 0),
+            "avg_wait_time": getattr(self, 'mean_wait', 0), 
+            "std_wait_time" : getattr(self, 'std_wait', 0),
 
-            "max_hold_time" : self.max_hold,
-            "avg_hold_time" : self.mean_hold,
-            "std_hold_time" : self.std_hold,
+            "max_hold_time" : getattr(self, 'max_hold', 0),
+            "avg_hold_time" : getattr(self, 'mean_hold', 0),
+            "std_hold_time" : getattr(self, 'std_hold', 0),
 
-            "max_takeoff_time" : self.max_take_off,
-            "avg_takeoff_time" : self.mean_take_off,
-            "std_take_off_time" : self.std_take_off,
+            "max_takeoff_time" : getattr(self, 'max_take_off', 0),
+            "avg_takeoff_time" : getattr(self, 'mean_take_off', 0),
+            "std_take_off_time" : getattr(self, 'std_take_off', 0),
 
-            "max_arrival_time" : self.max_arrival,
-            "avg_arrival_time" : self.mean_arrival,
-            "std_arrival_time" : self.std_arrival,
+            "max_arrival_time" : getattr(self, 'max_arrival', 0),
+            "avg_arrival_time" : getattr(self, 'mean_arrival', 0),
+            "std_arrival_time" : getattr(self, 'std_arrival', 0),
 
-            "efficiency": self.efficiency           
+            "efficiency": getattr(self, 'efficiency', 0)
         }
 
     def output_report_string(self) -> str:

@@ -4,15 +4,16 @@
 
 ### 1.1 Prerequisites
 
-- Python 3.7 or higher
+- Python 3.10 or higher (project currently tested on Python 3.11)
 - pip
 - Git
 
 ### 1.2 Install and Run
 
 ```bash
-pip install -r requirements.txt
-python app.py
+cd airport_sim
+..\.venv\Scripts\python.exe -m pip install -r requirements.txt
+..\.venv\Scripts\python.exe app.py
 ```
 
 ## 2. Project Structure

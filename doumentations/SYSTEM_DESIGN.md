@@ -11,7 +11,7 @@ This section maps project requirements to implementation components:
 | Model departures + takeoff queue | `simulation.py`, `queue_manager.py` | ✓ Complete |
 | Calculate max queue size | `results.py` (metrics) | ✓ Complete |
 | Calculate average wait time | `results.py` (statistics) | ✓ Complete |
-| Model arrival time variations | `currentFrameActions.py` | ✓ Complete (normal distribution) |
+| Model arrival/departure time variations | `plane.py` | ✓ Complete (normal distribution) |
 | Model aircraft holding pattern | `simulation.py` | ✓ Complete |
 | Calculate max/avg delays | `results.py` | ✓ Complete |
 
@@ -19,7 +19,7 @@ This section maps project requirements to implementation components:
 
 | Requirement | Component | Implementation Status |
 |-------------|-----------|----------------------|
-| Mixed-use runway support | `models.py` (RunwayMode enum) | ✓ Complete |
+| Mixed-use runway support | `models.py` (`Runway.mixed_mode`) | ✓ Complete |
 | Multiple runway configurations | `simulation.py` (runway_list) | ✓ Complete |
 | Mode switching | Web UI + `presets.py` | ✓ Complete |
 
@@ -27,18 +27,18 @@ This section maps project requirements to implementation components:
 
 | Requirement | Component | Implementation Status |
 |-------------|-----------|----------------------|
-| Runway closure specification | `models.py` (OperationalStatus) | ✓ Complete |
+| Runway closure specification | `models.py` (`Runway.close_runway/open_runway`) | ✓ Complete |
 | Cancellation time limit | `presets.py` (configurable) | ✓ Complete |
-| Diversion modeling | `currentFrameActions.py` | ✓ Complete |
+| Diversion modeling | `queue_manager.py`, `simulation.py` | ✓ Complete |
 
 ### Priority 4: Fuel Management
 
 | Requirement | Component | Implementation Status |
 |-------------|-----------|----------------------|
 | Fuel tracking | `plane.py` (fuel_level attribute) | ✓ Complete |
-| Uniform distribution (20-60 min) | `simulation.py` (aircraft generation) | ✓ Complete |
-| 10-minute threshold enforcement | `currentFrameActions.py` | ✓ Complete |
-| Diversion on low fuel | `currentFrameActions.py` | ✓ Complete |
+| Uniform distribution (20-60 min) | `plane.py` (fuel generation) | ✓ Complete |
+| 10-minute threshold enforcement | `queue_manager.py`, `plane.py` | ✓ Complete |
+| Diversion on low fuel | `queue_manager.py` | ✓ Complete |
 
 ---
 
@@ -120,12 +120,9 @@ Example:
 1. Emergency aircraft first (mechanical failure, low fuel, health issues)
 2. Non-emergency aircraft in FIFO order (by arrival time)
 
-**Vertical Separation Enforcement:**
-- Minimum 1000 feet between successive aircraft
-- Altitude assignment: Based on position in queue
-  - Position 1: Lowest altitude (ready to land)
-  - Position 2: +1000 ft
-  - Position N: +(N-1)*1000 ft
+**Emergency Priority Enforcement:**
+- Emergency aircraft are inserted ahead of non-emergency traffic in landing flow.
+- Priority is based on emergency urgency (fuel, health, mechanical timing).
 
 **Capacity Management:**
 - No hard queue limit
@@ -136,7 +133,7 @@ Example:
 
 **Ordering Logic:**
 - First-in, first-out until runway available
-- No emergency prioritization (per spec)
+- No emergency prioritisation (per spec)
 - Cancellation after max wait time
 
 **Capacity Management:**
@@ -169,32 +166,30 @@ Each time step:
 
 #### Mixed Mode Runway
 ```
-Decision logic (prioritize based on queue pressure):
-  landing_pressure = len(holding_pattern) / capacity
-  takeoff_pressure = len(takeoff_queue) / capacity
-  
+Decision logic (implemented):
+  each tick, toggle even_turn flag
+
   IF runway available:
-    IF landing_pressure > takeoff_pressure:
-      allocate to landing
-    ELSE:
-      allocate to takeoff
-      
-Alternative: Strict alternation (every other slot to each)
+    allow one side of mixed-mode processing this tick
+    block the other side until next tick
+
+This creates strict alternation and reduces starvation.
 ```
 
 ### Runway Closure Handling
 
 ```
-When runway marked as unavailable:
-  FOR each aircraft on runway:
-    Move to appropriate queue
-  FOR runways in mixed mode:
-    Mode switches to remaining runways if available
-  QueueManager: Recalculate wait times
-  
-Closure simulation:
-  Option 1: Fixed duration (e.g., 2 hours)
-  Option 2: Manual re-opening via UI
+Each simulation tick:
+  FOR each runway:
+    call runway.update_status()
+
+If runway is closed:
+  it is skipped for assignment this tick
+
+If runway re-opens:
+  it becomes eligible for assignment again
+
+Open/close transitions are probability-driven from user-configured settings.
 ```
 
 ---
@@ -208,7 +203,7 @@ Closure simulation:
 | Initial fuel | Uniform(20, 60) min | Stored as minutes of endurance |
 | Consumption rate | 5 units per tick | Equivalent to 1 unit/min |
 | Minimum safe level | 10 min remaining | Must land/divert before this |
-| No landing slot time | 30 min (configurable) | Diversion trigger |
+| Departure cancellation time | Configurable | Cancellation trigger for departure queue |
 
 ### Fuel State Tracking
 
@@ -274,15 +269,18 @@ Beyond averages, calculate:
 
 ### Input Validation Layer
 
+Current implementation validates request shape and types at API boundary:
+
 ```
-validateParameters(runways, inbound_flow, outbound_flow):
-  Assert 1 ≤ runways ≤ 10
-  Assert 0 ≤ inbound_flow ≤ 200
-  Assert 0 ≤ outbound_flow ≤ 200
-  Assert inbound_flow + outbound_flow > 0
-  Assert runway_mode valid in [LANDING, TAKEOFF, MIXED]
-  Assert operational_status valid
+app.py:
+  - reject non-JSON body (400)
+  - reject missing required keys where checked (400)
+  - convert values via int()/float() in controller startup
+  - return 400 on conversion/shape errors
 ```
+
+Range-based business validation (for example bounds checks on all numeric fields)
+is currently limited and can be expanded in future iterations.
 
 ### Runtime Error Handling
 
@@ -345,7 +343,7 @@ User Message:
 
 1. **Event-Based Processing**: Only process events when they occur
 2. **Incremental Metric Updates**: Update per aircraft, not whole system
-3. **Queue Indexing**: O(1) access for queue operations
+3. **Queue Operations**: List-based queue operations are simple and readable; front-removal operations are O(n)
 4. **Lazy Calculations**: Compute stats only when requested
 
 ---

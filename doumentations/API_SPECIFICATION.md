@@ -54,7 +54,9 @@ Failure:
 { "success": false, "error": "Description of what went wrong" }
 ```
 
-Note: /api/report returns HTTP 200 with success false when no active simulation or when report data is not ready.
+Note: /api/report returns:
+- HTTP 400 when there is no active simulation
+- HTTP 404 when report data is not ready
 
 ---
 
@@ -79,6 +81,10 @@ Request body fields consumed by the backend:
 - safety_closure_prob
 - construction_closure_prob
 - runway_opening_prob
+
+Notes:
+- `mechanical_emergency_prob` is not currently sent as its own field from the UI payload.
+- The backend currently maps `maintenance_closure_prob` into both maintenance closure probability and mechanical emergency probability.
 
 Success response:
 
