@@ -17,6 +17,8 @@ The Airport Simulation is a **prototype software solution** that models airport 
 
 **Real-World Application**: Used by airport planners to evaluate operational changes (e.g., converting a runway from landing-only to mixed-mode during peak hours) and identify the optimal configuration before building the runways.
 
+<img width="1740" height="813" alt="image" src="https://github.com/user-attachments/assets/56fd81c4-e7fb-405c-93b4-cc5f68a41e36" />
+
 ---
 
 ## Quick Start
