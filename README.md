@@ -2,6 +2,8 @@
 
 A discrete event simulation system for modeling aircraft arrivals, departures, and runway operations at a single airport. Designed to analyse operational scenarios and optimise runway configurations.
 
+<img width="1759" height="810" alt="image" src="https://github.com/user-attachments/assets/708cff7d-8fae-45ff-9c03-289e79b6c548" />
+
 ## Functions of Simulation
 
 The Airport Simulation is a **prototype software solution** that models airport operations under various configurations. It allows airport operators to:
